@@ -11,17 +11,27 @@ void ofApp::setup(){
 
 	ofSetVerticalSync(true);
 	frameByframe = false;
+	
+	//alterar aqui o valor inicial da variavel que mostra ou esconde o video.
+	showVideo = false;
     
 	setGUI1();
     
     gui1->loadSettings("gui1Settings.xml");
 
 	fingerMovie.loadMovie("movies/fingers.mov");
-	fingerMovie.play();
+	
+	if(showVideo)
+		fingerMovie.play();
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
+	if(showVideo) 
+		fingerMovie.play();
+	else 
+		fingerMovie.stop();
+
 	fingerMovie.update();
 }
 
@@ -43,40 +53,41 @@ void ofApp::draw(){
     ofSetRectMode(OF_RECTMODE_CENTER);
 
 	//cenas do video!!
-	ofSetHexColor(0xFFFFFF);
+	if(showVideo) {
+		ofSetHexColor(0xFFFFFF);
 
-    fingerMovie.draw(410,145);
-    ofSetHexColor(0x000000);
-    unsigned char * pixels = fingerMovie.getPixels();
-	int mean_luminance = 0;
-	int i;
-	int num_pixels = fingerMovie.getWidth() * fingerMovie.getHeight();
+		fingerMovie.draw(410,145);
+		ofSetHexColor(0x000000);
+		unsigned char * pixels = fingerMovie.getPixels();
+		int mean_luminance = 0;
+		int i;
+		int num_pixels = fingerMovie.getWidth() * fingerMovie.getHeight();
 
-	// calculate luminance for each rbg pixel
-	for (i = 0; i < num_pixels; i+=3){
-		//int inverse = 255 - pixels[i];
-        mean_luminance += 0.2125*pixels[i] + 0.7154*pixels[i+1] + 0.0721*pixels[i+2];
-    }
-	mean_luminance /= (i/3);
+		// calculate luminance for each rbg pixel
+		for (i = 0; i < num_pixels; i+=3){
+			//int inverse = 255 - pixels[i];
+			mean_luminance += 0.2125*pixels[i] + 0.7154*pixels[i+1] + 0.0721*pixels[i+2];
+		}
+		mean_luminance /= (i/3);
 
-    ofSetHexColor(0x000000);
-	ofDrawBitmapString("press f to change",250,320);
-    if(frameByframe) ofSetHexColor(0xCCCCCC);
-    ofDrawBitmapString("mouse speed position",250,340);
-    if(!frameByframe) ofSetHexColor(0xCCCCCC); else ofSetHexColor(0x000000);
-    ofDrawBitmapString("keys <- -> frame by frame " ,420,340);
-    ofSetHexColor(0x000000);
+		ofSetHexColor(0x000000);
+		ofDrawBitmapString("press c to change",250,320);
+		if(frameByframe) ofSetHexColor(0xCCCCCC);
+		ofDrawBitmapString("mouse speed position",250,340);
+		if(!frameByframe) ofSetHexColor(0xCCCCCC); else ofSetHexColor(0x000000);
+		ofDrawBitmapString("keys <- -> frame by frame " ,420,340);
+		ofSetHexColor(0x000000);
 
-    ofDrawBitmapString("frame: " + ofToString(fingerMovie.getCurrentFrame()) + "/"+ofToString(fingerMovie.getTotalNumFrames()),250,380);
-    ofDrawBitmapString("duration: " + ofToString(fingerMovie.getPosition()*fingerMovie.getDuration(),2) + "/"+ofToString(fingerMovie.getDuration(),2),250,400);
-    ofDrawBitmapString("speed: " + ofToString(fingerMovie.getSpeed(),2),250,420);
-	ofDrawBitmapString("luminance: " + ofToString(mean_luminance), 250, 440);
+		ofDrawBitmapString("frame: " + ofToString(fingerMovie.getCurrentFrame()) + "/"+ofToString(fingerMovie.getTotalNumFrames()),250,380);
+		ofDrawBitmapString("duration: " + ofToString(fingerMovie.getPosition()*fingerMovie.getDuration(),2) + "/"+ofToString(fingerMovie.getDuration(),2),250,400);
+		ofDrawBitmapString("speed: " + ofToString(fingerMovie.getSpeed(),2),250,420);
+		ofDrawBitmapString("luminance: " + ofToString(mean_luminance), 250, 440);
 
-    if(fingerMovie.getIsMovieDone()){
-        ofSetHexColor(0xFF0000);
-        ofDrawBitmapString("end of movie",250,440);
-    }
-
+		if(fingerMovie.getIsMovieDone()){
+			ofSetHexColor(0xFF0000);
+			ofDrawBitmapString("end of movie",250,440);
+		}
+	}
 }
 
 void ofApp::guiEvent(ofxUIEventArgs &e)
@@ -84,6 +95,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 	string name = e.getName();
 	int kind = e.getKind();
 	cout << "got event from: " << name << endl;
+
     if(kind == OFX_UI_WIDGET_NUMBERDIALER)
     {
         ofxUINumberDialer *n = (ofxUINumberDialer *) e.widget;
@@ -103,12 +115,14 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 		ofxUIButton *button = (ofxUIButton *) e.getButton();
 		bdrawGrid = button->getValue();
 	}
-	else if(name == "BUTTON")
+	else if(name == "TOGGLE")
 	{
-		ofxUIButton *button = (ofxUIButton *) e.getButton();
-		bdrawGrid = button->getValue();
-	}
+		ofxUIToggle *toggle = (ofxUIToggle *) e.getToggle();
+		showVideo = toggle->getValue();
 
+		cout << "SHOW-VIDEO" << showVideo;
+		update();
+	}
     else if(name == "RADIO VERTICAL")
     {
         ofxUIRadio *radio = (ofxUIRadio *) e.widget;
@@ -212,7 +226,7 @@ void ofApp::setGUI1()
     gui1->addSpacer();
     gui1->setWidgetFontSize(OFX_UI_FONT_SMALL);
 	gui1->addButton("BUTTON", false);
-	gui1->addToggle( "TOGGLE", false);
+	gui1->addToggle("TOGGLE", false);
     
     gui1->addSpacer();
     gui1->addLabel("RANGE SLIDER");
