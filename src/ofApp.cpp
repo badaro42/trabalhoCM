@@ -4,7 +4,6 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
 	
-    ofSetCircleResolution(120);
     red = 233; blue = 233; green = 233;
     hideGUI = false;
     bdrawGrid = false;
@@ -23,9 +22,7 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
-
-    /*mg->addPoint(buffer[0]);
-    for(int i = 0; i < 256; i++) { buffer[i] = ofNoise(i/100.0, ofGetElapsedTimef()); }*/
+	fingerMovie.update();
 }
 
 //--------------------------------------------------------------
@@ -48,7 +45,7 @@ void ofApp::draw(){
 	//cenas do video!!
 	ofSetHexColor(0xFFFFFF);
 
-    fingerMovie.draw(400,20);
+    fingerMovie.draw(410,145);
     ofSetHexColor(0x000000);
     unsigned char * pixels = fingerMovie.getPixels();
 	int mean_luminance = 0;
@@ -106,6 +103,12 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 		ofxUIButton *button = (ofxUIButton *) e.getButton();
 		bdrawGrid = button->getValue();
 	}
+	else if(name == "BUTTON")
+	{
+		ofxUIButton *button = (ofxUIButton *) e.getButton();
+		bdrawGrid = button->getValue();
+	}
+
     else if(name == "RADIO VERTICAL")
     {
         ofxUIRadio *radio = (ofxUIRadio *) e.widget;

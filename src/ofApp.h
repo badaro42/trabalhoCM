@@ -39,4 +39,5 @@ class ofApp : public ofBaseApp{
 		//cenas do video
 		ofVideoPlayer fingerMovie;
 		bool frameByframe;
+		bool showVideo;
 };

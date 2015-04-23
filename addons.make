@@ -1,4 +1,5 @@
 ofxGui
+ofxOpenCv
 ofxVectorGraphics
 ofxXmlSettings
 ofxUI
