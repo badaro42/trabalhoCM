@@ -17,7 +17,7 @@ void ofApp::setup(){
     
 	setGUI1();
     
-    gui1->loadSettings("gui1Settings.xml");
+    //gui1->loadSettings("gui1Settings.xml");
 
 	fingerMovie.loadMovie("movies/fingers.mov");
 	
@@ -39,24 +39,18 @@ void ofApp::update(){
 void ofApp::draw(){
     ofBackground(red, green, blue, 255);
 	
-	ofPushStyle();
-	ofEnableBlendMode(OF_BLENDMODE_ALPHA);
-    
-	if(bdrawGrid)
-	{
-		ofSetColor(255, 255, 255, 25);
-		drawGrid(8,8);
-	}
+	//ofPushStyle();
+	//ofEnableBlendMode(OF_BLENDMODE_ALPHA);
     
 	ofPopStyle();
     
-    ofSetRectMode(OF_RECTMODE_CENTER);
+    //ofSetRectMode(OF_RECTMODE_CENTER);
 
 	//cenas do video!!
 	if(showVideo) {
 		ofSetHexColor(0xFFFFFF);
 
-		fingerMovie.draw(410,145);
+		fingerMovie.draw(275,5);
 		ofSetHexColor(0x000000);
 		unsigned char * pixels = fingerMovie.getPixels();
 		int mean_luminance = 0;
@@ -71,17 +65,17 @@ void ofApp::draw(){
 		mean_luminance /= (i/3);
 
 		ofSetHexColor(0x000000);
-		ofDrawBitmapString("press c to change",250,320);
+		ofDrawBitmapString("press c to change",275,290);
 		if(frameByframe) ofSetHexColor(0xCCCCCC);
-		ofDrawBitmapString("mouse speed position",250,340);
+		ofDrawBitmapString("mouse speed position",275,310);
 		if(!frameByframe) ofSetHexColor(0xCCCCCC); else ofSetHexColor(0x000000);
-		ofDrawBitmapString("keys <- -> frame by frame " ,420,340);
+		ofDrawBitmapString("keys <- -> frame by frame " ,445,310);
 		ofSetHexColor(0x000000);
 
-		ofDrawBitmapString("frame: " + ofToString(fingerMovie.getCurrentFrame()) + "/"+ofToString(fingerMovie.getTotalNumFrames()),250,380);
-		ofDrawBitmapString("duration: " + ofToString(fingerMovie.getPosition()*fingerMovie.getDuration(),2) + "/"+ofToString(fingerMovie.getDuration(),2),250,400);
-		ofDrawBitmapString("speed: " + ofToString(fingerMovie.getSpeed(),2),250,420);
-		ofDrawBitmapString("luminance: " + ofToString(mean_luminance), 250, 440);
+		ofDrawBitmapString("frame: " + ofToString(fingerMovie.getCurrentFrame()) + "/"+ofToString(fingerMovie.getTotalNumFrames()),275,350);
+		ofDrawBitmapString("duration: " + ofToString(fingerMovie.getPosition()*fingerMovie.getDuration(),2) + "/"+ofToString(fingerMovie.getDuration(),2),275,370);
+		ofDrawBitmapString("speed: " + ofToString(fingerMovie.getSpeed(),2),275,390);
+		ofDrawBitmapString("luminance: " + ofToString(mean_luminance), 275, 410);
 
 		if(fingerMovie.getIsMovieDone()){
 			ofSetHexColor(0xFF0000);
@@ -133,7 +127,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 //--------------------------------------------------------------
 void ofApp::exit()
 {
-    gui1->saveSettings("gui1Settings.xml");
+    //gui1->saveSettings("gui1Settings.xml");
     
 	delete gui1;
 }
@@ -149,19 +143,6 @@ void ofApp::keyPressed(int key){
 		case 'h':
             gui1->toggleVisible();
 			break;
-            
-		case 'p':
-			bdrawPadding = !bdrawPadding;
-			gui1->setDrawWidgetPaddingOutline(bdrawPadding);
-			break;
-            
-		case '[':
-			gui1->setDrawWidgetPadding(false);
-			break;
-            
-		case ']':
-			gui1->setDrawWidgetPadding(true);
-			break;
 			
         case '1':
             gui1->toggleVisible();
@@ -172,7 +153,7 @@ void ofApp::keyPressed(int key){
 	}
 }
 
-void ofApp::drawGrid(float x, float y)
+/*void ofApp::drawGrid(float x, float y)
 {
     float w = ofGetWidth();
     float h = ofGetHeight();
@@ -186,7 +167,7 @@ void ofApp::drawGrid(float x, float y)
     {
         ofLine(j,0,j,h);
     }
-}
+}*/
 
 void ofApp::setGUI1()
 {
@@ -195,7 +176,7 @@ void ofApp::setGUI1()
 	names.push_back("RAD2");
 	names.push_back("RAD3");
 	
-	gui1 = new ofxUISuperCanvas("CONTROLOS!");
+	gui1 = new ofxUISuperCanvas("CONTROLOS!", 5, 5, 250, 1500);
     gui1->addSpacer();
     gui1->addLabel("Press 'h' to Hide GUIs", OFX_UI_FONT_SMALL);
     
