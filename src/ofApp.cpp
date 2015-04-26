@@ -6,8 +6,10 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-	isFullScreen = false;
 
+	isFullScreen = false;
+	choose_video_screen = true;
+	play_video_screen = false;
 
 	ofDirectory dir;
 	ofVideoPlayer video;
@@ -40,44 +42,23 @@ void ofApp::setup(){
 				OF_IMAGE_COLOR);
 		}
 
+		img_swipe.setIndicatorStyle(0.9f,7,0.05f);
+
 		img_swipe.load(frames,FRAME_WIDTH,FRAME_HEIGHT,FADE_SIZE);
 		img_swipe.setAnchorPercent(0.5,0.7);
 		position.set(ofGetWidth()*0.65,ofGetHeight()*0.5);
 	}
-
-
-
-	/*vector<string> path;
-    path.push_back("images/img1.jpg");
-    path.push_back("images/img2.jpg");
-	path.push_back("images/img3.png");
-	path.push_back("images/img4.png");
-
-	img_swipe.load(path,FRAME_WIDTH,FRAME_HEIGHT,FADE_SIZE);
-    img_swipe.setAnchorPercent(0.5,0.7);
-    position.set(ofGetWidth()*0.65,ofGetHeight()*0.5);*/
     
     time = 0;
 	
     red = 200; blue = 200; green = 200;
     hideGUI = false;
-    bdrawGrid = false;
-	bdrawPadding = false;
 
 	ofSetVerticalSync(true);
-	frameByframe = false;
-	
-	//alterar aqui o valor inicial da variavel que mostra ou esconde o video.
-	showVideo = false;
     
 	setGUI1();
     
     //gui1->loadSettings("gui1Settings.xml");
-
-	fingerMovie.loadMovie("movies/fingers.mov");
-	
-	//if(showVideo)
-	//	fingerMovie.play();
 }
 
 //--------------------------------------------------------------
@@ -90,7 +71,7 @@ void ofApp::update(){
 	//fingerMovie.update();
 
 	float t = ofGetElapsedTimef();
-    float dt = t -time;
+    float dt = t - time;
     time = t;
 	img_swipe.update(dt);
 }
@@ -99,20 +80,23 @@ void ofApp::update(){
 void ofApp::draw(){
     ofBackground(red, green, blue, 255);
 	
-	play_button.draw((ofGetWidth()*0.65)-(play_button.width/2), ofGetHeight()*0.7);
+	//estamos no primeiro ecra
+	if(choose_video_screen) {
+		play_button.draw((ofGetWidth()*0.65)-(play_button.width/2), ofGetHeight()*0.7);
+	}
     
-	ofPopStyle();
+	//ofPopStyle();
 
-	//cenas do video!!
-	if(showVideo) {
+	//estamos no segundo ecra, o do video
+	if(play_video_screen) {
 		ofSetHexColor(0xFFFFFF);
 
-		fingerMovie.draw(275,5);
+		movie.draw(275,5);
 		ofSetHexColor(0x000000);
-		unsigned char * pixels = fingerMovie.getPixels();
+		unsigned char * pixels = movie.getPixels();
 		int mean_luminance = 0;
 		int i;
-		int num_pixels = fingerMovie.getWidth() * fingerMovie.getHeight();
+		int num_pixels = movie.getWidth() * movie.getHeight();
 
 		// calculate luminance for each rbg pixel
 		for (i = 0; i < num_pixels; i+=3){
@@ -121,20 +105,20 @@ void ofApp::draw(){
 		}
 		mean_luminance /= (i/3);
 
-		ofSetHexColor(0x000000);
+		/*ofSetHexColor(0x000000);
 		ofDrawBitmapString("press c to change",275,290);
 		if(frameByframe) ofSetHexColor(0xCCCCCC);
 		ofDrawBitmapString("mouse speed position",275,310);
 		if(!frameByframe) ofSetHexColor(0xCCCCCC); else ofSetHexColor(0x000000);
 		ofDrawBitmapString("keys <- -> frame by frame " ,445,310);
-		ofSetHexColor(0x000000);
+		ofSetHexColor(0x000000);*/
 
-		ofDrawBitmapString("frame: " + ofToString(fingerMovie.getCurrentFrame()) + "/"+ofToString(fingerMovie.getTotalNumFrames()),275,350);
-		ofDrawBitmapString("duration: " + ofToString(fingerMovie.getPosition()*fingerMovie.getDuration(),2) + "/"+ofToString(fingerMovie.getDuration(),2),275,370);
-		ofDrawBitmapString("speed: " + ofToString(fingerMovie.getSpeed(),2),275,390);
+		ofDrawBitmapString("frame: " + ofToString(movie.getCurrentFrame()) + "/"+ofToString(movie.getTotalNumFrames()),275,350);
+		ofDrawBitmapString("duration: " + ofToString(movie.getPosition()*movie.getDuration(),2) + "/"+ofToString(movie.getDuration(),2),275,370);
+		ofDrawBitmapString("speed: " + ofToString(movie.getSpeed(),2),275,390);
 		ofDrawBitmapString("luminance: " + ofToString(mean_luminance), 275, 410);
 
-		if(fingerMovie.getIsMovieDone()){
+		if(movie.getIsMovieDone()){
 			ofSetHexColor(0xFF0000);
 			ofDrawBitmapString("end of movie",250,440);
 		}
@@ -153,25 +137,7 @@ void ofApp::draw(){
 	ofLine(ofGetWidth()*0.9, ofGetHeight()*0.17, ofGetWidth()*0.9, ofGetHeight()*0.6); //vertical direita
 	ofLine(ofGetWidth()*0.38, ofGetHeight()*0.2, ofGetWidth()*0.92, ofGetHeight()*0.2);	//horizontal cima
 	ofLine(ofGetWidth()*0.38, ofGetHeight()*0.57, ofGetWidth()*0.92, ofGetHeight()*0.57); //horizontal baixo
-        
-    //Just squares to show the dimensions of the scrollable zone and fade
-    /*ofSetColor(0);
-    ofNoFill();
-    ofSetRectMode(OF_RECTMODE_CENTER);
-    ofRect(ofGetWidth()*0.65,
-		ofGetHeight()*0.4,
-		img_swipe.getWidth()*1.1,
-		img_swipe.getHeight());
-    ofLine(ofGetWidth()*0.5-img_swipe.getWidth()*0.25,
-		ofGetHeight()*0.5-img_swipe.getHeight()*0.5+FADE_SIZE,
-		ofGetWidth()*0.5+img_swipe.getWidth()*0.75,
-		ofGetHeight()*0.5-img_swipe.getHeight()*0.5+FADE_SIZE);
-    ofLine(ofGetWidth()*0.5-img_swipe.getWidth()*0.5,
-		ofGetHeight()*0.5+img_swipe.getHeight()*0.5-FADE_SIZE,
-		ofGetWidth()*0.5+img_swipe.getWidth()*0.5,
-		ofGetHeight()*0.5+img_swipe.getHeight()*0.5-FADE_SIZE);
-    
-    ofSetRectMode(OF_RECTMODE_CORNER);*/
+
 }
 
 void ofApp::guiEvent(ofxUIEventArgs &e)
@@ -197,15 +163,15 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 	else if(name == "BUTTON")
 	{
 		ofxUIButton *button = (ofxUIButton *) e.getButton();
-		bdrawGrid = button->getValue();
+		//bdrawGrid = button->getValue();
 	}
 	else if(name == "TOGGLE")
 	{
 		ofxUIToggle *toggle = (ofxUIToggle *) e.getToggle();
-		showVideo = toggle->getValue();
+		//showVideo = toggle->getValue();
 
-		cout << "SHOW-VIDEO" << showVideo;
-		update();
+		//cout << "SHOW-VIDEO" << showVideo;
+		//update();
 	}
     else if(name == "RADIO VERTICAL")
     {
@@ -243,22 +209,6 @@ void ofApp::keyPressed(int key){
 			break;
 	}
 }
-
-/*void ofApp::drawGrid(float x, float y)
-{
-    float w = ofGetWidth();
-    float h = ofGetHeight();
-    
-    for(int i = 0; i < h; i+=y)
-    {
-        ofLine(0,i,w,i);
-    }
-    
-    for(int j = 0; j < w; j+=x)
-    {
-        ofLine(j,0,j,h);
-    }
-}*/
 
 void ofApp::setGUI1()
 {
@@ -331,14 +281,23 @@ void ofApp::mouseDragged(int x, int y, int button){
 //------------------------------------------------------------
 //so é possivel fazer swipe dentro da area do video!
 void ofApp::mousePressed(int x, int y, int button){
-	//swipe dentro do rectangulo das imagens do video
+	//swipe dentro do rectangulo das imagens do video - so no primeiro ecra
 	if((x >= ofGetWidth()*0.4) && (x <= ofGetWidth()*0.9) &&
-		(y >= ofGetHeight()*0.2) && (y <= ofGetHeight()*0.57)){
+		(y >= ofGetHeight()*0.2) && (y <= ofGetHeight()*0.57) &&
+		choose_video_screen){
 		img_swipe.pressed(ofPoint(x,y)-position);
+
     }
-	//botao de play
-	else if(true) {
+	//botao de play - so no primeiro ecra!!
+	else if((x >= ((ofGetWidth()*0.65)-(play_button.width/2))) &&
+		(x <= ((ofGetWidth()*0.65)+(play_button.width/2))) &&
+		(y >= ofGetHeight()*0.7) &&
+		(y <= ofGetHeight()*0.7 + play_button.height) &&
+		choose_video_screen) {
 		//carregamos dentro do botao, fazer play do video seleccionado
+			cout << "DENTRO DO BOTAO DE PLAY, POSIÇÃO ACTUAL: " << img_swipe.getCurrent() << "\n";
+		//choose_video_screen = false;
+		//play_video_screen = true;
 	}
 }
 
@@ -349,7 +308,7 @@ void ofApp::mouseReleased(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
-
+	 
 }
 
 //--------------------------------------------------------------

@@ -22,26 +22,17 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
-    
-		//void drawGrid(float x, float y);
-    
+
+		void guiEvent(ofxUIEventArgs &e);
 		void setGUI1();
 	
+		//cenas da barra lateral e do background
 		ofxUISuperCanvas *gui1;
-
 		bool hideGUI;
-	
-		float red, green, blue;
-		bool bdrawGrid;
-		bool bdrawPadding;
-	
-		void guiEvent(ofxUIEventArgs &e);
+		float red, green, blue;		
 
 		//cenas do video
-		ofVideoPlayer fingerMovie;
-		bool frameByframe;
-		bool showVideo;
-
+		ofVideoPlayer movie;
 		bool isFullScreen;
 
 		//cenas do swipe das imagens
@@ -49,4 +40,9 @@ class ofApp : public ofBaseApp{
 		float time;
 		ofPoint position;
 		ofImage play_button;
+		int current_position;
+
+		//variaveis de controlo do ecra actual
+		bool choose_video_screen;
+		bool play_video_screen;
 };
