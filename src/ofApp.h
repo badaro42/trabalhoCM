@@ -48,4 +48,5 @@ class ofApp : public ofBaseApp{
 		ofxSwipeable img_swipe;
 		float time;
 		ofPoint position;
+		ofImage play_button;
 };

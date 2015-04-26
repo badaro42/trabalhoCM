@@ -11,7 +11,10 @@ void ofApp::setup(){
 
 	ofDirectory dir;
 	ofVideoPlayer video;
-	
+
+	//load dos botoes da app
+	play_button.loadImage("images/youtube_play.png");
+	play_button.resize(128,104);
     
     int nFiles = dir.listDir("movies");
 
@@ -30,7 +33,7 @@ void ofApp::setup(){
 			int middleFrame = video.getTotalNumFrames()/2;
 			video.setFrame(middleFrame);
 
-			cout << "TAMANHO DO ARRAY 'FRAMES'" << frames.size() << "\n";
+			cout << "TAMANHO DO ARRAY 'FRAMES': " << frames.size() << "\n";
 
 			//TODO: ESTA A DAR ERRO AQUI, SE NAO ME ENGANO DÁ "ARRAY OUT OF BOUNDS"!!
 			frames[i].setFromPixels(video.getPixels(), video.getWidth(), video.getHeight(),
@@ -96,12 +99,9 @@ void ofApp::update(){
 void ofApp::draw(){
     ofBackground(red, green, blue, 255);
 	
-	//ofPushStyle();
-	//ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+	play_button.draw((ofGetWidth()*0.65)-(play_button.width/2), ofGetHeight()*0.7);
     
 	ofPopStyle();
-    
-    //ofSetRectMode(OF_RECTMODE_CENTER);
 
 	//cenas do video!!
 	if(showVideo) {
@@ -331,10 +331,15 @@ void ofApp::mouseDragged(int x, int y, int button){
 //------------------------------------------------------------
 //so é possivel fazer swipe dentro da area do video!
 void ofApp::mousePressed(int x, int y, int button){
+	//swipe dentro do rectangulo das imagens do video
 	if((x >= ofGetWidth()*0.4) && (x <= ofGetWidth()*0.9) &&
 		(y >= ofGetHeight()*0.2) && (y <= ofGetHeight()*0.57)){
 		img_swipe.pressed(ofPoint(x,y)-position);
     }
+	//botao de play
+	else if(true) {
+		//carregamos dentro do botao, fazer play do video seleccionado
+	}
 }
 
 //--------------------------------------------------------------
