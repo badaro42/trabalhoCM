@@ -1,10 +1,62 @@
 #include "ofApp.h"
 
+#define FRAME_WIDTH 600
+#define FRAME_HEIGHT 450
+#define FADE_SIZE 50
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+	isFullScreen = false;
+
+
+	ofDirectory dir;
+	ofVideoPlayer video;
 	
-    red = 233; blue = 233; green = 233;
+    
+    int nFiles = dir.listDir("movies");
+
+	cout << "TAMANHO DA PASTA: " << nFiles << "\n";
+	if(nFiles > 0) {
+		//vou a cada video nesta pasta e crio um vector de pixeis
+		//frames.reserve(50);
+		vector<ofPixels> frames(dir.numFiles());
+		for(int i = 0; i < dir.numFiles(); i++) {
+			string fullPath = dir.getPath(i);
+
+			cout << "CAMINHO DO VIDEO: " << fullPath << "\n";
+			video.loadMovie(fullPath);
+
+			//inteiro com o numero que representa o meio do video
+			int middleFrame = video.getTotalNumFrames()/2;
+			video.setFrame(middleFrame);
+
+			cout << "TAMANHO DO ARRAY 'FRAMES'" << frames.size() << "\n";
+
+			//TODO: ESTA A DAR ERRO AQUI, SE NAO ME ENGANO DÁ "ARRAY OUT OF BOUNDS"!!
+			frames[i].setFromPixels(video.getPixels(), video.getWidth(), video.getHeight(),
+				OF_IMAGE_COLOR);
+		}
+
+		img_swipe.load(frames,FRAME_WIDTH,FRAME_HEIGHT,FADE_SIZE);
+		img_swipe.setAnchorPercent(0.5,0.7);
+		position.set(ofGetWidth()*0.65,ofGetHeight()*0.5);
+	}
+
+
+
+	/*vector<string> path;
+    path.push_back("images/img1.jpg");
+    path.push_back("images/img2.jpg");
+	path.push_back("images/img3.png");
+	path.push_back("images/img4.png");
+
+	img_swipe.load(path,FRAME_WIDTH,FRAME_HEIGHT,FADE_SIZE);
+    img_swipe.setAnchorPercent(0.5,0.7);
+    position.set(ofGetWidth()*0.65,ofGetHeight()*0.5);*/
+    
+    time = 0;
+	
+    red = 200; blue = 200; green = 200;
     hideGUI = false;
     bdrawGrid = false;
 	bdrawPadding = false;
@@ -21,18 +73,23 @@ void ofApp::setup(){
 
 	fingerMovie.loadMovie("movies/fingers.mov");
 	
-	if(showVideo)
-		fingerMovie.play();
+	//if(showVideo)
+	//	fingerMovie.play();
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-	if(showVideo) 
-		fingerMovie.play();
-	else 
-		fingerMovie.stop();
+	//if(showVideo) 
+	//	fingerMovie.play();
+	//else 
+	//	fingerMovie.stop();
 
-	fingerMovie.update();
+	//fingerMovie.update();
+
+	float t = ofGetElapsedTimef();
+    float dt = t -time;
+    time = t;
+	img_swipe.update(dt);
 }
 
 //--------------------------------------------------------------
@@ -82,6 +139,39 @@ void ofApp::draw(){
 			ofDrawBitmapString("end of movie",250,440);
 		}
 	}
+
+    //ofSetColor(255);
+    
+	if(isFullScreen)
+		img_swipe.draw(ofGetWidth()*0.65,ofGetHeight()*0.5);
+	else
+		img_swipe.draw(position.x,position.y);
+
+	//linhas para indicar a area onde é possivel fazer swipe com o rato
+	//DESACTIVAR ANTES DA ENTREGA!!!
+	ofLine(ofGetWidth()*0.4, ofGetHeight()*0.17, ofGetWidth()*0.4, ofGetHeight()*0.6); //vertical esquerda
+	ofLine(ofGetWidth()*0.9, ofGetHeight()*0.17, ofGetWidth()*0.9, ofGetHeight()*0.6); //vertical direita
+	ofLine(ofGetWidth()*0.38, ofGetHeight()*0.2, ofGetWidth()*0.92, ofGetHeight()*0.2);	//horizontal cima
+	ofLine(ofGetWidth()*0.38, ofGetHeight()*0.57, ofGetWidth()*0.92, ofGetHeight()*0.57); //horizontal baixo
+        
+    //Just squares to show the dimensions of the scrollable zone and fade
+    /*ofSetColor(0);
+    ofNoFill();
+    ofSetRectMode(OF_RECTMODE_CENTER);
+    ofRect(ofGetWidth()*0.65,
+		ofGetHeight()*0.4,
+		img_swipe.getWidth()*1.1,
+		img_swipe.getHeight());
+    ofLine(ofGetWidth()*0.5-img_swipe.getWidth()*0.25,
+		ofGetHeight()*0.5-img_swipe.getHeight()*0.5+FADE_SIZE,
+		ofGetWidth()*0.5+img_swipe.getWidth()*0.75,
+		ofGetHeight()*0.5-img_swipe.getHeight()*0.5+FADE_SIZE);
+    ofLine(ofGetWidth()*0.5-img_swipe.getWidth()*0.5,
+		ofGetHeight()*0.5+img_swipe.getHeight()*0.5-FADE_SIZE,
+		ofGetWidth()*0.5+img_swipe.getWidth()*0.5,
+		ofGetHeight()*0.5+img_swipe.getHeight()*0.5-FADE_SIZE);
+    
+    ofSetRectMode(OF_RECTMODE_CORNER);*/
 }
 
 void ofApp::guiEvent(ofxUIEventArgs &e)
@@ -138,6 +228,7 @@ void ofApp::keyPressed(int key){
 	{            
 		case 'f':
 			ofToggleFullscreen();
+			isFullScreen = !isFullScreen;
 			break;
             
 		case 'h':
@@ -237,14 +328,18 @@ void ofApp::mouseDragged(int x, int y, int button){
 
 }
 
-//--------------------------------------------------------------
+//------------------------------------------------------------
+//so é possivel fazer swipe dentro da area do video!
 void ofApp::mousePressed(int x, int y, int button){
-
+	if((x >= ofGetWidth()*0.4) && (x <= ofGetWidth()*0.9) &&
+		(y >= ofGetHeight()*0.2) && (y <= ofGetHeight()*0.57)){
+		img_swipe.pressed(ofPoint(x,y)-position);
+    }
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
-
+	img_swipe.released(ofPoint(x,y)-position);
 }
 
 //--------------------------------------------------------------

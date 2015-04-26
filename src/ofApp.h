@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxUI.h"
+#include "ofxSwipeable.h"
 
 class ofApp : public ofBaseApp{
 
@@ -40,4 +41,11 @@ class ofApp : public ofBaseApp{
 		ofVideoPlayer fingerMovie;
 		bool frameByframe;
 		bool showVideo;
+
+		bool isFullScreen;
+
+		//cenas do swipe das imagens
+		ofxSwipeable img_swipe;
+		float time;
+		ofPoint position;
 };

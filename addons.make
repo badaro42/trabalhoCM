@@ -2,4 +2,5 @@ ofxGui
 ofxOpenCv
 ofxVectorGraphics
 ofxXmlSettings
+ofxSwipeable
 ofxUI

@@ -70,6 +70,9 @@
 		<ClCompile Include="..\..\..\addons\ofxXmlSettings\libs\tinyxmlparser.cpp">
 			<Filter>addons\ofxXmlSettings\libs</Filter>
 		</ClCompile>
+		<ClCompile Include="..\..\..\addons\ofxSwipeable\src\ofxSwipeable.cpp">
+			<Filter>addons\ofxSwipeable\src</Filter>
+		</ClCompile>
 		<ClCompile Include="..\..\..\addons\ofxUI\src\ofxUI2DGraph.cpp">
 			<Filter>addons\ofxUI\src</Filter>
 		</ClCompile>
@@ -293,6 +296,12 @@
 		</Filter>
 		<Filter Include="addons\ofxXmlSettings\libs">
 			<UniqueIdentifier>{687714A8-1662-FA1C-261F-50F0}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="addons\ofxSwipeable">
+			<UniqueIdentifier>{E8EA0464-784B-33BF-0DE4-73B4}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="addons\ofxSwipeable\src">
+			<UniqueIdentifier>{56C62153-5030-594A-D591-8B08}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="addons\ofxUI">
 			<UniqueIdentifier>{B492C5B0-FF91-9C5A-638A-3142}</UniqueIdentifier>
@@ -622,6 +631,9 @@
 		</ClInclude>
 		<ClInclude Include="..\..\..\addons\ofxXmlSettings\libs\tinyxml.h">
 			<Filter>addons\ofxXmlSettings\libs</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\..\addons\ofxSwipeable\src\ofxSwipeable.h">
+			<Filter>addons\ofxSwipeable\src</Filter>
 		</ClInclude>
 		<ClInclude Include="..\..\..\addons\ofxUI\src\ofxUI.h">
 			<Filter>addons\ofxUI\src</Filter>
