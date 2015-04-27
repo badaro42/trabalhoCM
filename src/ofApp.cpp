@@ -85,17 +85,12 @@ void ofApp::update(){
 		play_video_screen = true;
 	}
 
-	//user carregou no back, paramos o video e voltamos ao ecra inicial
-	/*else if(**BACK_BUTTON**) {
-		
-	}*/
-
 	//estamos no ecra do video e o video esta' a tocar, fazemos update
 	else if(play_video_screen) {
 		movie.update();
 	}
 
-	//estamos no ecra do video e o user parou o video
+	//user carregou no back, paramos o video e voltamos ao ecra inicial
 	else if(back_button_pressed) {
 		movie.stop();
 		back_button_pressed = false;
@@ -351,6 +346,20 @@ void ofApp::mousePressed(int x, int y, int button){
 			cout << "botao de pause!!!\n";
 		//choose_video_screen = false;
 		//play_video_screen = true;
+	}
+	//botao de PLAY/PAUSE - no segundo ecra!!
+	else if((x >= (ofGetWidth()*0.65)) &&
+		(x <= ((ofGetWidth()*0.65)+(play_button.width))) &&
+		(y >= ofGetHeight()*0.7) &&
+		(y <= ofGetHeight()*0.7 + play_button.height) &&
+		play_video_screen) {
+		//carregamos dentro do botao, fazer play do video seleccionado
+			if(movie.isPlaying())
+				movie.stop();
+			else
+				movie.play();
+
+			cout << "botao de play/pause kkkk!!!\n";
 	}
 }
 
