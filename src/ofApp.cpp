@@ -18,13 +18,16 @@ void ofApp::setup(){
 
 	//load dos botoes da app
 	play_button.loadImage("images/youtube_play.png");
-	play_button.resize(BUTTON_WIDTH, BUTTON_HEIGHT);
+	play_button.resize(LARGE_BUTTON_WIDTH, BUTTON_HEIGHT);
 
 	back_button.loadImage("images/back_button.png");
-	back_button.resize(BUTTON_WIDTH, BUTTON_HEIGHT);
+	back_button.resize(SMALL_BUTTON_WIDTH, BUTTON_HEIGHT);
 
 	play_pause_button.loadImage("images/play_pause_button.jpg");
-	play_pause_button.resize(BUTTON_WIDTH, BUTTON_HEIGHT);
+	play_pause_button.resize(SMALL_BUTTON_WIDTH, BUTTON_HEIGHT);
+
+	stop_button.loadImage("images/stop_button.jpg");
+	stop_button.resize(SMALL_BUTTON_WIDTH, BUTTON_HEIGHT);
     
     int nFiles = dir.listDir("movies");
 
@@ -62,7 +65,10 @@ void ofApp::setup(){
     
     time = 0;
 	
-    red = 200; blue = 200; green = 200;
+    red = 200; 
+	blue = 200; 
+	green = 200;
+
     hideGUI = false;
 
 	ofSetVerticalSync(true);
@@ -90,12 +96,6 @@ void ofApp::update(){
 		movie.update();
 	}
 
-	//user carregou no back, paramos o video e voltamos ao ecra inicial
-	else if(back_button_pressed) {
-		movie.stop();
-		back_button_pressed = false;
-	}
-
 	float t = ofGetElapsedTimef();
     float dt = t - time;
     time = t;
@@ -108,7 +108,7 @@ void ofApp::draw(){
 
 	//estamos no primeiro ecra - INICIO
 	if(choose_video_screen) {
-		play_button.draw((ofGetWidth()*0.65)-(play_button.width/2), ofGetHeight()*0.7);
+		play_button.draw((ofGetWidth()*0.65)-(LARGE_BUTTON_WIDTH/2), ofGetHeight()*0.7);
 
 		if(isFullScreen)
 			img_swipe.draw(ofGetWidth()*0.65, ofGetHeight()*0.5);
@@ -120,9 +120,11 @@ void ofApp::draw(){
 
 	//estamos no segundo ecra, o do video
 	if(play_video_screen) {
-		back_button.draw((ofGetWidth()*0.65)-(play_button.width), 
+		back_button.draw((ofGetWidth()*0.65)-(1.5*SMALL_BUTTON_WIDTH)-SMALL_INTERVAL, 
 			ofGetHeight()*0.7);
-		play_pause_button.draw(ofGetWidth()*0.65, 
+		play_pause_button.draw(ofGetWidth()*0.65-(SMALL_BUTTON_WIDTH/2), 
+			ofGetHeight()*0.7);
+		stop_button.draw(ofGetWidth()*0.65+(SMALL_BUTTON_WIDTH/2)+SMALL_INTERVAL, 
 			ofGetHeight()*0.7);
 	
 		ofSetHexColor(0xFFFFFF);
@@ -233,10 +235,6 @@ void ofApp::keyPressed(int key){
 		case 'h':
             gui1->toggleVisible();
 			break;
-			
-        case '1':
-            gui1->toggleVisible();
-            break;
 
 		default:
 			break;
@@ -322,44 +320,47 @@ void ofApp::mousePressed(int x, int y, int button){
 
     }
 	//botao de play - so no primeiro ecra!!
-	else if((x >= ((ofGetWidth()*0.65)-(play_button.width/2))) &&
-		(x <= ((ofGetWidth()*0.65)+(play_button.width/2))) &&
+	else if((x >= ofGetWidth()*0.65 - LARGE_BUTTON_WIDTH/2) &&
+		(x <= ofGetWidth()*0.65 + LARGE_BUTTON_WIDTH/2) &&
 		(y >= ofGetHeight()*0.7) &&
-		(y <= ofGetHeight()*0.7 + play_button.height) &&
+		(y <= ofGetHeight()*0.7 + BUTTON_HEIGHT) &&
 		choose_video_screen) {
-		//carregamos dentro do botao, fazer play do video seleccionado
 			load_video = true;
 			cout << "DENTRO DO BOTAO DE PLAY, POSICAO ACTUAL: " << img_swipe.getCurrent() << "\n";
-		//choose_video_screen = false;
-		//play_video_screen = true;
 	}
 	//botao de back - no segundo ecra!!
-	else if((x >= ((ofGetWidth()*0.65)-(play_button.width))) &&
-		(x <= (ofGetWidth()*0.65)) &&
+	else if((x >= ofGetWidth()*0.65 - 1.5*SMALL_BUTTON_WIDTH - SMALL_INTERVAL) &&
+		(x <= ofGetWidth()*0.65 - SMALL_BUTTON_WIDTH/2 - SMALL_INTERVAL) &&
 		(y >= ofGetHeight()*0.7) &&
-		(y <= ofGetHeight()*0.7 + play_button.height) &&
+		(y <= ofGetHeight()*0.7 + BUTTON_HEIGHT) &&
 		play_video_screen) {
-		//carregamos dentro do botao, fazer play do video seleccionado
 			play_video_screen = false;
 			choose_video_screen = true;
-			back_button_pressed = true;
+			movie.stop();
 			cout << "botao de pause!!!\n";
-		//choose_video_screen = false;
-		//play_video_screen = true;
 	}
 	//botao de PLAY/PAUSE - no segundo ecra!!
-	else if((x >= (ofGetWidth()*0.65)) &&
-		(x <= ((ofGetWidth()*0.65)+(play_button.width))) &&
+	else if((x >= ofGetWidth()*0.65 - SMALL_BUTTON_WIDTH/2) &&
+		(x <= ofGetWidth()*0.65 + SMALL_BUTTON_WIDTH/2) &&
 		(y >= ofGetHeight()*0.7) &&
-		(y <= ofGetHeight()*0.7 + play_button.height) &&
+		(y <= ofGetHeight()*0.7 + BUTTON_HEIGHT) &&
 		play_video_screen) {
-		//carregamos dentro do botao, fazer play do video seleccionado
 			if(movie.isPlaying())
 				movie.stop();
 			else
 				movie.play();
-
 			cout << "botao de play/pause kkkk!!!\n";
+	}
+	//botao de STOP - no segundo ecra!!
+	else if((x >= (ofGetWidth()*0.65)+(SMALL_BUTTON_WIDTH/2)+SMALL_INTERVAL) &&
+		(x <= (ofGetWidth()*0.65)+(1.5*SMALL_BUTTON_WIDTH)+SMALL_INTERVAL) &&
+		(y >= ofGetHeight()*0.7) &&
+		(y <= ofGetHeight()*0.7 + BUTTON_HEIGHT) &&
+		play_video_screen) {
+			movie.firstFrame();
+			movie.stop();
+			//movie.play;
+			cout << "botao de STOP HUEHUHE!!!\n";
 	}
 }
 

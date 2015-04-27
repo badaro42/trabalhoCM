@@ -7,8 +7,10 @@
 class ofApp : public ofBaseApp{
 
 	public:
-		static const int BUTTON_WIDTH = 180;
+		static const int LARGE_BUTTON_WIDTH = 180;
 		static const int BUTTON_HEIGHT = 110;
+		static const int SMALL_BUTTON_WIDTH = 110;
+		static const int SMALL_INTERVAL = 10;
 
 		void setup();
 		void update();
@@ -42,6 +44,7 @@ class ofApp : public ofBaseApp{
 		ofImage play_button;
 		ofImage back_button;
 		ofImage play_pause_button;
+		ofImage stop_button;
 
 		//cenas do swipe das imagens
 		ofxSwipeable img_swipe;
