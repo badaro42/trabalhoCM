@@ -34,6 +34,7 @@ class ofApp : public ofBaseApp{
 		//cenas do video
 		ofVideoPlayer movie;
 		bool isFullScreen;
+		vector<string> video_paths;
 
 		//cenas do swipe das imagens
 		ofxSwipeable img_swipe;
@@ -45,4 +46,5 @@ class ofApp : public ofBaseApp{
 		//variaveis de controlo do ecra actual
 		bool choose_video_screen;
 		bool play_video_screen;
+		bool load_video;
 };

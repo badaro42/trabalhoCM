@@ -12,7 +12,7 @@ void ofApp::setup(){
 	play_video_screen = false;
 
 	ofDirectory dir;
-	ofVideoPlayer video;
+	ofVideoPlayer temp_video;
 
 	//load dos botoes da app
 	play_button.loadImage("images/youtube_play.png");
@@ -21,24 +21,27 @@ void ofApp::setup(){
     int nFiles = dir.listDir("movies");
 
 	cout << "TAMANHO DA PASTA: " << nFiles << "\n";
+
+	//se houver videos na pasta, carregamos cada um deles
+	//e colocamos a frame do meio do video no ecra principal
 	if(nFiles > 0) {
-		//vou a cada video nesta pasta e crio um vector de pixeis
-		//frames.reserve(50);
+		
 		vector<ofPixels> frames(dir.numFiles());
 		for(int i = 0; i < dir.numFiles(); i++) {
 			string fullPath = dir.getPath(i);
+			video_paths.push_back(fullPath);
 
 			cout << "CAMINHO DO VIDEO: " << fullPath << "\n";
-			video.loadMovie(fullPath);
+			temp_video.loadMovie(fullPath);
 
 			//inteiro com o numero que representa o meio do video
-			int middleFrame = video.getTotalNumFrames()/2;
-			video.setFrame(middleFrame);
+			int middleFrame = temp_video.getTotalNumFrames()/2;
+			temp_video.setFrame(middleFrame);
 
 			cout << "TAMANHO DO ARRAY 'FRAMES': " << frames.size() << "\n";
 
-			//TODO: ESTA A DAR ERRO AQUI, SE NAO ME ENGANO DÁ "ARRAY OUT OF BOUNDS"!!
-			frames[i].setFromPixels(video.getPixels(), video.getWidth(), video.getHeight(),
+			frames[i].setFromPixels(temp_video.getPixels(), 
+				temp_video.getWidth(), temp_video.getHeight(),
 				OF_IMAGE_COLOR);
 		}
 
@@ -62,13 +65,30 @@ void ofApp::setup(){
 }
 
 //--------------------------------------------------------------
+//UPDATE E' CHAMADO ANTES DO DRAW!!!!
 void ofApp::update(){
-	//if(showVideo) 
-	//	fingerMovie.play();
-	//else 
-	//	fingerMovie.stop();
+	//user carregou no play, carregamos o video e começa a tocar
+	/*if(load_video) {
+		movie.loadMovie(video_paths[img_swipe.getCurrent()]);
 
-	//fingerMovie.update();
+		load_video = false;
+		play_video_screen = true;
+	}*/
+
+	//user carregou no back, paramos o video e voltamos ao ecra inicial
+	/*else if(**BACK_BUTTON**) {
+		
+	}*/
+
+	//estamos no ecra do video e o video esta' a tocar, fazemos update
+	/*else if(**VIDEO_PLAYING**) {
+		fingerMovie.update();
+	}*/
+
+	//estamos no ecra do video e o user parou o video
+	/*else if(**STOP_VIDEO**) {
+		fingerMovie.stop();
+	}*/
 
 	float t = ofGetElapsedTimef();
     float dt = t - time;
@@ -79,7 +99,7 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
     ofBackground(red, green, blue, 255);
-	
+
 	//estamos no primeiro ecra
 	if(choose_video_screen) {
 		play_button.draw((ofGetWidth()*0.65)-(play_button.width/2), ofGetHeight()*0.7);
@@ -295,7 +315,7 @@ void ofApp::mousePressed(int x, int y, int button){
 		(y <= ofGetHeight()*0.7 + play_button.height) &&
 		choose_video_screen) {
 		//carregamos dentro do botao, fazer play do video seleccionado
-			cout << "DENTRO DO BOTAO DE PLAY, POSIÇÃO ACTUAL: " << img_swipe.getCurrent() << "\n";
+			cout << "DENTRO DO BOTAO DE PLAY, POSICAO ACTUAL: " << img_swipe.getCurrent() << "\n";
 		//choose_video_screen = false;
 		//play_video_screen = true;
 	}
