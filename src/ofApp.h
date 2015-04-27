@@ -7,6 +7,8 @@
 class ofApp : public ofBaseApp{
 
 	public:
+		static const int BUTTON_WIDTH = 180;
+		static const int BUTTON_HEIGHT = 110;
 
 		void setup();
 		void update();
@@ -36,15 +38,20 @@ class ofApp : public ofBaseApp{
 		bool isFullScreen;
 		vector<string> video_paths;
 
+		//os varios botoes da app hehe
+		ofImage play_button;
+		ofImage back_button;
+		ofImage play_pause_button;
+
 		//cenas do swipe das imagens
 		ofxSwipeable img_swipe;
 		float time;
 		ofPoint position;
-		ofImage play_button;
 		int current_position;
 
 		//variaveis de controlo do ecra actual
 		bool choose_video_screen;
 		bool play_video_screen;
 		bool load_video;
+		bool back_button_pressed;
 };

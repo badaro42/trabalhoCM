@@ -1,7 +1,7 @@
 #include "ofApp.h"
 
 #define FRAME_WIDTH 600
-#define FRAME_HEIGHT 450
+#define FRAME_HEIGHT 440
 #define FADE_SIZE 50
 
 //--------------------------------------------------------------
@@ -10,13 +10,21 @@ void ofApp::setup(){
 	isFullScreen = false;
 	choose_video_screen = true;
 	play_video_screen = false;
+	load_video = false;
+	back_button_pressed = false;
 
 	ofDirectory dir;
 	ofVideoPlayer temp_video;
 
 	//load dos botoes da app
 	play_button.loadImage("images/youtube_play.png");
-	play_button.resize(128,104);
+	play_button.resize(BUTTON_WIDTH, BUTTON_HEIGHT);
+
+	back_button.loadImage("images/back_button.png");
+	back_button.resize(BUTTON_WIDTH, BUTTON_HEIGHT);
+
+	play_pause_button.loadImage("images/play_pause_button.jpg");
+	play_pause_button.resize(BUTTON_WIDTH, BUTTON_HEIGHT);
     
     int nFiles = dir.listDir("movies");
 
@@ -68,12 +76,14 @@ void ofApp::setup(){
 //UPDATE E' CHAMADO ANTES DO DRAW!!!!
 void ofApp::update(){
 	//user carregou no play, carregamos o video e começa a tocar
-	/*if(load_video) {
+	if(load_video) {
 		movie.loadMovie(video_paths[img_swipe.getCurrent()]);
+		movie.play();
 
+		choose_video_screen = false;
 		load_video = false;
 		play_video_screen = true;
-	}*/
+	}
 
 	//user carregou no back, paramos o video e voltamos ao ecra inicial
 	/*else if(**BACK_BUTTON**) {
@@ -81,14 +91,15 @@ void ofApp::update(){
 	}*/
 
 	//estamos no ecra do video e o video esta' a tocar, fazemos update
-	/*else if(**VIDEO_PLAYING**) {
-		fingerMovie.update();
-	}*/
+	else if(play_video_screen) {
+		movie.update();
+	}
 
 	//estamos no ecra do video e o user parou o video
-	/*else if(**STOP_VIDEO**) {
-		fingerMovie.stop();
-	}*/
+	else if(back_button_pressed) {
+		movie.stop();
+		back_button_pressed = false;
+	}
 
 	float t = ofGetElapsedTimef();
     float dt = t - time;
@@ -100,23 +111,35 @@ void ofApp::update(){
 void ofApp::draw(){
     ofBackground(red, green, blue, 255);
 
-	//estamos no primeiro ecra
+	//estamos no primeiro ecra - INICIO
 	if(choose_video_screen) {
 		play_button.draw((ofGetWidth()*0.65)-(play_button.width/2), ofGetHeight()*0.7);
+
+		if(isFullScreen)
+			img_swipe.draw(ofGetWidth()*0.65, ofGetHeight()*0.5);
+		else
+			img_swipe.draw(position.x, position.y);
 	}
     
 	//ofPopStyle();
 
 	//estamos no segundo ecra, o do video
 	if(play_video_screen) {
+		back_button.draw((ofGetWidth()*0.65)-(play_button.width), 
+			ofGetHeight()*0.7);
+		play_pause_button.draw(ofGetWidth()*0.65, 
+			ofGetHeight()*0.7);
+	
 		ofSetHexColor(0xFFFFFF);
 
-		movie.draw(275,5);
+		movie.draw(ofGetWidth()*0.65-movie.getWidth()/2,
+			ofGetHeight()*0.38-movie.getHeight()/2);
+
 		ofSetHexColor(0x000000);
 		unsigned char * pixels = movie.getPixels();
 		int mean_luminance = 0;
 		int i;
-		int num_pixels = movie.getWidth() * movie.getHeight();
+		int num_pixels = movie.getWidth()*movie.getHeight();
 
 		// calculate luminance for each rbg pixel
 		for (i = 0; i < num_pixels; i+=3){
@@ -144,12 +167,7 @@ void ofApp::draw(){
 		}
 	}
 
-    //ofSetColor(255);
-    
-	if(isFullScreen)
-		img_swipe.draw(ofGetWidth()*0.65,ofGetHeight()*0.5);
-	else
-		img_swipe.draw(position.x,position.y);
+    ofSetColor(255);
 
 	//linhas para indicar a area onde é possivel fazer swipe com o rato
 	//DESACTIVAR ANTES DA ENTREGA!!!
@@ -315,7 +333,22 @@ void ofApp::mousePressed(int x, int y, int button){
 		(y <= ofGetHeight()*0.7 + play_button.height) &&
 		choose_video_screen) {
 		//carregamos dentro do botao, fazer play do video seleccionado
+			load_video = true;
 			cout << "DENTRO DO BOTAO DE PLAY, POSICAO ACTUAL: " << img_swipe.getCurrent() << "\n";
+		//choose_video_screen = false;
+		//play_video_screen = true;
+	}
+	//botao de back - no segundo ecra!!
+	else if((x >= ((ofGetWidth()*0.65)-(play_button.width))) &&
+		(x <= (ofGetWidth()*0.65)) &&
+		(y >= ofGetHeight()*0.7) &&
+		(y <= ofGetHeight()*0.7 + play_button.height) &&
+		play_video_screen) {
+		//carregamos dentro do botao, fazer play do video seleccionado
+			play_video_screen = false;
+			choose_video_screen = true;
+			back_button_pressed = true;
+			cout << "botao de pause!!!\n";
 		//choose_video_screen = false;
 		//play_video_screen = true;
 	}
