@@ -11,8 +11,10 @@ void ofApp::setup(){
 
 	isFullScreen = false;
 	choose_video_screen = true;
+	choose_range_screen = false;
 	play_video_screen = false;
 	load_video = false;
+	load_range_gui = false;
 	entered_exited_fullscreen = false;
 	redraw_frame_flag = true;
 
@@ -36,6 +38,9 @@ void ofApp::setup(){
 
 	stop_button.loadImage("images/stop_button.jpg");
 	stop_button.resize(SMALL_BUTTON_WIDTH, BUTTON_HEIGHT);
+
+	confirm_button.loadImage("images/apply_button.png");
+	confirm_button.resize(SMALL_BUTTON_WIDTH, BUTTON_HEIGHT);
     
     int nFiles = dir.listDir("movies");
 
@@ -89,8 +94,8 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 //UPDATE E' CHAMADO ANTES DO DRAW!!!!
 void ofApp::update(){
-	//user carregou no play, carregamos o video e começa a tocar
-	//criamos aqui tambem a GUI do range do video, com base na duracao do video
+	//user carregou no play, carregamos o video e mostramos a range bar
+	//para o utilizador poder escolher o range a avaliar
 	if(load_video) {
 		movie.loadMovie(video_paths[img_swipe.getCurrent()]);
 		movie.stop();
@@ -102,13 +107,14 @@ void ofApp::update(){
 		cout << "update - DURACAO DA PUTA DO FILME: " << duration << "\n";
 		setGUI2(duration, duration/4, 3*duration/4);
 
-		choose_video_screen = false;
+		//choose_range_screen = false;
+		//choose_video_screen = false;
 		load_video = false;
-		play_video_screen = true;
+		//play_video_screen = true;
 	}
 
 	//estamos no ecra do video e o video esta' a tocar, fazemos update
-	else if(play_video_screen) {
+	else if(play_video_screen || choose_range_screen) {
 		movie.update();
 	}
 
@@ -132,14 +138,21 @@ void ofApp::draw(){
 			img_swipe.draw(position.x, position.y);
 	}
 
-	//estamos no segundo ecra, o do video
-	if(play_video_screen) {
+	//estamos no segundo ecra, o do range 
+	else if(choose_range_screen) {
 		if(entered_exited_fullscreen) {
 			delete gui2;
 			setGUI2(movie.getDuration(), min_value, max_value);
 			entered_exited_fullscreen = false;
 		}
+		back_button.draw((ofGetWidth()*0.65)-SMALL_BUTTON_WIDTH-(SMALL_INTERVAL/2), 
+			ofGetHeight()*0.62+BUTTON_HEIGHT+(SMALL_INTERVAL/2));
+		confirm_button.draw(ofGetWidth()*0.65+(SMALL_INTERVAL/2), 
+			ofGetHeight()*0.62+BUTTON_HEIGHT+(SMALL_INTERVAL/2));
+	}
 
+	//estamos no terceiro ecra, o do video
+	else if(play_video_screen) {
 		back_button.draw((ofGetWidth()*0.65)-(1.5*SMALL_BUTTON_WIDTH)-SMALL_INTERVAL, 
 			ofGetHeight()*0.62);
 		play_pause_button.draw(ofGetWidth()*0.65-(SMALL_BUTTON_WIDTH/2), 
@@ -344,8 +357,13 @@ void ofApp::setGUI1()
 
 void ofApp::setGUI2(float duration, float min, float max)
 {
-	gui2 = new ofxUISuperCanvas("", ofGetWidth()*0.4, ofGetHeight()*0.8, ofGetWidth()*0.5, 75);   
+	gui2 = new ofxUISuperCanvas("", ofGetWidth()*0.4, ofGetHeight()*0.62, 
+		ofGetWidth()*0.5, BUTTON_HEIGHT);   
     gui2->addLabel("Movie Time Interval");
+	gui2->addSpacer();
+	gui2->addTextArea("textarea", 
+		"Choose the desired range. Press the button to confirm.", OFX_UI_FONT_SMALL);
+	gui2->addSpacer();
 	gui2->addRangeSlider(RANGE_SLIDER_NAME, 0.0, duration, min, max);
        
     //gui2->autoSizeToFitWidgets();
@@ -384,10 +402,13 @@ void ofApp::mousePressed(int x, int y, int button){
 		(y <= ofGetHeight()*0.7 + BUTTON_HEIGHT) &&
 		choose_video_screen) 
 	{
+		choose_video_screen = false;
+		choose_range_screen = true;
+		load_range_gui = true;
 		load_video = true;
 		cout << "DENTRO DO BOTAO DE PLAY, POSICAO ACTUAL: " << img_swipe.getCurrent() << "\n";
 	}
-	//botao de back - no segundo ecra!!
+	//botao de back - no terceiro ecra!!
 	else if((x >= ofGetWidth()*0.65 - 1.5*SMALL_BUTTON_WIDTH - SMALL_INTERVAL) &&
 		(x <= ofGetWidth()*0.65 - SMALL_BUTTON_WIDTH/2 - SMALL_INTERVAL) &&
 		(y >= ofGetHeight()*0.62) &&
@@ -395,15 +416,15 @@ void ofApp::mousePressed(int x, int y, int button){
 		play_video_screen) 
 	{
 		play_video_screen = false;
-		choose_video_screen = true;
-		redraw_frame_flag = true;
+		choose_video_screen = false;
+		choose_range_screen = true;
 
 		redraw_frame_flag = true;
 		gui2->toggleVisible();
 		
 		cout << "botao de pause!!!\n";
 	}
-	//botao de PLAY/PAUSE - no segundo ecra!!
+	//botao de PLAY/PAUSE - no terceiro ecra!!
 	else if((x >= ofGetWidth()*0.65 - SMALL_BUTTON_WIDTH/2) &&
 		(x <= ofGetWidth()*0.65 + SMALL_BUTTON_WIDTH/2) &&
 		(y >= ofGetHeight()*0.62) &&
@@ -416,9 +437,9 @@ void ofApp::mousePressed(int x, int y, int button){
 			movie.play();
 		cout << "botao de play/pause kkkk!!!\n";
 	}
-	//botao de STOP - no segundo ecra!!
-	else if((x >= (ofGetWidth()*0.65)+(SMALL_BUTTON_WIDTH/2)+SMALL_INTERVAL) &&
-		(x <= (ofGetWidth()*0.65)+(1.5*SMALL_BUTTON_WIDTH)+SMALL_INTERVAL) &&
+	//botao de STOP - no terceiro ecra!!
+	else if((x >= (ofGetWidth()*0.65) + (SMALL_BUTTON_WIDTH/2) + SMALL_INTERVAL) &&
+		(x <= (ofGetWidth()*0.65) + (1.5*SMALL_BUTTON_WIDTH) + SMALL_INTERVAL) &&
 		(y >= ofGetHeight()*0.62) &&
 		(y <= ofGetHeight()*0.62 + BUTTON_HEIGHT) &&
 		play_video_screen) 
@@ -430,6 +451,33 @@ void ofApp::mousePressed(int x, int y, int button){
 			movie.stop();
 
 		cout << "botao de STOP HUEHUHE!!! duration: " << movie.getDuration() << "\n";
+	}
+	//botao para confirmar o range - no segundo ecra!!
+	else if((x >= (ofGetWidth()*0.65) + (SMALL_INTERVAL/2)) &&
+		(x <= (ofGetWidth()*0.65) + (SMALL_INTERVAL/2) + SMALL_BUTTON_WIDTH) &&
+		(y >= ofGetHeight()*0.62 + BUTTON_HEIGHT) &&
+		(y <= ofGetHeight()*0.62 + 2*BUTTON_HEIGHT) &&
+		choose_range_screen) 
+	{
+		choose_range_screen = false;
+		play_video_screen = true;
+		gui2->toggleVisible();
+
+		cout << "botao para confirmar o range huehue\n";
+	}
+	//botao de back - no SEGUNDO ecra!!
+	else if((x >= ofGetWidth()*0.65 - SMALL_BUTTON_WIDTH - (SMALL_INTERVAL/2)) &&
+		(x <= ofGetWidth()*0.65 - (SMALL_INTERVAL/2)) &&
+		(y >= ofGetHeight()*0.62 + BUTTON_HEIGHT) &&
+		(y <= ofGetHeight()*0.62 + 2*BUTTON_HEIGHT) &&
+		choose_range_screen) 
+	{
+		play_video_screen = false;
+		choose_video_screen = true;
+		choose_range_screen = false;
+		gui2->toggleVisible();
+		
+		cout << "botao de pause!!!\n";
 	}
 }
 

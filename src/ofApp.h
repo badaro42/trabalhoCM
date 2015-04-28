@@ -60,6 +60,7 @@ class ofApp : public ofBaseApp{
 		ofImage back_button;
 		ofImage play_pause_button;
 		ofImage stop_button;
+		ofImage confirm_button;
 
 		//cenas do swipe das imagens
 		ofxSwipeable img_swipe;
@@ -69,7 +70,10 @@ class ofApp : public ofBaseApp{
 
 		//variaveis de controlo do ecra actual
 		bool choose_video_screen;
+		bool choose_range_screen;
 		bool play_video_screen;
+
+		bool load_range_gui;
 		bool load_video;
 		bool entered_exited_fullscreen;
 		bool redraw_frame_flag;
