@@ -15,6 +15,8 @@ void ofApp::setup(){
 	load_video = false;
 	entered_exited_fullscreen = false;
 
+	cout << "SETUP!!\n";
+
 	min_value = 0;
 	max_value = 0;
 
@@ -81,10 +83,6 @@ void ofApp::setup(){
 	ofSetVerticalSync(true);
     
 	setGUI1();
-	//setGUI2();
-	//gui2->toggleVisible(); //queremos que comece escondida
-    
-    //gui1->loadSettings("gui1Settings.xml");
 }
 
 //--------------------------------------------------------------
@@ -97,7 +95,10 @@ void ofApp::update(){
 		movie.play();
 
 		float duration = movie.getDuration();
-		cout << "DURACAO DA PUTA DO FILME: " << duration << "\n";
+		min_value = duration/4;
+		max_value = 3*duration/4;
+
+		cout << "update - DURACAO DA PUTA DO FILME: " << duration << "\n";
 		setGUI2(duration, duration/4, 3*duration/4);
 
 		choose_video_screen = false;
@@ -135,7 +136,8 @@ void ofApp::draw(){
 	//estamos no segundo ecra, o do video
 	if(play_video_screen) {
 		if(entered_exited_fullscreen) {
-			cout << "LOOOOOOOOOOOOOOOL\n";
+			cout << "draw - DURACAO DA PUTA DO FILME: " << movie.getDuration() << "\n";
+			cout << "draw - min: " << min_value << "; max: " << max_value << "\n";
 			delete gui2;
 			setGUI2(movie.getDuration(), min_value, max_value);
 			entered_exited_fullscreen = false;
@@ -333,7 +335,6 @@ void ofApp::setGUI2(float duration, float min, float max)
 {
 	gui2 = new ofxUISuperCanvas("", ofGetWidth()*0.4, ofGetHeight()*0.8, ofGetWidth()*0.5, 75);   
     gui2->addLabel("Movie Time Interval");
-	cout << "DURACAO DA PUTA DO FILME: " << duration << "\n";
 	gui2->addRangeSlider(RANGE_SLIDER_NAME, 0.0, duration, min, max);
        
     //gui2->autoSizeToFitWidgets();
@@ -407,7 +408,8 @@ void ofApp::mousePressed(int x, int y, int button){
 			movie.firstFrame();
 			movie.stop();
 			//movie.play;
-			cout << "botao de STOP HUEHUHE!!!\n";
+			cout << "botao de STOP HUEHUHE!!! duration: " << movie.getDuration() << "\n";
+
 	}
 }
 
@@ -418,7 +420,7 @@ void ofApp::mouseReleased(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
-	 
+	 //cout << "WINDOWS RESIZED!!!!\n";
 }
 
 //--------------------------------------------------------------
