@@ -68,6 +68,8 @@ void ofApp::setup(){
     red = 200; 
 	blue = 200; 
 	green = 200;
+	luminance = 0; 
+	contrast = 0;
 
     hideGUI = false;
 
@@ -250,15 +252,15 @@ void ofApp::setGUI1()
 	
 	gui1 = new ofxUISuperCanvas("CONTROLOS!", 5, 5, 250, 1500);
     gui1->addSpacer();
-    gui1->addLabel("Press 'h' to Hide GUIs", OFX_UI_FONT_SMALL);
+    gui1->addLabel("Press 'h' to hide interface", OFX_UI_FONT_SMALL);
     
     gui1->addSpacer();
-	gui1->addLabel("H SLIDERS");
+	gui1->addLabel("Main Color:");
 	gui1->addSlider("RED", 0.0, 255.0, &red)->setTriggerType(OFX_UI_TRIGGER_ALL);
 	gui1->addSlider("GREEN", 0.0, 255.0, &green)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
 	gui1->addSlider("BLUE", 0.0, 255.0, &blue)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE);
     
-    gui1->addSpacer();
+   /* gui1->addSpacer();
     gui1->addLabel("V SLIDERS");
 	gui1->addSlider("0", 0.0, 255.0, 150, 17, 160);
 	gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
@@ -279,8 +281,12 @@ void ofApp::setGUI1()
     gui1->addSpacer();
     gui1->setWidgetFontSize(OFX_UI_FONT_SMALL);
 	gui1->addButton("BUTTON", false);
-	gui1->addToggle("TOGGLE", false);
+	gui1->addToggle("TOGGLE", false);*/
     
+	gui1->addSpacer();
+	gui1->addSlider("Luminance", 0.0, 100.0, &luminance)->setTriggerType(OFX_UI_TRIGGER_ALL);
+	gui1->addSlider("Contrast", 0.0, 100.0, &contrast)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
+
     gui1->addSpacer();
     gui1->addLabel("RANGE SLIDER");
 	gui1->addRangeSlider("RSLIDER", 0.0, 255.0, 50.0, 100.0);
@@ -292,6 +298,17 @@ void ofApp::setGUI1()
     
     gui1->autoSizeToFitWidgets();
 	ofAddListener(gui1->newGUIEvent,this,&ofApp::guiEvent);
+}
+
+void ofApp::setGui2()
+{
+	gui2 = new ofxUISuperCanvas("", 500, 600, 400, 200);   
+	float duration = movie.getDuration();
+    gui2->addLabel("Movie Time Interval");
+	gui2->addRangeSlider("MTIME", 0.0, duration, 30.0, 100.0);
+       
+    gui2->autoSizeToFitWidgets();
+	ofAddListener(gui2->newGUIEvent,this,&ofApp::guiEvent);
 }
 
 //--------------------------------------------------------------
@@ -327,6 +344,7 @@ void ofApp::mousePressed(int x, int y, int button){
 		choose_video_screen) {
 			load_video = true;
 			cout << "DENTRO DO BOTAO DE PLAY, POSICAO ACTUAL: " << img_swipe.getCurrent() << "\n";
+			setGui2();
 	}
 	//botao de back - no segundo ecra!!
 	else if((x >= ofGetWidth()*0.65 - 1.5*SMALL_BUTTON_WIDTH - SMALL_INTERVAL) &&

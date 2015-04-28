@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "ofxUI.h"
 #include "ofxSwipeable.h"
+#include <stdio.h>
 
 class ofApp : public ofBaseApp{
 
@@ -29,11 +30,13 @@ class ofApp : public ofBaseApp{
 
 		void guiEvent(ofxUIEventArgs &e);
 		void setGUI1();
+		void setGui2();
 	
 		//cenas da barra lateral e do background
 		ofxUISuperCanvas *gui1;
+		ofxUISuperCanvas *gui2;
 		bool hideGUI;
-		float red, green, blue;		
+		float red, green, blue, luminance, contrast;
 
 		//cenas do video
 		ofVideoPlayer movie;
