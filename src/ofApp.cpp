@@ -4,6 +4,8 @@
 #define FRAME_HEIGHT 440
 #define FADE_SIZE 50
 
+const std::string ofApp::RANGE_SLIDER_NAME = "MTIME";
+
 //--------------------------------------------------------------
 void ofApp::setup(){
 
@@ -11,7 +13,10 @@ void ofApp::setup(){
 	choose_video_screen = true;
 	play_video_screen = false;
 	load_video = false;
-	back_button_pressed = false;
+	entered_exited_fullscreen = false;
+
+	min_value = 0;
+	max_value = 0;
 
 	ofDirectory dir;
 	ofVideoPlayer temp_video;
@@ -76,6 +81,8 @@ void ofApp::setup(){
 	ofSetVerticalSync(true);
     
 	setGUI1();
+	//setGUI2();
+	//gui2->toggleVisible(); //queremos que comece escondida
     
     //gui1->loadSettings("gui1Settings.xml");
 }
@@ -84,9 +91,14 @@ void ofApp::setup(){
 //UPDATE E' CHAMADO ANTES DO DRAW!!!!
 void ofApp::update(){
 	//user carregou no play, carregamos o video e começa a tocar
+	//criamos aqui tambem a GUI do range do video, com base na duracao do video
 	if(load_video) {
 		movie.loadMovie(video_paths[img_swipe.getCurrent()]);
 		movie.play();
+
+		float duration = movie.getDuration();
+		cout << "DURACAO DA PUTA DO FILME: " << duration << "\n";
+		setGUI2(duration, duration/4, 3*duration/4);
 
 		choose_video_screen = false;
 		load_video = false;
@@ -122,12 +134,19 @@ void ofApp::draw(){
 
 	//estamos no segundo ecra, o do video
 	if(play_video_screen) {
+		if(entered_exited_fullscreen) {
+			cout << "LOOOOOOOOOOOOOOOL\n";
+			delete gui2;
+			setGUI2(movie.getDuration(), min_value, max_value);
+			entered_exited_fullscreen = false;
+		}
+
 		back_button.draw((ofGetWidth()*0.65)-(1.5*SMALL_BUTTON_WIDTH)-SMALL_INTERVAL, 
-			ofGetHeight()*0.7);
+			ofGetHeight()*0.62);
 		play_pause_button.draw(ofGetWidth()*0.65-(SMALL_BUTTON_WIDTH/2), 
-			ofGetHeight()*0.7);
+			ofGetHeight()*0.62);
 		stop_button.draw(ofGetWidth()*0.65+(SMALL_BUTTON_WIDTH/2)+SMALL_INTERVAL, 
-			ofGetHeight()*0.7);
+			ofGetHeight()*0.62);
 	
 		ofSetHexColor(0xFFFFFF);
 
@@ -215,6 +234,15 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         ofxUIRadio *radio = (ofxUIRadio *) e.widget;
         cout << radio->getName() << " value: " << radio->getValue() << " active name: " << radio->getActiveName() << endl; 
     }
+	else if(name == RANGE_SLIDER_NAME)
+	{
+		ofxUIRangeSlider *slider = (ofxUIRangeSlider *) e.widget;
+		cout << slider->getName() << " low [%; #] -> [" << slider->getPercentValueLow() <<
+			"; " << slider->getScaledValueLow() << "], high [%;#] -> [" <<
+			slider->getPercentValueHigh() << "; " << slider->getScaledValueHigh() << "];\n";
+		min_value = slider->getScaledValueLow();
+		max_value = slider->getScaledValueHigh();
+	}
 }
 
 //--------------------------------------------------------------
@@ -232,6 +260,7 @@ void ofApp::keyPressed(int key){
 		case 'f':
 			ofToggleFullscreen();
 			isFullScreen = !isFullScreen;
+			entered_exited_fullscreen = true;
 			break;
             
 		case 'h':
@@ -300,14 +329,14 @@ void ofApp::setGUI1()
 	ofAddListener(gui1->newGUIEvent,this,&ofApp::guiEvent);
 }
 
-void ofApp::setGui2()
+void ofApp::setGUI2(float duration, float min, float max)
 {
-	gui2 = new ofxUISuperCanvas("", 500, 600, 400, 200);   
-	float duration = movie.getDuration();
+	gui2 = new ofxUISuperCanvas("", ofGetWidth()*0.4, ofGetHeight()*0.8, ofGetWidth()*0.5, 75);   
     gui2->addLabel("Movie Time Interval");
-	gui2->addRangeSlider("MTIME", 0.0, duration, 30.0, 100.0);
+	cout << "DURACAO DA PUTA DO FILME: " << duration << "\n";
+	gui2->addRangeSlider(RANGE_SLIDER_NAME, 0.0, duration, min, max);
        
-    gui2->autoSizeToFitWidgets();
+    //gui2->autoSizeToFitWidgets();
 	ofAddListener(gui2->newGUIEvent,this,&ofApp::guiEvent);
 }
 
@@ -344,24 +373,24 @@ void ofApp::mousePressed(int x, int y, int button){
 		choose_video_screen) {
 			load_video = true;
 			cout << "DENTRO DO BOTAO DE PLAY, POSICAO ACTUAL: " << img_swipe.getCurrent() << "\n";
-			setGui2();
 	}
 	//botao de back - no segundo ecra!!
 	else if((x >= ofGetWidth()*0.65 - 1.5*SMALL_BUTTON_WIDTH - SMALL_INTERVAL) &&
 		(x <= ofGetWidth()*0.65 - SMALL_BUTTON_WIDTH/2 - SMALL_INTERVAL) &&
-		(y >= ofGetHeight()*0.7) &&
-		(y <= ofGetHeight()*0.7 + BUTTON_HEIGHT) &&
+		(y >= ofGetHeight()*0.62) &&
+		(y <= ofGetHeight()*0.62 + BUTTON_HEIGHT) &&
 		play_video_screen) {
 			play_video_screen = false;
 			choose_video_screen = true;
 			movie.stop();
+			gui2->toggleVisible();
 			cout << "botao de pause!!!\n";
 	}
 	//botao de PLAY/PAUSE - no segundo ecra!!
 	else if((x >= ofGetWidth()*0.65 - SMALL_BUTTON_WIDTH/2) &&
 		(x <= ofGetWidth()*0.65 + SMALL_BUTTON_WIDTH/2) &&
-		(y >= ofGetHeight()*0.7) &&
-		(y <= ofGetHeight()*0.7 + BUTTON_HEIGHT) &&
+		(y >= ofGetHeight()*0.62) &&
+		(y <= ofGetHeight()*0.62 + BUTTON_HEIGHT) &&
 		play_video_screen) {
 			if(movie.isPlaying())
 				movie.stop();
@@ -372,8 +401,8 @@ void ofApp::mousePressed(int x, int y, int button){
 	//botao de STOP - no segundo ecra!!
 	else if((x >= (ofGetWidth()*0.65)+(SMALL_BUTTON_WIDTH/2)+SMALL_INTERVAL) &&
 		(x <= (ofGetWidth()*0.65)+(1.5*SMALL_BUTTON_WIDTH)+SMALL_INTERVAL) &&
-		(y >= ofGetHeight()*0.7) &&
-		(y <= ofGetHeight()*0.7 + BUTTON_HEIGHT) &&
+		(y >= ofGetHeight()*0.62) &&
+		(y <= ofGetHeight()*0.62 + BUTTON_HEIGHT) &&
 		play_video_screen) {
 			movie.firstFrame();
 			movie.stop();

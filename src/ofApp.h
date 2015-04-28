@@ -13,6 +13,8 @@ class ofApp : public ofBaseApp{
 		static const int SMALL_BUTTON_WIDTH = 110;
 		static const int SMALL_INTERVAL = 10;
 
+		static const std::string RANGE_SLIDER_NAME;
+
 		void setup();
 		void update();
 		void draw();
@@ -30,13 +32,17 @@ class ofApp : public ofBaseApp{
 
 		void guiEvent(ofxUIEventArgs &e);
 		void setGUI1();
-		void setGui2();
+		void setGUI2(float duration, float min, float max);
 	
 		//cenas da barra lateral e do background
 		ofxUISuperCanvas *gui1;
 		ofxUISuperCanvas *gui2;
 		bool hideGUI;
 		float red, green, blue, luminance, contrast;
+
+		//cenas da barra de range do video
+		float min_value;
+		float max_value;
 
 		//cenas do video
 		ofVideoPlayer movie;
@@ -59,5 +65,5 @@ class ofApp : public ofBaseApp{
 		bool choose_video_screen;
 		bool play_video_screen;
 		bool load_video;
-		bool back_button_pressed;
+		bool entered_exited_fullscreen;
 };
