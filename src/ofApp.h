@@ -13,6 +13,9 @@ class ofApp : public ofBaseApp{
 		static const int SMALL_BUTTON_WIDTH = 110;
 		static const int SMALL_INTERVAL = 10;
 
+		//0 - rapido, - detalhe; 1 - lento, + detalhe 
+		static const int DEFAULT_PERFORMANCE_OPTION = 1;
+
 		static const std::string RANGE_SLIDER_NAME;
 
 		void setup();
@@ -34,6 +37,9 @@ class ofApp : public ofBaseApp{
 		void setGUI1();
 		void setGUI2(float duration, float min, float max);
 	
+		//customization stuff
+		int fast_or_beauty_option; //0 - faster; 1 - slower
+
 		//cenas da barra lateral e do background
 		ofxUISuperCanvas *gui1;
 		ofxUISuperCanvas *gui2;
@@ -66,4 +72,5 @@ class ofApp : public ofBaseApp{
 		bool play_video_screen;
 		bool load_video;
 		bool entered_exited_fullscreen;
+		bool redraw_frame_flag;
 };
