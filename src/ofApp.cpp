@@ -18,8 +18,10 @@ void ofApp::setup(){
 	entered_exited_fullscreen = false;
 	redraw_frame_flag = true;
 
-	min_value = 0;
-	max_value = 0;
+	range_minimum = 0;
+	range_maximum = 0;
+	min_frame = 0;
+	max_frame = 0;
 
 	fast_or_beauty_option = DEFAULT_PERFORMANCE_OPTION;
 
@@ -101,16 +103,11 @@ void ofApp::update(){
 		movie.stop();
 
 		float duration = movie.getDuration();
-		min_value = duration/4;
-		max_value = 3*duration/4;
 
 		cout << "update - DURACAO DA PUTA DO FILME: " << duration << "\n";
 		setGUI2(duration, duration/4, 3*duration/4);
 
-		//choose_range_screen = false;
-		//choose_video_screen = false;
 		load_video = false;
-		//play_video_screen = true;
 	}
 
 	//estamos no ecra do video e o video esta' a tocar, fazemos update
@@ -142,14 +139,26 @@ void ofApp::draw(){
 	else if(choose_range_screen) {
 		if(entered_exited_fullscreen) {
 			delete gui2;
-			setGUI2(movie.getDuration(), min_value, max_value);
+			setGUI2(movie.getDuration(), range_minimum, range_maximum);
 			entered_exited_fullscreen = false;
 		}
 		back_button.draw((ofGetWidth()*0.65)-SMALL_BUTTON_WIDTH-(SMALL_INTERVAL/2), 
 			ofGetHeight()*0.62+BUTTON_HEIGHT+(SMALL_INTERVAL/2));
 		confirm_button.draw(ofGetWidth()*0.65+(SMALL_INTERVAL/2), 
 			ofGetHeight()*0.62+BUTTON_HEIGHT+(SMALL_INTERVAL/2));
+
+		if(redraw_frame_flag && (fast_or_beauty_option == 1))
+			movie.play();
+
+		movie.draw(ofGetWidth()*0.65-movie.getWidth()/2,
+			ofGetHeight()*0.38-movie.getHeight()/2);
+
+		if(redraw_frame_flag && (fast_or_beauty_option == 1)) {
+			redraw_frame_flag = false;
+			movie.stop();
+		}
 	}
+
 
 	//estamos no terceiro ecra, o do video
 	else if(play_video_screen) {
@@ -162,10 +171,10 @@ void ofApp::draw(){
 	
 		ofSetHexColor(0xFFFFFF);
 
-		if(redraw_frame_flag && (fast_or_beauty_option == 1))
-			movie.play();
+		/*if(redraw_frame_flag && (fast_or_beauty_option == 1))
+			movie.play();*/
 
-		//cout << "CURRENT_VIDEO_FRAME: " << movie.getCurrentFrame() << "\n";
+		cout << "RANGE (IN FRAMES): [" << min_frame << "; " << max_frame << "]\n";
 
 		movie.draw(ofGetWidth()*0.65-movie.getWidth()/2,
 			ofGetHeight()*0.38-movie.getHeight()/2);
@@ -183,19 +192,17 @@ void ofApp::draw(){
 		}
 		mean_luminance /= (i/3);
 
+		ofDrawBitmapString("range chosen: from " + ofToString(min_frame) + 
+			" to " + ofToString(max_frame),275,330);
 		ofDrawBitmapString("frame: " + ofToString(movie.getCurrentFrame()) + "/"+ofToString(movie.getTotalNumFrames()),275,350);
 		ofDrawBitmapString("duration: " + ofToString(movie.getPosition()*movie.getDuration(),2) + "/"+ofToString(movie.getDuration(),2),275,370);
 		ofDrawBitmapString("speed: " + ofToString(movie.getSpeed(),2),275,390);
 		ofDrawBitmapString("luminance: " + ofToString(mean_luminance), 275, 410);
 
-		if(redraw_frame_flag && (fast_or_beauty_option == 1)) {
-			redraw_frame_flag = false;
-			movie.stop();
-		}
-
-		if(movie.getIsMovieDone()){
-			ofSetHexColor(0xFF0000);
-			ofDrawBitmapString("end of movie",250,440);
+		//chegamos ao ultimo frame escolhido pelo utilizador
+		//uma vez que o filme esta em loop, apontamos para o min do range
+		if(movie.getCurrentFrame() == max_frame) {
+			movie.setFrame(min_frame);
 		}
 	}
 
@@ -256,13 +263,13 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 		//	"; " << slider->getScaledValueLow() << "], high [%;#] -> [" <<
 		//	slider->getPercentValueHigh() << "; " << slider->getScaledValueHigh() << "];\n";
 
-		min_value = slider->getScaledValueLow();
-		max_value = slider->getScaledValueHigh();
-
-		int desired_frame = slider->getPercentValueLow()*movie.getTotalNumFrames();
+		range_minimum = slider->getScaledValueLow();
+		range_maximum = slider->getScaledValueHigh();
+		min_frame = (range_minimum*movie.getTotalNumFrames())/movie.getDuration();
+		max_frame = (range_maximum*movie.getTotalNumFrames())/movie.getDuration();
 
 		redraw_frame_flag = true;
-		movie.setFrame(desired_frame);
+		movie.setFrame(min_frame);
 
 		if(fast_or_beauty_option == 0)
 			movie.stop();
@@ -365,6 +372,11 @@ void ofApp::setGUI2(float duration, float min, float max)
 		"Choose the desired range. Press the button to confirm.", OFX_UI_FONT_SMALL);
 	gui2->addSpacer();
 	gui2->addRangeSlider(RANGE_SLIDER_NAME, 0.0, duration, min, max);
+
+	range_minimum = duration/4;
+	range_maximum = 3*duration/4;
+	min_frame = (range_minimum*movie.getTotalNumFrames())/movie.getDuration();
+	max_frame = (range_maximum*movie.getTotalNumFrames())/movie.getDuration();
        
     //gui2->autoSizeToFitWidgets();
 	ofAddListener(gui2->newGUIEvent,this,&ofApp::guiEvent);
@@ -447,8 +459,8 @@ void ofApp::mousePressed(int x, int y, int button){
 		redraw_frame_flag = true;
 		movie.firstFrame();
 
-		if(fast_or_beauty_option == 0)
-			movie.stop();
+		//if(fast_or_beauty_option == 0)
+		movie.stop();
 
 		cout << "botao de STOP HUEHUHE!!! duration: " << movie.getDuration() << "\n";
 	}
@@ -462,6 +474,7 @@ void ofApp::mousePressed(int x, int y, int button){
 		choose_range_screen = false;
 		play_video_screen = true;
 		gui2->toggleVisible();
+		//movie.play();
 
 		cout << "botao para confirmar o range huehue\n";
 	}

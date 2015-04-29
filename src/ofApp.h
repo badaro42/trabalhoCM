@@ -47,8 +47,10 @@ class ofApp : public ofBaseApp{
 		float red, green, blue, luminance, contrast;
 
 		//cenas da barra de range do video
-		float min_value;
-		float max_value;
+		float range_minimum;
+		float range_maximum;
+		int min_frame;
+		int max_frame;
 
 		//cenas do video
 		ofVideoPlayer movie;
