@@ -45,6 +45,7 @@ class ofApp : public ofBaseApp{
 		ofxUISuperCanvas *gui2;
 		bool hideGUI;
 		float red, green, blue, luminance, contrast, number_of_people;
+		vector<string> radio_options;
 
 		//cenas da barra de range do video
 		float range_minimum_percentage;

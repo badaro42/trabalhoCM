@@ -321,18 +321,21 @@ void ofApp::setGUI1()
 	gui1->addSlider("8", 0.0, 255.0, 150, 17, 160);
 	gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     
-    gui1->addSpacer();
-	gui1->addRadio("", names, OFX_UI_ORIENTATION_HORIZONTAL);
-	gui1->addRadio("", names, OFX_UI_ORIENTATION_VERTICAL);
-    
+
     gui1->addSpacer();
     gui1->setWidgetFontSize(OFX_UI_FONT_SMALL);
 	gui1->addButton("BUTTON", false);
 	gui1->addToggle("TOGGLE", false);*/
     
+	radio_options.push_back("Above");
+	radio_options.push_back("Below");
+	radio_options.push_back("Neighborhood");
+
 	gui1->addSpacer();
-	gui1->addSlider("Luminance", 0.0, 100.0, &luminance)->setTriggerType(OFX_UI_TRIGGER_ALL);
-	gui1->addSlider("Contrast", 0.0, 100.0, &contrast)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
+	gui1->addRadio("", radio_options, OFX_UI_ORIENTATION_VERTICAL);
+	gui1->addSpacer();
+	gui1->addSlider("Luminance", 0.0, 255.0, &luminance)->setTriggerType(OFX_UI_TRIGGER_ALL);
+	gui1->addSlider("Contrast", 0.0, 255.0, &contrast)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
 	gui1->addSlider("People", 0.0, 50.0, &number_of_people)->setIncrement(1);
 
 
