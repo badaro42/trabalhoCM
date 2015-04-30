@@ -14,7 +14,7 @@ class ofApp : public ofBaseApp{
 		static const int SMALL_INTERVAL = 10;
 
 		//0 - rapido, - detalhe; 1 - lento, + detalhe 
-		static const int DEFAULT_PERFORMANCE_OPTION = 1;
+		//static const int DEFAULT_PERFORMANCE_OPTION = 1;
 
 		static const std::string RANGE_SLIDER_NAME;
 
@@ -35,10 +35,10 @@ class ofApp : public ofBaseApp{
 
 		void guiEvent(ofxUIEventArgs &e);
 		void setGUI1();
-		void setGUI2(float duration, float min, float max);
+		void setGUI2(float duration);
 	
 		//customization stuff
-		int fast_or_beauty_option; //0 - faster; 1 - slower
+		//int fast_or_beauty_option; //0 - faster; 1 - slower
 
 		//cenas da barra lateral e do background
 		ofxUISuperCanvas *gui1;
@@ -47,18 +47,17 @@ class ofApp : public ofBaseApp{
 		float red, green, blue, luminance, contrast;
 
 		//cenas da barra de range do video
-		float range_minimum;
-		float range_maximum;
-		int min_frame;
-		int max_frame;
+		float range_minimum_percentage;
+		float range_maximum_percentage;
 
 		//cenas do video
 		ofVideoPlayer movie;
 		bool isFullScreen;
 		vector<string> video_paths;
+		vector<float> movies_duration;
 
 		//os varios botoes da app hehe
-		ofImage play_button;
+		//ofImage play_button;
 		ofImage back_button;
 		ofImage play_pause_button;
 		ofImage stop_button;
@@ -71,12 +70,13 @@ class ofApp : public ofBaseApp{
 		int current_position;
 
 		//variaveis de controlo do ecra actual
-		bool choose_video_screen;
-		bool choose_range_screen;
+		bool choose_video_and_range_screen;
 		bool play_video_screen;
 
+		bool redraw_frame_flag;
 		bool load_range_gui;
 		bool load_video;
 		bool entered_exited_fullscreen;
-		bool redraw_frame_flag;
+
+		int current_img;
 };
