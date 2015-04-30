@@ -253,6 +253,12 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 		range_minimum_percentage = slider->getPercentValueLow();
 		range_maximum_percentage = slider->getPercentValueHigh();
 	}
+	else if(name == "People")
+	{
+		int levels = int(e.getSlider()->getScaledValue());
+		e.getSlider()->setValue( levels );
+	}
+
 }
 
 //--------------------------------------------------------------
@@ -327,6 +333,8 @@ void ofApp::setGUI1()
 	gui1->addSpacer();
 	gui1->addSlider("Luminance", 0.0, 100.0, &luminance)->setTriggerType(OFX_UI_TRIGGER_ALL);
 	gui1->addSlider("Contrast", 0.0, 100.0, &contrast)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
+	gui1->addSlider("People", 0.0, 50.0, &number_of_people)->setIncrement(1);
+
 
     gui1->addSpacer();
     gui1->addLabel("RANGE SLIDER");
