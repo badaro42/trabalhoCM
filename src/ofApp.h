@@ -13,9 +13,6 @@ class ofApp : public ofBaseApp{
 		static const int SMALL_BUTTON_WIDTH = 110;
 		static const int SMALL_INTERVAL = 10;
 
-		//0 - rapido, - detalhe; 1 - lento, + detalhe 
-		//static const int DEFAULT_PERFORMANCE_OPTION = 1;
-
 		static const std::string RANGE_SLIDER_NAME;
 
 		void setup();

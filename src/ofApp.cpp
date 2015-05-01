@@ -253,12 +253,21 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 		range_minimum_percentage = slider->getPercentValueLow();
 		range_maximum_percentage = slider->getPercentValueHigh();
 	}
-	else if(name == "People")
+	else if(name == "People") //slider das pessoas
 	{
 		int levels = int(e.getSlider()->getScaledValue());
 		e.getSlider()->setValue( levels );
 	}
-
+	else if(name == "Luminance") //slider da luminancia
+	{
+		int levels = int(e.getSlider()->getScaledValue());
+		e.getSlider()->setValue( levels );
+	}
+	else if(name == "Contrast") //slider do constraste
+	{
+		int levels = int(e.getSlider()->getScaledValue());
+		e.getSlider()->setValue( levels );
+	}
 }
 
 //--------------------------------------------------------------
@@ -287,25 +296,16 @@ void ofApp::keyPressed(int key){
 }
 
 void ofApp::setGUI1()
-{
-    vector<string> performance_options;
-	performance_options.push_back("Faster, less detail");
-	performance_options.push_back("Slower, more detail");
-	
-	gui1 = new ofxUISuperCanvas("CONTROLOS", 5, 5, 250, 1500);
+{	
+	gui1 = new ofxUISuperCanvas("CONTROLS", 5, 5, 250, 1500);
     gui1->addSpacer();
     gui1->addLabel("Press 'h' to hide interface", OFX_UI_FONT_SMALL);
     
     gui1->addSpacer();
-	gui1->addLabel("Background Color:");
-	gui1->addSlider("RED", 0.0, 255.0, &red)->setTriggerType(OFX_UI_TRIGGER_ALL);
-	gui1->addSlider("GREEN", 0.0, 255.0, &green)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
-	gui1->addSlider("BLUE", 0.0, 255.0, &blue)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE);
-    
-	//gui1->addSpacer();
-    //gui1->addLabel("Performance tweaks:");
-	//ofxUIRadio *radio = gui1->addRadio("", performance_options, OFX_UI_ORIENTATION_VERTICAL);
-	//radio->activateToggle(performance_options[DEFAULT_PERFORMANCE_OPTION]);
+	gui1->addLabel("Edit Background Color:");
+	gui1->addSlider("Red", 0.0, 255.0, &red)->setTriggerType(OFX_UI_TRIGGER_ALL);
+	gui1->addSlider("Green", 0.0, 255.0, &green)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
+	gui1->addSlider("Blue", 0.0, 255.0, &blue)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE);
 
     /*gui1->addSpacer();
     gui1->addLabel("V SLIDERS");
@@ -320,7 +320,6 @@ void ofApp::setGUI1()
 	gui1->addSlider("7", 0.0, 255.0, 150, 17, 160);
 	gui1->addSlider("8", 0.0, 255.0, 150, 17, 160);
 	gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    
 
     gui1->addSpacer();
     gui1->setWidgetFontSize(OFX_UI_FONT_SMALL);
@@ -332,21 +331,22 @@ void ofApp::setGUI1()
 	radio_options.push_back("Neighborhood");
 
 	gui1->addSpacer();
-	gui1->addRadio("", radio_options, OFX_UI_ORIENTATION_VERTICAL);
+	gui1->addLabel("Options (for filters):");
+	gui1->addRadio("Options", radio_options, OFX_UI_ORIENTATION_VERTICAL);
 	gui1->addSpacer();
+	gui1->addLabel("Filter Criteria:");
 	gui1->addSlider("Luminance", 0.0, 255.0, &luminance)->setTriggerType(OFX_UI_TRIGGER_ALL);
 	gui1->addSlider("Contrast", 0.0, 255.0, &contrast)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
 	gui1->addSlider("People", 0.0, 50.0, &number_of_people)->setIncrement(1);
 
-
-    gui1->addSpacer();
+    /*gui1->addSpacer();
     gui1->addLabel("RANGE SLIDER");
 	gui1->addRangeSlider("RSLIDER", 0.0, 255.0, 50.0, 100.0);
     
     string textString = "This widget is a text area widget. Use this when you need to display a paragraph of text. It takes care of formatting the text to fit the block.";
     gui1->addSpacer();
     
-    gui1->addTextArea("textarea", textString, OFX_UI_FONT_SMALL);
+    gui1->addTextArea("textarea", textString, OFX_UI_FONT_SMALL);*/
     
     gui1->autoSizeToFitWidgets();
 	ofAddListener(gui1->newGUIEvent,this,&ofApp::guiEvent);
