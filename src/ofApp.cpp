@@ -16,6 +16,7 @@ void ofApp::setup(){
 	entered_exited_fullscreen = false;
 	load_range_gui = true;
 	redraw_frame_flag = false;
+	contador_de_frames = 0;
 
 	ofDirectory dir;
 	ofVideoPlayer temp_video;
@@ -176,6 +177,29 @@ void ofApp::draw(){
 		}
 		mean_luminance /= (i/3);
 
+		if(radio_button_position == ABOVE) 
+		{
+			if(mean_luminance >= luminance){
+				contador_de_frames++;
+				frames.push_back(movie.getCurrentFrame());			
+			}
+		}
+		else if(radio_button_position == BELOW)
+		{
+			if(mean_luminance <= luminance){
+				contador_de_frames++;
+				frames.push_back(movie.getCurrentFrame());			
+			}
+		}
+		else{
+			if(mean_luminance >= luminance-10 || mean_luminance <= luminance+10){
+				contador_de_frames++;
+				frames.push_back(movie.getCurrentFrame());			
+			}
+		}
+
+		cout << "Contador de frames:" << contador_de_frames << "\n";
+
 		ofDrawBitmapString("range chosen: from " + ofToString(int(range_minimum_percentage*movie.getTotalNumFrames())) + 
 			" to " + ofToString(int(range_maximum_percentage*movie.getTotalNumFrames())),275,330);
 		ofDrawBitmapString("frame: " + ofToString(movie.getCurrentFrame()) + "/"+ofToString(movie.getTotalNumFrames()),275,350);
@@ -267,6 +291,14 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 	{
 		int levels = int(e.getSlider()->getScaledValue());
 		e.getSlider()->setValue( levels );
+	}else if(name == "Above")
+	{
+		radio_button_position = ABOVE;
+	}else if(name == "Below")
+	{
+		radio_button_position = BELOW;
+	}else if (name == "Neighborhood"){
+		radio_button_position = RANGE;
 	}
 }
 
@@ -331,16 +363,20 @@ void ofApp::setGUI1()
 	radio_options.push_back("Neighborhood");
 
 	gui1->addSpacer();
-	gui1->addLabel("Options (for filters):");
-	gui1->addRadio("Options", radio_options, OFX_UI_ORIENTATION_VERTICAL);
+	ofxUIRadio *radio  = gui1->addRadio("Radio Button", radio_options, OFX_UI_ORIENTATION_VERTICAL);
+	radio->activateToggle(radio_options[0]);
+	radio_button_position = 0;
+
 	gui1->addSpacer();
 	gui1->addLabel("Filter Criteria:");
 	gui1->addSlider("Luminance", 0.0, 255.0, &luminance)->setTriggerType(OFX_UI_TRIGGER_ALL);
 	gui1->addSlider("Contrast", 0.0, 255.0, &contrast)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
 	gui1->addSlider("People", 0.0, 50.0, &number_of_people)->setIncrement(1);
 
-    /*gui1->addSpacer();
-    gui1->addLabel("RANGE SLIDER");
+
+    gui1->addSpacer();
+
+    /*gui1->addLabel("RANGE SLIDER");
 	gui1->addRangeSlider("RSLIDER", 0.0, 255.0, 50.0, 100.0);
     
     string textString = "This widget is a text area widget. Use this when you need to display a paragraph of text. It takes care of formatting the text to fit the block.";
@@ -501,3 +537,4 @@ void ofApp::gotMessage(ofMessage msg){
 void ofApp::dragEvent(ofDragInfo dragInfo){ 
 
 }
+
