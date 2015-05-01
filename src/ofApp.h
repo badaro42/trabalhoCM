@@ -12,6 +12,9 @@ class ofApp : public ofBaseApp{
 		static const int BUTTON_HEIGHT = 110;
 		static const int SMALL_BUTTON_WIDTH = 110;
 		static const int SMALL_INTERVAL = 10;
+		static const int ABOVE = 0;
+		static const int BELOW = 1;
+		static const int RANGE = 2;
 
 		//0 - rapido, - detalhe; 1 - lento, + detalhe 
 		//static const int DEFAULT_PERFORMANCE_OPTION = 1;
@@ -68,7 +71,9 @@ class ofApp : public ofBaseApp{
 		ofxSwipeable img_swipe;
 		float time;
 		ofPoint position;
-		int current_position;
+		int current_position; 
+
+
 
 		//variaveis de controlo do ecra actual
 		bool choose_video_and_range_screen;
@@ -78,6 +83,10 @@ class ofApp : public ofBaseApp{
 		bool load_range_gui;
 		bool load_video;
 		bool entered_exited_fullscreen;
+		int radio_button_position; 
 
 		int current_img;
+
+		int contador_de_frames;
+		vector<int> frames; 
 };
