@@ -499,7 +499,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 void ofApp::setFrames(){
 
-	/* calculo do numero de pessoas na frame */
+	/* calculo do numero de pessoas na frame, ta a por a cena bue lenta*/
 	ofxCvHaarFinder haarFinder; 
 	haarFinder.setup("HaarFinder/haarcascade_frontalface_default.xml");
 	nr_people += haarFinder.findHaarObjects(movie.getPixelsRef());
