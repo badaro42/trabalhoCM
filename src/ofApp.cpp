@@ -179,6 +179,7 @@ void ofApp::draw(){
 		ofDrawBitmapString("speed: " + ofToString(movie.getSpeed(),2),275,390);
 		ofDrawBitmapString("luminance: " + ofToString(mean_luminance), 275, 410);
 		ofDrawBitmapString("caras: " + ofToString(nr_people), 275, 430);
+		//ofDrawBitmapString("caras: " + ofToString(nr_people), 275, 430);
 		//paramos o video para que
 		if(redraw_frame_flag) {
 			movie.stop();
@@ -311,8 +312,8 @@ void ofApp::setGUI1()
 	gui1->addSlider("Green", 0.0, 255.0, &green)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
 	gui1->addSlider("Blue", 0.0, 255.0, &blue)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE);
 
-	/*
-    gui1->addSpacer();
+	
+    /*gui1->addSpacer();
     gui1->setWidgetFontSize(OFX_UI_FONT_SMALL);
 	gui1->addButton("BUTTON", false);
 	gui1->addToggle("TOGGLE", false);*/
@@ -507,18 +508,35 @@ void ofApp::setFrames(){
 	unsigned char * pixels = movie.getPixels();
 	int i;
 	int num_pixels = movie.getWidth()*movie.getHeight();
-	float  red, green, blue, max, min;
 
+	//conversao to HSV
+	float hue_total; 
 	// calculate luminance for each rbg pixel
 	for (i = 0; i < num_pixels; i+=3){
+		float  red, green, blue, max, min, delta, hue;
 		//int inverse = 255 - pixels[i];
 		mean_luminance += 0.2125*pixels[i] + 0.7154*pixels[i+1] + 0.0721*pixels[i+2];
-		red = pixels[i];
-		green = pixels[i+1];
-		blue = pixels[i+2];
+		red = pixels[i]/255;
+		green = pixels[i+1]/255;
+		blue = pixels[i+2]/255;
 		max = std::max(std::max(red, green), blue);
+		min = std::min(std::min(red, green), blue);
+		delta = max-min;
+		if(delta != 0)
+		{
+			if(max = red)
+				hue = 60*((green-blue)/delta);
+			else if(max = green)
+				hue = 60*(((blue-red)/delta) + 2);
+			else if(max = blue)
+				hue = 60*(((red-green)/delta) + 4);
+		}else {
+			hue = 0;
+		}
+		hue_total += hue; 
 	}
 	mean_luminance /= (i/3);
+	cout << "Total de hue" << hue_total << "\n";
 
 	if(radio_button_position == ABOVE) 
 	{
