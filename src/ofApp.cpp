@@ -510,7 +510,9 @@ void ofApp::setFrames(){
 	int num_pixels = movie.getWidth()*movie.getHeight();
 
 	//conversao to HSV
-	float hue_total; 
+	float hue_total, saturation, value_max, value_min; 
+	value_max = -1;
+	value_min = 100;
 	// calculate luminance for each rbg pixel
 	for (i = 0; i < num_pixels; i+=3){
 		float  red, green, blue, max, min, delta, hue;
@@ -522,6 +524,10 @@ void ofApp::setFrames(){
 		max = std::max(std::max(red, green), blue);
 		min = std::min(std::min(red, green), blue);
 		delta = max-min;
+		if(max > value_max)
+			value_max = max;
+		if(min < value_min)
+			value_min = min;
 		if(delta != 0)
 		{
 			if(max = red)
@@ -535,6 +541,11 @@ void ofApp::setFrames(){
 		}
 		hue_total += hue; 
 	}
+	if(value_max == 0)
+		saturation = 0;
+	else 
+		saturation = (value_max-value_min)/value_max;
+
 	mean_luminance /= (i/3);
 	cout << "Total de hue" << hue_total << "\n";
 
