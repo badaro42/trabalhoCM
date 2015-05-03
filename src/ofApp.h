@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "ofxUI.h"
 #include "ofxSwipeable.h"
+#include "ofxCvHaarFinder.h"
 #include <stdio.h>
 
 class ofApp : public ofBaseApp{
@@ -36,6 +37,8 @@ class ofApp : public ofBaseApp{
 		void guiEvent(ofxUIEventArgs &e);
 		void setGUI1();
 		void setGUI2(float duration);
+
+		void setFrames();
 	
 		//customization stuff
 		//int fast_or_beauty_option; //0 - faster; 1 - slower
@@ -86,4 +89,6 @@ class ofApp : public ofBaseApp{
 
 		int contador_de_frames;
 		vector<int> frames; 
+		int mean_luminance; 
+		int nr_people;
 };

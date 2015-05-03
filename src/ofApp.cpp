@@ -17,6 +17,8 @@ void ofApp::setup(){
 	load_range_gui = true;
 	redraw_frame_flag = false;
 	contador_de_frames = 0;
+	mean_luminance = 0;
+	nr_people = 0;
 
 	ofDirectory dir;
 	ofVideoPlayer temp_video;
@@ -165,48 +167,18 @@ void ofApp::draw(){
 			ofGetHeight()*0.38-movie.getHeight()/2);
 
 		ofSetHexColor(0x000000);
-		unsigned char * pixels = movie.getPixels();
-		int mean_luminance = 0;
-		int i;
-		int num_pixels = movie.getWidth()*movie.getHeight();
 
-		// calculate luminance for each rbg pixel
-		for (i = 0; i < num_pixels; i+=3){
-			//int inverse = 255 - pixels[i];
-			mean_luminance += 0.2125*pixels[i] + 0.7154*pixels[i+1] + 0.0721*pixels[i+2];
-		}
-		mean_luminance /= (i/3);
+		setFrames();
 
-		if(radio_button_position == ABOVE) 
-		{
-			if(mean_luminance >= luminance){
-				contador_de_frames++;
-				frames.push_back(movie.getCurrentFrame());			
-			}
-		}
-		else if(radio_button_position == BELOW)
-		{
-			if(mean_luminance <= luminance){
-				contador_de_frames++;
-				frames.push_back(movie.getCurrentFrame());			
-			}
-		}
-		else{
-			if(mean_luminance >= luminance-10 || mean_luminance <= luminance+10){
-				contador_de_frames++;
-				frames.push_back(movie.getCurrentFrame());			
-			}
-		}
-
-		cout << "Contador de frames:" << contador_de_frames << "\n";
-
+		//cout << "Contador de frames:" << contador_de_frames << "\n";
+		cout << "Contador de pessoas" << nr_people << "\n";
 		ofDrawBitmapString("range chosen: from " + ofToString(int(range_minimum_percentage*movie.getTotalNumFrames())) + 
 			" to " + ofToString(int(range_maximum_percentage*movie.getTotalNumFrames())),275,330);
 		ofDrawBitmapString("frame: " + ofToString(movie.getCurrentFrame()) + "/"+ofToString(movie.getTotalNumFrames()),275,350);
 		ofDrawBitmapString("duration: " + ofToString(movie.getPosition()*movie.getDuration(),2) + "/"+ofToString(movie.getDuration(),2),275,370);
 		ofDrawBitmapString("speed: " + ofToString(movie.getSpeed(),2),275,390);
 		ofDrawBitmapString("luminance: " + ofToString(mean_luminance), 275, 410);
-
+		ofDrawBitmapString("caras: " + ofToString(nr_people), 275, 430);
 		//paramos o video para que
 		if(redraw_frame_flag) {
 			movie.stop();
@@ -339,20 +311,7 @@ void ofApp::setGUI1()
 	gui1->addSlider("Green", 0.0, 255.0, &green)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
 	gui1->addSlider("Blue", 0.0, 255.0, &blue)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE);
 
-    /*gui1->addSpacer();
-    gui1->addLabel("V SLIDERS");
-	gui1->addSlider("0", 0.0, 255.0, 150, 17, 160);
-	gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-	gui1->addSlider("1", 0.0, 255.0, 150, 17, 160);
-	gui1->addSlider("2", 0.0, 255.0, 150, 17, 160);
-	gui1->addSlider("3", 0.0, 255.0, 150, 17, 160);
-	gui1->addSlider("4", 0.0, 255.0, 150, 17, 160);
-	gui1->addSlider("5", 0.0, 255.0, 150, 17, 160);
-	gui1->addSlider("6", 0.0, 255.0, 150, 17, 160);
-	gui1->addSlider("7", 0.0, 255.0, 150, 17, 160);
-	gui1->addSlider("8", 0.0, 255.0, 150, 17, 160);
-	gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-
+	/*
     gui1->addSpacer();
     gui1->setWidgetFontSize(OFX_UI_FONT_SMALL);
 	gui1->addButton("BUTTON", false);
@@ -538,3 +497,48 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 }
 
+void ofApp::setFrames(){
+
+	/* calculo do numero de pessoas na frame */
+	ofxCvHaarFinder haarFinder; 
+	haarFinder.setup("HaarFinder/haarcascade_frontalface_default.xml");
+	nr_people += haarFinder.findHaarObjects(movie.getPixelsRef());
+
+	unsigned char * pixels = movie.getPixels();
+	int i;
+	int num_pixels = movie.getWidth()*movie.getHeight();
+	float  red, green, blue, max, min;
+
+	// calculate luminance for each rbg pixel
+	for (i = 0; i < num_pixels; i+=3){
+		//int inverse = 255 - pixels[i];
+		mean_luminance += 0.2125*pixels[i] + 0.7154*pixels[i+1] + 0.0721*pixels[i+2];
+		red = pixels[i];
+		green = pixels[i+1];
+		blue = pixels[i+2];
+		max = std::max(std::max(red, green), blue);
+	}
+	mean_luminance /= (i/3);
+
+	if(radio_button_position == ABOVE) 
+	{
+		if(mean_luminance >= luminance && nr_people >= number_of_people){
+				contador_de_frames++;
+				frames.push_back(movie.getCurrentFrame());
+		}
+	}
+	else if(radio_button_position == BELOW)  
+	{
+		if(mean_luminance <= luminance && nr_people <= number_of_people){
+			contador_de_frames++;
+			frames.push_back(movie.getCurrentFrame());			
+		}
+	}
+	else{
+		if(mean_luminance >= luminance-10 || mean_luminance <= luminance+10 || 
+			 nr_people <= number_of_people-5 || nr_people <= number_of_people+5){
+			contador_de_frames++;
+			frames.push_back(movie.getCurrentFrame());			
+		}
+	}
+}
