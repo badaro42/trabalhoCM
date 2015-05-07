@@ -9,13 +9,18 @@ const std::string ofApp::RANGE_SLIDER_NAME = "MTIME";
 //--------------------------------------------------------------
 void ofApp::setup(){
 
+	video_playing = false;
 	isFullScreen = false;
+
 	choose_video_and_range_screen = true;
 	play_video_screen = false;
+	gallery_screen = false;
+
 	load_video = false;
 	entered_exited_fullscreen = false;
 	load_range_gui = true;
 	redraw_frame_flag = false;
+
 	contador_de_frames = 0;
 	mean_luminance = 0;
 	nr_people = 0;
@@ -34,6 +39,9 @@ void ofApp::setup(){
 
 	confirm_button.loadImage("images/apply_button.png");
 	confirm_button.resize(SMALL_BUTTON_WIDTH, BUTTON_HEIGHT);
+	
+	view_gallery_button.loadImage("images/view_gallery.jpg");
+	view_gallery_button.resize(SMALL_BUTTON_WIDTH*3 + SMALL_INTERVAL*2, BUTTON_HEIGHT);
     
     int nFiles = dir.listDir("movies");
 
@@ -156,19 +164,22 @@ void ofApp::draw(){
 			ofGetHeight()*0.62);
 		stop_button.draw(ofGetWidth()*0.65+(SMALL_BUTTON_WIDTH/2)+SMALL_INTERVAL, 
 			ofGetHeight()*0.62);
+		view_gallery_button.draw((ofGetWidth()*0.65)-(1.5*SMALL_BUTTON_WIDTH)-SMALL_INTERVAL, 
+			ofGetHeight()*0.8);
 	
 		ofSetHexColor(0xFFFFFF);
 
 		//fazemos isto para desenhar a primeira frame quando o user escolhe o video
 		if(redraw_frame_flag)
 			movie.play();
-		 
+		
 		movie.draw(ofGetWidth()*0.65-movie.getWidth()/2,
 			ofGetHeight()*0.38-movie.getHeight()/2);
 
 		ofSetHexColor(0x000000);
 
-		setFrames();
+		if(video_playing)
+			setFrames();
 
 		//cout << "Contador de frames:" << contador_de_frames << "\n";
 		cout << "Contador de pessoas" << nr_people << "\n";
@@ -413,6 +424,7 @@ void ofApp::mousePressed(int x, int y, int button){
 		(y <= ofGetHeight()*0.62 + BUTTON_HEIGHT) &&
 		play_video_screen) 
 	{
+		video_playing = false;
 		play_video_screen = false;
 		choose_video_and_range_screen = true;
 		gui2->toggleVisible();
@@ -426,10 +438,14 @@ void ofApp::mousePressed(int x, int y, int button){
 		(y <= ofGetHeight()*0.62 + BUTTON_HEIGHT) &&
 		play_video_screen) 
 	{
-		if(movie.isPlaying())
+		if(movie.isPlaying()) {
 			movie.stop();
-		else
+			video_playing = false;
+		}
+		else {
 			movie.play();
+			video_playing = true;
+		}
 
 		cout << "botao de play/pause kkkk!!!\n";
 	}
@@ -443,39 +459,11 @@ void ofApp::mousePressed(int x, int y, int button){
 		movie.stop();
 		movie.setFrame(int(range_minimum_percentage*movie.getTotalNumFrames()));
 		redraw_frame_flag = true;
+		video_playing = false;
 
 		cout << "botao de STOP HUEHUHE!!! min_frame: " << int(range_minimum_percentage*movie.getTotalNumFrames()) << "\n";
 	}
-	//botao para confirmar o range - no segundo ecra!!
-	/*else if((x >= (ofGetWidth()*0.65) + (SMALL_INTERVAL/2)) &&
-		(x <= (ofGetWidth()*0.65) + (SMALL_INTERVAL/2) + SMALL_BUTTON_WIDTH) &&
-		(y >= ofGetHeight()*0.62 + BUTTON_HEIGHT) &&
-		(y <= ofGetHeight()*0.62 + 2*BUTTON_HEIGHT) &&
-		choose_video_and_range_screen) 
-	{
-		//movie.setFrame(range_minimum);
-		movie.stop();
 
-		choose_video_and_range_screen = false;
-		play_video_screen = true;
-		gui2->toggleVisible();
-		//movie.play();
-
-		cout << "botao para confirmar o range huehue\n";
-	}
-	//botao de back - no SEGUNDO ecra!!
-	else if((x >= ofGetWidth()*0.65 - SMALL_BUTTON_WIDTH - (SMALL_INTERVAL/2)) &&
-		(x <= ofGetWidth()*0.65 - (SMALL_INTERVAL/2)) &&
-		(y >= ofGetHeight()*0.62 + BUTTON_HEIGHT) &&
-		(y <= ofGetHeight()*0.62 + 2*BUTTON_HEIGHT) &&
-		choose_video_and_range_screen) 
-	{
-		play_video_screen = false;
-		choose_video_and_range_screen = true;
-		gui2->toggleVisible();
-		
-		cout << "botao de pause!!!\n";
-	}*/
 }
 
 //--------------------------------------------------------------
@@ -501,11 +489,11 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 void ofApp::setFrames(){
 
 	/* calculo do numero de pessoas na frame, ta a por a cena bue lenta*/
-	if(movie.getCurrentFrame() % 10 == 0) {
+	/*if(movie.getCurrentFrame() % 10 == 0) {
 		ofxCvHaarFinder haarFinder; 
 		haarFinder.setup("HaarFinder/haarcascade_frontalface_default.xml");
 		nr_people = haarFinder.findHaarObjects(movie.getPixelsRef());
-	}
+	}*/
 
 	unsigned char * pixels = movie.getPixels();
 	int i;
