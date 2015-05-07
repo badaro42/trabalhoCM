@@ -5,8 +5,9 @@
 #include "ofxSwipeable.h"
 #include "ofxCvHaarFinder.h"
 #include <stdio.h>
+#include "Auxiliar.h"
 
-class ofApp : public ofBaseApp{
+class ofApp {
 
 	public:
 		static const int LARGE_BUTTON_WIDTH = 350;
@@ -86,6 +87,7 @@ class ofApp : public ofBaseApp{
 		bool load_video;
 		bool entered_exited_fullscreen;
 		int radio_button_position; 
+		float calcSelectedColor();
 
 		int current_img;
 

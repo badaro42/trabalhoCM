@@ -488,12 +488,15 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 void ofApp::setFrames(){
 
+	Auxiliar aux;
+	float selected_color = aux.calcColor(red, green, blue);
+
 	/* calculo do numero de pessoas na frame, ta a por a cena bue lenta*/
-	/*if(movie.getCurrentFrame() % 10 == 0) {
+	if(movie.getCurrentFrame() % 10 == 0) {
 		ofxCvHaarFinder haarFinder; 
 		haarFinder.setup("HaarFinder/haarcascade_frontalface_default.xml");
 		nr_people = haarFinder.findHaarObjects(movie.getPixelsRef());
-	}*/
+	}
 
 	unsigned char * pixels = movie.getPixels();
 	int i;
@@ -507,64 +510,17 @@ void ofApp::setFrames(){
 
 	// calculate luminance for each rbg pixel
 	for (i = 0; i < num_pixels; i+=3){
-		float  red, green, blue;
-
+		float  red, green, blue, hue;
 		red = pixels[i];
 		green = pixels[i+1];
 		blue = pixels[i+2];
 		mean_luminance += 0.2125*red + 0.7154*green + 0.0721*blue;
-
-		red /= 255;
-		green /= 255;
-		blue /= 255;
-
-		float max, min, delta;
-		max = std::max(red, std::max(green, blue));
-		min = std::min(red, std::min(green, blue));
-		delta = max - min;
-
-		if(i % 1000 == 0)
+		hue = aux.calcColor(red, green, blue);
+		/*if(i % 1000 == 0)
 			cout << "[RED; GREEN; BLUE; MAX; MIN; DELTA]\n[" << red << "; "  << green << 
-			"; " << blue << "; " << max << "; " << min << "; " << delta << "]\n";
-
-		float hue_temp, hue;
-		if (red == max) {
-			hue_temp = (green - blue) / (delta + 1e-20f);
-			if(hue_temp < 0.0)
-				hue_temp = hue_temp + 6.0;
-		}
-		else if (green == max)
-			hue_temp = ((blue - red) / (delta + 1e-20f)) + 2;
-		else
-			hue_temp = ((red - green) / (delta + 1e-20f)) + 4;
-		//if (hue_temp < 0)
-		//	hue_temp += 6.f;
-		//hue = hue_temp * (1.f / 6.f);
-		hue = hue_temp * 60;
-
-		
-		/*delta = max-min;
-
-		if(max > value_max)
-			value_max = max;
-		if(min < value_min)
-			value_min = min;
-
-		if(delta != 0)
-		{
-			if(max = red)
-				hue = 60*((green-blue)/delta);
-			else if(max = green)
-				hue = 60*(((blue-red)/delta) + 2);
-			else if(max = blue)
-				hue = 60*(((red-green)/delta) + 4);
-		}
-		else 
-			hue = 0;*/
-		
+			"; " << blue << "; " << max << "; " << min << "; " << delta << "]\n";*/
 		hue_total += hue; 
 	}
-
 	hue_total /= num_pixels;
 	mean_luminance /= (i/3);
 	
@@ -572,23 +528,29 @@ void ofApp::setFrames(){
 
 	if(radio_button_position == ABOVE) 
 	{
-		if(mean_luminance >= luminance && nr_people >= number_of_people){
+		if(mean_luminance >= luminance 
+			&& nr_people >= number_of_people
+			&& selected_color >= hue_total){
 				contador_de_frames++;
 				frames.push_back(movie.getCurrentFrame());
 		}
 	}
 	else if(radio_button_position == BELOW)  
 	{
-		if(mean_luminance <= luminance && nr_people <= number_of_people){
+		if(mean_luminance <= luminance 
+			&& nr_people <= number_of_people
+			&& selected_color <= hue_total){
 			contador_de_frames++;
 			frames.push_back(movie.getCurrentFrame());			
 		}
 	}
 	else{
-		if(mean_luminance >= luminance-10 || mean_luminance <= luminance+10 || 
-			 nr_people <= number_of_people-5 || nr_people <= number_of_people+5){
+		if((mean_luminance >= luminance-10 || mean_luminance <= luminance+10) 
+			&& (nr_people <= number_of_people-5 || nr_people <= number_of_people+5)
+			&& (selected_color >= hue_total-10 || selected_color <= hue_total+10)){
 			contador_de_frames++;
 			frames.push_back(movie.getCurrentFrame());			
 		}
 	}
 }
+
