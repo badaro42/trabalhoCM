@@ -41,7 +41,7 @@ void ofApp::setup(){
 	confirm_button.resize(SMALL_BUTTON_WIDTH, BUTTON_HEIGHT);
 	
 	view_gallery_button.loadImage("images/view_gallery.jpg");
-	view_gallery_button.resize(SMALL_BUTTON_WIDTH*3 + SMALL_INTERVAL*2, BUTTON_HEIGHT);
+	view_gallery_button.resize(LARGE_BUTTON_WIDTH, BUTTON_HEIGHT);
     
     int nFiles = dir.listDir("movies");
 

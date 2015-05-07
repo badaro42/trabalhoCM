@@ -11,7 +11,7 @@ class ofApp : public ofBaseApp{
 	public:
 		static const int LARGE_BUTTON_WIDTH = 180;
 		static const int BUTTON_HEIGHT = 110;
-		static const int SMALL_BUTTON_WIDTH = 110;
+		static const int SMALL_BUTTON_WIDTH = 350;
 		static const int SMALL_INTERVAL = 10;
 		static const int ABOVE = 0;
 		static const int BELOW = 1;
