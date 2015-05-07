@@ -11,7 +11,7 @@ class ofApp : public ofBaseApp{
 	public:
 		static const int LARGE_BUTTON_WIDTH = 180;
 		static const int BUTTON_HEIGHT = 110;
-		static const int SMALL_BUTTON_WIDTH = 110;
+		static const int SMALL_BUTTON_WIDTH = 350;
 		static const int SMALL_INTERVAL = 10;
 		static const int ABOVE = 0;
 		static const int BELOW = 1;
@@ -66,6 +66,7 @@ class ofApp : public ofBaseApp{
 		ofImage play_pause_button;
 		ofImage stop_button;
 		ofImage confirm_button;
+		ofImage view_gallery_button;
 
 		//cenas do swipe das imagens
 		ofxSwipeable img_swipe;
@@ -73,12 +74,12 @@ class ofApp : public ofBaseApp{
 		ofPoint position;
 		int current_position; 
 
-
-
 		//variaveis de controlo do ecra actual
 		bool choose_video_and_range_screen;
 		bool play_video_screen;
+		bool gallery_screen;
 
+		bool video_playing;
 		bool redraw_frame_flag;
 		bool load_range_gui;
 		bool load_video;
