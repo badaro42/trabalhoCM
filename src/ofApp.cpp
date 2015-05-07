@@ -182,7 +182,7 @@ void ofApp::draw(){
 			setFrames();
 
 		//cout << "Contador de frames:" << contador_de_frames << "\n";
-		cout << "Contador de pessoas" << nr_people << "\n";
+		//cout << "Contador de pessoas" << nr_people << "\n";
 		ofDrawBitmapString("range chosen: from " + ofToString(int(range_minimum_percentage*movie.getTotalNumFrames())) + 
 			" to " + ofToString(int(range_maximum_percentage*movie.getTotalNumFrames())),275,330);
 		ofDrawBitmapString("frame: " + ofToString(movie.getCurrentFrame()) + "/"+ofToString(movie.getTotalNumFrames()),275,350);
@@ -489,17 +489,11 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 void ofApp::setFrames(){
 
 	/* calculo do numero de pessoas na frame, ta a por a cena bue lenta*/
-<<<<<<< HEAD
-	ofxCvHaarFinder haarFinder; 
-	haarFinder.setup("HaarFinder/haarcascade_frontalface_default.xml");
-	nr_people = haarFinder.findHaarObjects(movie.getPixelsRef());
-=======
 	/*if(movie.getCurrentFrame() % 10 == 0) {
 		ofxCvHaarFinder haarFinder; 
 		haarFinder.setup("HaarFinder/haarcascade_frontalface_default.xml");
 		nr_people = haarFinder.findHaarObjects(movie.getPixelsRef());
 	}*/
->>>>>>> origin/master
 
 	unsigned char * pixels = movie.getPixels();
 	int i;
@@ -513,7 +507,7 @@ void ofApp::setFrames(){
 
 	// calculate luminance for each rbg pixel
 	for (i = 0; i < num_pixels; i+=3){
-		float  red, green, blue, max, min, delta, hue;
+		float  red, green, blue;
 
 		red = pixels[i];
 		green = pixels[i+1];
@@ -524,9 +518,32 @@ void ofApp::setFrames(){
 		green /= 255;
 		blue /= 255;
 
-		max = std::max(std::max(red, green), blue);
-		min = std::min(std::min(red, green), blue);
-		delta = max-min;
+		float max, min, delta;
+		max = std::max(red, std::max(green, blue));
+		min = std::min(red, std::min(green, blue));
+		delta = max - min;
+
+		if(i % 1000 == 0)
+			cout << "[RED; GREEN; BLUE; MAX; MIN; DELTA]\n[" << red << "; "  << green << 
+			"; " << blue << "; " << max << "; " << min << "; " << delta << "]\n";
+
+		float hue_temp, hue;
+		if (red == max) {
+			hue_temp = (green - blue) / (delta + 1e-20f);
+			if(hue_temp < 0.0)
+				hue_temp = hue_temp + 6.0;
+		}
+		else if (green == max)
+			hue_temp = ((blue - red) / (delta + 1e-20f)) + 2;
+		else
+			hue_temp = ((red - green) / (delta + 1e-20f)) + 4;
+		//if (hue_temp < 0)
+		//	hue_temp += 6.f;
+		//hue = hue_temp * (1.f / 6.f);
+		hue = hue_temp * 60;
+
+		
+		/*delta = max-min;
 
 		if(max > value_max)
 			value_max = max;
@@ -543,15 +560,15 @@ void ofApp::setFrames(){
 				hue = 60*(((red-green)/delta) + 4);
 		}
 		else 
-			hue = 0;
+			hue = 0;*/
 		
 		hue_total += hue; 
 	}
 
 	hue_total /= num_pixels;
-
 	mean_luminance /= (i/3);
-	cout << "Total de hue" << hue_total << "\n";
+	
+	cout << movie.getCurrentFrame() << ": Total de hue" << hue_total << "\n";
 
 	if(radio_button_position == ABOVE) 
 	{
