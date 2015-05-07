@@ -503,7 +503,7 @@ void ofApp::setFrames(){
 	/* calculo do numero de pessoas na frame, ta a por a cena bue lenta*/
 	ofxCvHaarFinder haarFinder; 
 	haarFinder.setup("HaarFinder/haarcascade_frontalface_default.xml");
-	nr_people += haarFinder.findHaarObjects(movie.getPixelsRef());
+	nr_people = haarFinder.findHaarObjects(movie.getPixelsRef());
 
 	unsigned char * pixels = movie.getPixels();
 	int i;
@@ -551,10 +551,8 @@ void ofApp::setFrames(){
 		
 		hue_total += hue; 
 	}
-	if(value_max == 0)
-		saturation = 0;
-	else 
-		saturation = (value_max-value_min)/value_max;
+
+	hue_total /= num_pixels;
 
 	mean_luminance /= (i/3);
 	cout << "Total de hue" << hue_total << "\n";
