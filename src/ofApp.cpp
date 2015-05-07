@@ -511,23 +511,32 @@ void ofApp::setFrames(){
 
 	//conversao to HSV
 	float hue_total, saturation, value_max, value_min; 
+	hue_total = 0;
 	value_max = -1;
 	value_min = 100;
+
 	// calculate luminance for each rbg pixel
 	for (i = 0; i < num_pixels; i+=3){
 		float  red, green, blue, max, min, delta, hue;
-		//int inverse = 255 - pixels[i];
-		mean_luminance += 0.2125*pixels[i] + 0.7154*pixels[i+1] + 0.0721*pixels[i+2];
-		red = pixels[i]/255;
-		green = pixels[i+1]/255;
-		blue = pixels[i+2]/255;
+
+		red = pixels[i];
+		green = pixels[i+1];
+		blue = pixels[i+2];
+		mean_luminance += 0.2125*red + 0.7154*green + 0.0721*blue;
+
+		red /= 255;
+		green /= 255;
+		blue /= 255;
+
 		max = std::max(std::max(red, green), blue);
 		min = std::min(std::min(red, green), blue);
 		delta = max-min;
+
 		if(max > value_max)
 			value_max = max;
 		if(min < value_min)
 			value_min = min;
+
 		if(delta != 0)
 		{
 			if(max = red)
@@ -536,9 +545,10 @@ void ofApp::setFrames(){
 				hue = 60*(((blue-red)/delta) + 2);
 			else if(max = blue)
 				hue = 60*(((red-green)/delta) + 4);
-		}else {
-			hue = 0;
 		}
+		else 
+			hue = 0;
+		
 		hue_total += hue; 
 	}
 	if(value_max == 0)
