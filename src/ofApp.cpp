@@ -295,6 +295,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 void ofApp::exit()
 {    
 	delete gui1;
+
 }
 
 //--------------------------------------------------------------

@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include "Auxiliar.h"
 
-class ofApp {
+class ofApp : public ofBaseApp {
 
 	public:
 		static const int LARGE_BUTTON_WIDTH = 350;
