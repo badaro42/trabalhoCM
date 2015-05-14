@@ -49,7 +49,7 @@ class ofApp {
 		ofxUISuperCanvas *gui1;
 		ofxUISuperCanvas *gui2;
 		bool hideGUI;
-		float red, green, blue, luminance, contrast, number_of_people, dominant_color;
+		float red, green, blue, luminance, contrast, number_of_people, dominant_color, number_of_edges;
 		vector<string> radio_options;
 
 		//cenas da barra de range do video
@@ -95,4 +95,5 @@ class ofApp {
 		vector<int> frames; 
 		int mean_luminance; 
 		int nr_people;
+		int nr_edges;
 };

@@ -11,11 +11,7 @@ float Auxiliar::calcColor(float green, float red, float blue){
 	red /= 255;
 	green /= 255;
 	blue /= 255;
-
-	float max = 0;
-	float min = 0;
-	float delta = 0; 
-
+	float delta; 
 	max = std::max(red, std::max(green, blue));
 	min = std::min(red, std::min(green, blue));
 	delta = max - min;

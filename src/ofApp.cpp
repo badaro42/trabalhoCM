@@ -266,6 +266,11 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 		int levels = int(e.getSlider()->getScaledValue());
 		e.getSlider()->setValue( levels );
 	}
+	else if(name == "Edges") //slider das pessoas
+	{
+		int levels = int(e.getSlider()->getScaledValue());
+		e.getSlider()->setValue(levels);
+	}
 	else if(name == "Luminance") //slider da luminancia
 	{
 		int levels = int(e.getSlider()->getScaledValue());
@@ -343,7 +348,7 @@ void ofApp::setGUI1()
 	gui1->addSlider("Luminance", 0.0, 255.0, &luminance)->setTriggerType(OFX_UI_TRIGGER_ALL);
 	gui1->addSlider("Contrast", 0.0, 255.0, &contrast)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
 	gui1->addSlider("People", 0.0, 50.0, &number_of_people)->setIncrement(1);
-
+    gui1->addSlider("Edges", 0.0, 50.0, &number_of_edges)->setIncrement(1);
 
     gui1->addSpacer();
 
