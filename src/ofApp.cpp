@@ -504,22 +504,33 @@ void ofApp::setFrames(){
 		nr_people = haarFinder.findHaarObjects(movie.getPixelsRef());
 	}
 
+	movie.getCurrentFrame();
+
 	unsigned char * pixels = movie.getPixels();
 	int i;
 	int num_pixels = movie.getWidth()*movie.getHeight();
 
+	ofxCvGrayscaleImage image;
+	image.setFromPixels(movie.getPixels(), movie.getWidth(), movie.getHeight());
 	//conversao to HSV
 	float hue_total, saturation, value_max, value_min; 
 	hue_total = 0;
 	value_max = -1;
 	value_min = 100;
 
+	for(int i = 0; i < movie.getHeight(); i++){
+		for(int j = 0; i < movie.getWidth(); j++){
+			float  red, green, blue;
+			 red = pixels[i];
+		}
+	}
 	// calculate luminance for each rbg pixel
 	for (i = 0; i < num_pixels; i+=3){
 		float  red, green, blue, hue;
 		red = pixels[i];
 		green = pixels[i+1];
 		blue = pixels[i+2];
+
 		mean_luminance += 0.2125*red + 0.7154*green + 0.0721*blue;
 		hue = aux.calcColor(red, green, blue);
 		/*if(i % 1000 == 0)
