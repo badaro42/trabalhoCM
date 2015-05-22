@@ -510,27 +510,76 @@ void ofApp::setFrames(){
 	int i;
 	int num_pixels = movie.getWidth()*movie.getHeight();
 
-	ofxCvGrayscaleImage image;
-	image.setFromPixels(movie.getPixels(), movie.getWidth(), movie.getHeight());
-	//conversao to HSV
-	float hue_total, saturation, value_max, value_min; 
-	hue_total = 0;
-	value_max = -1;
-	value_min = 100;
+	/* nao acrescentou nada de novo
+	
+	ofImage image;
+	image.setFromPixels(movie.getPixels(), movie.getWidth(), movie.getHeight(), OF_IMAGE_GRAYSCALE, true);
 
-	for(int i = 0; i < movie.getHeight(); i++){
+	unsigned char * pixels2 = image.getPixels();
+	int nr_pixels_2 = image.getHeight()*image.getWidth();
+
+		for(int i = 0; i < movie.getHeight(); i++){
 		for(int j = 0; i < movie.getWidth(); j++){
 			float  red, green, blue;
 			 red = pixels[i];
 		}
 	}
+	*/
+	//conversao to HSV
+
+	float hue_total, saturation, value_max, value_min; 
+	hue_total = 0;
+	value_max = -1;
+	value_min = 100;
+
+	// calculo de contraste
+
+	for(int i = 0; i < num_pixels; i+=3) {
+		float red, green, blue;
+		red = pixels[i];
+		green = pixels[i+1];
+		red = pixels[i+2];
+
+		if(i > (movie.getWidth()*3-1) && i < (num_pixels - movie.getWidth()*3)){
+			//tenho parte de cima e de baixo
+			if(i % (int) movie.getWidth()-3 != 0 && ((i % (int) movie.getWidth()*3)+3 != 9)){
+
+				// tenho esquerdo e direito
+			}else if(i % (int) movie.getWidth()-3 != 0 && !((i % (int) movie.getWidth()*3)+3 != 9)){
+				// tenho esquerdo
+			}else if(!(i % (int) movie.getWidth()-3 != 0) && (i % (int) movie.getWidth()*3)+3 != 9){
+				// tenho direito
+			}
+		}else if(!(i > (movie.getWidth()*3-1)) && i < (num_pixels - movie.getWidth()*3)){
+			//tenho parte de cima e de baixo
+			if(i % (int) movie.getWidth()-3 != 0 && ((i % (int) movie.getWidth()*3)+3 != 9)){
+
+				// tenho esquerdo e direito
+			}else if(i % (int) movie.getWidth()-3 != 0 && !((i % (int) movie.getWidth()*3)+3 != 9)){
+				// tenho esquerdo
+			}else if(!(i % (int) movie.getWidth()-3 != 0) && (i % (int) movie.getWidth()*3)+3 != 9){
+				// tenho direito
+			}
+		}else if(i > (movie.getWidth()*3-1) && !(i < (num_pixels - movie.getWidth()*3))){
+			//tenho parte de cima e de baixo
+			if(i % (int) movie.getWidth()-3 != 0 && ((i % (int) movie.getWidth()*3)+3 != 9)){
+
+				// tenho esquerdo e direito
+			}else if(i % (int) movie.getWidth()-3 != 0 && !((i % (int) movie.getWidth()*3)+3 != 9)){
+				// tenho esquerdo
+			}else if(!(i % (int) movie.getWidth()-3 != 0) && (i % (int) movie.getWidth()*3)+3 != 9){
+				// tenho direito
+			}
+		}
+
+
+
 	// calculate luminance for each rbg pixel
 	for (i = 0; i < num_pixels; i+=3){
 		float  red, green, blue, hue;
 		red = pixels[i];
 		green = pixels[i+1];
 		blue = pixels[i+2];
-
 		mean_luminance += 0.2125*red + 0.7154*green + 0.0721*blue;
 		hue = aux.calcColor(red, green, blue);
 		/*if(i % 1000 == 0)
