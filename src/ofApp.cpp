@@ -190,6 +190,8 @@ void ofApp::draw(){
 		ofDrawBitmapString("speed: " + ofToString(movie.getSpeed(),2),275,390);
 		ofDrawBitmapString("luminance: " + ofToString(mean_luminance), 275, 410);
 		ofDrawBitmapString("caras: " + ofToString(nr_people), 275, 430);
+		ofDrawBitmapString("contrast: " + ofToString(contrastVal), 275, 450);
+		
 		//ofDrawBitmapString("caras: " + ofToString(nr_people), 275, 430);
 		//paramos o video para que
 		if(redraw_frame_flag) {
@@ -527,7 +529,7 @@ void ofApp::setFrames(){
 	*/
 	//conversao to HSV
 
-	float hue_total, saturation, value_max, value_min, contrast; 
+	float hue_total, saturation, value_max, value_min; 
 	hue_total = 0;
 	value_max = -1;
 	value_min = 100;
@@ -538,20 +540,13 @@ void ofApp::setFrames(){
 	aux.setWidth((int) movie.getWidth());
 	aux.setNrPixels(num_pixels);
 
-	for(int i = 0; i < num_pixels; i+=3) {
-		float red, green, blue;
-		red = pixels[i];
-		green = pixels[i+1];
-		red = pixels[i+2];
 	// calculate luminance for each rbg pixel
 	for (i = 0; i < num_pixels; i+=3){
 		float  red, green, blue, hue;
 		red = pixels[i];
 		green = pixels[i+1];
 		blue = pixels[i+2];
-
-		contrast += aux.calculateContrast(i);
-
+		contrastVal += aux.calculateContrast(i);
 		mean_luminance += 0.2125*red + 0.7154*green + 0.0721*blue;
 		hue = aux.calcColor(red, green, blue);
 
@@ -559,6 +554,7 @@ void ofApp::setFrames(){
 	}
 	hue_total /= num_pixels;
 	mean_luminance /= (i/3);
+	contrastVal /= (i/3);
 	
 	cout << movie.getCurrentFrame() << ": Total de hue" << hue_total << "\n";
 
@@ -588,5 +584,6 @@ void ofApp::setFrames(){
 			frames.push_back(movie.getCurrentFrame());			
 		}
 	}
+
 }
 

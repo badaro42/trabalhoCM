@@ -94,6 +94,7 @@ class ofApp : public ofBaseApp {
 		int contador_de_frames;
 		vector<int> frames; 
 		int mean_luminance; 
+		float contrastVal;
 		int nr_people;
 		int nr_edges;
 };
