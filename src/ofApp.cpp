@@ -359,7 +359,7 @@ void ofApp::setGUI1()
 	radio_options2.push_back("On");
 	ofxUIRadio *radio2  = gui1->addRadio("Edges", radio_options2, OFX_UI_ORIENTATION_VERTICAL);
 	radio2->activateToggle(radio_options2[0]);
-	radio_button_position2 = 0; 
+	radio_button_position2 = OFF; 
     
     gui1->addSpacer();
 
@@ -594,6 +594,11 @@ void ofApp::setFrames(){
 			contador_de_frames++;
 			frames.push_back(movie.getCurrentFrame());			
 		}
+	}
+	if(radio_button_position2 == ON){
+		//aplicar filter
+		const int arr_size = 9;
+		int edges[arr_size] = {-1,-1,-1,-1,8,-1,-1,-1,-1};
 	}
 
 }
