@@ -290,6 +290,10 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 		radio_button_position = BELOW;
 	}else if (name == "Neighborhood"){
 		radio_button_position = RANGE;
+	}else if(name == "On"){
+		radio_button_position2 = ON;
+	}else if(name == "Off"){
+		radio_button_position2 = OFF;
 	}
 }
 
@@ -351,8 +355,12 @@ void ofApp::setGUI1()
 	gui1->addSlider("Luminance", 0.0, 255.0, &luminance)->setTriggerType(OFX_UI_TRIGGER_ALL);
 	gui1->addSlider("Contrast", 0.0, 100.0, &contrast)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
 	gui1->addSlider("People", 0.0, 50.0, &number_of_people)->setIncrement(1);
-    gui1->addSlider("Edges", 0.0, 50.0, &number_of_edges)->setIncrement(1);
-
+	radio_options2.push_back("Off");
+	radio_options2.push_back("On");
+	ofxUIRadio *radio2  = gui1->addRadio("Edges", radio_options2, OFX_UI_ORIENTATION_VERTICAL);
+	radio2->activateToggle(radio_options2[0]);
+	radio_button_position2 = 0; 
+    
     gui1->addSpacer();
 
     /*gui1->addLabel("RANGE SLIDER");

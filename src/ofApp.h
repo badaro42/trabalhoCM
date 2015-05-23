@@ -19,6 +19,9 @@ class ofApp : public ofBaseApp {
 		static const int BELOW = 1;
 		static const int RANGE = 2;
 
+		static const int ON = 0;
+		static const int OFF = 1;
+
 		static const std::string RANGE_SLIDER_NAME;
 
 		void setup();
@@ -51,6 +54,7 @@ class ofApp : public ofBaseApp {
 		bool hideGUI;
 		float red, green, blue, luminance, contrast, number_of_people, dominant_color, number_of_edges;
 		vector<string> radio_options;
+		vector<string> radio_options2;
 
 		//cenas da barra de range do video
 		float range_minimum_percentage;
@@ -87,6 +91,7 @@ class ofApp : public ofBaseApp {
 		bool load_video;
 		bool entered_exited_fullscreen;
 		int radio_button_position; 
+		int radio_button_position2; 
 		float calcSelectedColor();
 
 		int current_img;
