@@ -349,7 +349,7 @@ void ofApp::setGUI1()
 	gui1->addSpacer();
 	gui1->addLabel("Filter Criteria:");
 	gui1->addSlider("Luminance", 0.0, 255.0, &luminance)->setTriggerType(OFX_UI_TRIGGER_ALL);
-	gui1->addSlider("Contrast", 0.0, 255.0, &contrast)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
+	gui1->addSlider("Contrast", 0.0, 100.0, &contrast)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
 	gui1->addSlider("People", 0.0, 50.0, &number_of_people)->setIncrement(1);
     gui1->addSlider("Edges", 0.0, 50.0, &number_of_edges)->setIncrement(1);
 
@@ -562,7 +562,8 @@ void ofApp::setFrames(){
 	{
 		if(mean_luminance >= luminance 
 			&& nr_people >= number_of_people
-			&& selected_color >= hue_total){
+			&& selected_color >= hue_total
+			&& contrastVal >= contrast){
 				contador_de_frames++;
 				frames.push_back(movie.getCurrentFrame());
 		}
@@ -571,7 +572,8 @@ void ofApp::setFrames(){
 	{
 		if(mean_luminance <= luminance 
 			&& nr_people <= number_of_people
-			&& selected_color <= hue_total){
+			&& selected_color <= hue_total
+			&& contrastVal <= contrast){
 			contador_de_frames++;
 			frames.push_back(movie.getCurrentFrame());			
 		}
@@ -579,7 +581,8 @@ void ofApp::setFrames(){
 	else{
 		if((mean_luminance >= luminance-10 || mean_luminance <= luminance+10) 
 			&& (nr_people <= number_of_people-5 || nr_people <= number_of_people+5)
-			&& (selected_color >= hue_total-10 || selected_color <= hue_total+10)){
+			&& (selected_color >= hue_total-10 || selected_color <= hue_total+10)
+			&& (contrastVal >= contrast-10 || contrastVal <= contrast+10)){
 			contador_de_frames++;
 			frames.push_back(movie.getCurrentFrame());			
 		}

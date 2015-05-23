@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include "ofxUI.h"
+#include <math.h>
 
 class Auxiliar
 {
@@ -16,7 +17,7 @@ public:
 	void setWidth(int width);
 	void setNrPixels(int nr_pixels);
 	float calcColor(float green, float red, float blue);
-	float calculateContrast(int i); 
+	double calculateContrast(int i); 
 };
 
 #endif

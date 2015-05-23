@@ -42,19 +42,19 @@ void Auxiliar::setNrPixels(int nr_pixels){
 	num_pixels = nr_pixels;
 }
 
-float Auxiliar::calculateContrast(int i){
+double Auxiliar::calculateContrast(int i){
 
-	float red_topo_esquerdo, blue_topo_esquerdo, green_topo_esquerdo;
-	float red_topo_direito, blue_topo_direito, green_topo_direito;
-	float red_topo, blue_topo, green_topo;
-	float red_esquerdo, blue_esquerdo, green_esquerdo;
-	float red_direito, blue_direito, green_direito;
-	float red_baixo_esquerdo, blue_baixo_esquerdo, green_baixo_esquerdo;
-	float red_baixo_direito, blue_baixo_direito, green_baixo_direito;
-	float red_baixo, blue_baixo, green_baixo;
-	float red, blue, green;
-	float mean_luminance_pixel;
-	float mean_luminance_adjances;
+	double red_topo_esquerdo, blue_topo_esquerdo, green_topo_esquerdo;
+	double red_topo_direito, blue_topo_direito, green_topo_direito;
+	double red_topo, blue_topo, green_topo;
+	double red_esquerdo, blue_esquerdo, green_esquerdo;
+	double red_direito, blue_direito, green_direito;
+	double red_baixo_esquerdo, blue_baixo_esquerdo, green_baixo_esquerdo;
+	double red_baixo_direito, blue_baixo_direito, green_baixo_direito;
+	double red_baixo, blue_baixo, green_baixo;
+	double red, blue, green;
+	double mean_luminance_pixel;
+	double mean_luminance_adjances;
 
 	red = pixels[i];
 	green = pixels[i+1];
@@ -107,7 +107,7 @@ float Auxiliar::calculateContrast(int i){
 				+ 0.2125*red_esquerdo + 0.7154*green_esquerdo + 0.0721*blue_esquerdo
 				)/8;
 
-			return (mean_luminance_pixel-mean_luminance_adjances)/mean_luminance_adjances; 
+			return (abs(mean_luminance_pixel-mean_luminance_adjances))/abs(mean_luminance_adjances); 
 
 		}else if(i % (int) width-3 != 0 && !((i % (int) width*3)+3 != 9)){
 			// tenho esquerdo
@@ -129,7 +129,7 @@ float Auxiliar::calculateContrast(int i){
 				+ 0.2125*red_baixo_esquerdo + 0.7154*green_baixo_esquerdo + 0.0721*blue_baixo_esquerdo
 				+ 0.2125*red_esquerdo + 0.7154*green_esquerdo + 0.0721*blue_esquerdo)/5;
 
-			return (mean_luminance_pixel-mean_luminance_adjances)/mean_luminance_adjances; 
+			return (abs(mean_luminance_pixel-mean_luminance_adjances))/abs(mean_luminance_adjances); 
 
 		}else if(!(i % (int) width-3 != 0) && (i % (int) width*3)+3 != 9){
 			// tenho direito
@@ -151,7 +151,7 @@ float Auxiliar::calculateContrast(int i){
 				+ 0.2125*red_baixo_esquerdo + 0.7154*green_baixo_esquerdo + 0.0721*blue_baixo_esquerdo
 				+ 0.2125*red_direito + 0.7154*green_direito + 0.0721*blue_direito)/5;
 
-			return (mean_luminance_pixel-mean_luminance_adjances)/mean_luminance_adjances; 
+			return (abs(mean_luminance_pixel-mean_luminance_adjances))/abs(mean_luminance_adjances); 
 		}
 	}else if(!(i > (width*3-1)) && i < (num_pixels - width*3)){
 		//tenho parte de  baixo
@@ -186,7 +186,7 @@ float Auxiliar::calculateContrast(int i){
 				+ 0.2125*red_esquerdo + 0.7154*green_esquerdo + 0.0721*blue_esquerdo
 				)/5;
 
-			return (mean_luminance_pixel-mean_luminance_adjances)/mean_luminance_adjances; 
+			return (abs(mean_luminance_pixel-mean_luminance_adjances))/abs(mean_luminance_adjances);  
 
 		}else if(i % (int) width-3 != 0 && !((i % (int) width*3)+3 != 9)){
 			// tenho esquerdo
@@ -206,7 +206,7 @@ float Auxiliar::calculateContrast(int i){
 				+ 0.2125*red_baixo_esquerdo + 0.7154*green_baixo_esquerdo + 0.0721*blue_baixo_esquerdo
 				+ 0.2125*red_esquerdo + 0.7154*green_esquerdo + 0.0721*blue_esquerdo)/3;
 
-			return (mean_luminance_pixel-mean_luminance_adjances)/mean_luminance_adjances; 
+			return (abs(mean_luminance_pixel-mean_luminance_adjances))/abs(mean_luminance_adjances); 
 
 		}else if(!(i % (int) width-3 != 0) && (i % (int) width*3)+3 != 9){
 			// tenho direito
@@ -226,7 +226,7 @@ float Auxiliar::calculateContrast(int i){
 				+ 0.2125*red_baixo_direito + 0.7154*green_baixo_direito + 0.0721*blue_baixo_direito
 				+ 0.2125*red_direito + 0.7154*green_direito + 0.0721*blue_direito)/3;
 
-			return (mean_luminance_pixel-mean_luminance_adjances)/mean_luminance_adjances; 
+			return (abs(mean_luminance_pixel-mean_luminance_adjances))/abs(mean_luminance_adjances); 
 		}
 	}else if(i > (width*3-1) && !(i < (num_pixels - width*3))){
 		//tenho parte de cima 
@@ -260,7 +260,7 @@ float Auxiliar::calculateContrast(int i){
 				+ 0.2125*red_esquerdo + 0.7154*green_esquerdo + 0.0721*blue_esquerdo
 				)/5;
 
-			return (mean_luminance_pixel-mean_luminance_adjances)/mean_luminance_adjances; 
+			return (abs(mean_luminance_pixel-mean_luminance_adjances))/abs(mean_luminance_adjances); 
 
 		}else if(i % (int) width-3 != 0 && !((i % (int) width*3)+3 != 9)){
 			// tenho esquerdo
@@ -277,7 +277,7 @@ float Auxiliar::calculateContrast(int i){
 				+ 0.2125*red_esquerdo + 0.7154*green_esquerdo + 0.0721*blue_esquerdo
 				)/3;
 
-			return (mean_luminance_pixel-mean_luminance_adjances)/mean_luminance_adjances; 
+			return (abs(mean_luminance_pixel-mean_luminance_adjances))/abs(mean_luminance_adjances); 
 
 		}else if(!(i % (int) width-3 != 0) && (i % (int) width*3)+3 != 9){
 			// tenho direito
@@ -292,7 +292,8 @@ float Auxiliar::calculateContrast(int i){
 			mean_luminance_adjances = (0.2125*red_topo + 0.7154*green_topo + 0.0721*blue_topo
 				+ 0.2125*red_topo_esquerdo + 0.7154*green_topo_esquerdo + 0.0721*blue_topo_esquerdo
 				+ 0.2125*red_direito + 0.7154*green_direito + 0.0721*blue_direito)/3;
-			return (mean_luminance_pixel-mean_luminance_adjances)/mean_luminance_adjances; 
+
+			return (abs(mean_luminance_pixel-mean_luminance_adjances))/abs(mean_luminance_adjances); 
 		}
 	}
 	return 0;
