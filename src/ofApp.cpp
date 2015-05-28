@@ -517,24 +517,23 @@ void ofApp::setFrames(){
 	movie.getCurrentFrame();
 
 	unsigned char * pixels = movie.getPixels();
-	int i;
+	int i = 0;
 	int num_pixels = movie.getWidth()*movie.getHeight();
 
-	/* nao acrescentou nada de novo
-	
+	/* a testar, falta mudar for
+	*/
 	ofImage image;
 	image.setFromPixels(movie.getPixels(), movie.getWidth(), movie.getHeight(), OF_IMAGE_GRAYSCALE, true);
 
 	unsigned char * pixels2 = image.getPixels();
-	int nr_pixels_2 = image.getHeight()*image.getWidth();
-
-		for(int i = 0; i < movie.getHeight(); i++){
-		for(int j = 0; i < movie.getWidth(); j++){
-			float  red, green, blue;
-			 red = pixels[i];
-		}
+	aux.setPixels(pixels2);
+	aux.setWidth((int) movie.getWidth());
+	aux.setNrPixels(num_pixels);
+	for(i = 0; i < movie.getHeight()*movie.getWidth(); i++) {
+			contrastVal += aux.calculateContrast2(i);
 	}
-	*/
+	
+	contrastVal /= i; 
 	//conversao to HSV
 
 	float hue_total, saturation, value_max, value_min; 
@@ -543,10 +542,9 @@ void ofApp::setFrames(){
 	value_min = 100;
 
 	// calculo de contraste
-
-	aux.setPixels(pixels);
+	/*aux.setPixels(pixels);
 	aux.setWidth((int) movie.getWidth());
-	aux.setNrPixels(num_pixels);
+	aux.setNrPixels(num_pixels);*/
 
 	// calculate luminance for each rbg pixel
 	for (i = 0; i < num_pixels; i+=3){

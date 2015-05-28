@@ -18,6 +18,7 @@ public:
 	void setNrPixels(int nr_pixels);
 	float calcColor(float green, float red, float blue);
 	double calculateContrast(int i); 
+	double calculateContrast2(int i); 
 };
 
 #endif
