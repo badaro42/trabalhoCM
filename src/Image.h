@@ -20,9 +20,10 @@ public:
 	int getWidth();
 	int getHeight();
 	double getPixel(int x, int y);
+	int getEdges(int i, int j);
 
 	float calcColor(float green, float red, float blue);
-	double calculateContrast(int x, int y, int count); 
+	double calculateContrast(int x, int y); 
 };
 
 #endif

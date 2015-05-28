@@ -63,7 +63,7 @@ double Image::getPixel(int i, int j) {
 }
 
 
-double Image::calculateContrast(int i, int j, int count){
+double Image::calculateContrast(int i, int j){
 	double topo_esquerdo = getPixel(i-1,j-1);
 	double topo_direito = getPixel(i-1,j+1);
 	double topo = getPixel(i-1,j);
@@ -83,100 +83,23 @@ double Image::calculateContrast(int i, int j, int count){
 	}
 
 	return (std::abs(middle_pixel-mean_luminance_adjacentes))/std::abs(mean_luminance_adjacentes); 
+}
 
-	/*if(count > (width-1) && i < (size - width)){
-		//tenho parte de cima e de baixo
-		baixo = pixels[i+width];
-		topo = pixels[i-width];
+int Image::getEdges(int i, int j){
+	const int arr_size = 9;
+	int edges[arr_size] = {-1,-1,-1,-1,8,-1,-1,-1,-1};
 
-		if(i % width-1 != 0 && ((i % width) != 3)){
-			// tenho esquerdo e direito
-			topo_esquerdo = pixels[i-width-1];
-			baixo_esquerdo = pixels[i+width-1];
-			esquerdo = pixels[i-1];
-			direito = pixels[i+1];
-			topo_direito = pixels[i-1*width+1];
-			baixo_direito = pixels[i+1*width+1];
+	double topo_esquerdo = getPixel(i-1,j-1);
+	double topo_direito = getPixel(i-1,j+1);
+	double topo = getPixel(i-1,j);
+	double esquerdo = getPixel(i,j-1);
+	double direito = getPixel(i,j+1);
+	double baixo_esquerdo = getPixel(i+1,j-1);
+	double baixo_direito = getPixel(i+1,j+1);
+	double baixo = getPixel(i+1,j);
+	double middle_pixel = getPixel(i,j);
 
-			mean_luminance_adjances = (baixo + topo + topo_esquerdo + baixo_esquerdo + esquerdo + direito + topo_direito + baixo_direito)/8;
-
-			return (std::abs(intensity-mean_luminance_adjances))/std::abs(mean_luminance_adjances); 
-
-		}else if(i % width-1 != 0 && !((i % width) != 3)){
-			// tenho esquerdo
-			topo_esquerdo = pixels[i-width-1];
-			baixo_esquerdo = pixels[i+width-1];
-			esquerdo = pixels[i-1];
-
-			mean_luminance_adjances = (baixo + topo + topo_esquerdo + baixo_esquerdo + esquerdo)/5;
-
-			return (std::abs(intensity-mean_luminance_adjances))/std::abs(mean_luminance_adjances); 
-
-		}else if(!(i % (int) width-1 != 0) && (i % (int) width)+1 != 3){
-			// tenho direito
-			topo_direito = pixels[i-width+1];
-			baixo_direito = pixels[i+width+1];
-			direito = pixels[i+1];
-
-			mean_luminance_adjances = (baixo + topo + direito + topo_direito + baixo_direito)/5;
-			return (std::abs(intensity-mean_luminance_adjances))/std::abs(mean_luminance_adjances); 
-		}
-	}else if(!(i > (width*-1)) && i < (num_pixels - width)){
-		//tenho parte de  baixo
-		baixo = pixels[i+width-1];
-
-		if(i % (int) width-1 != 0 && ((i % (int) width) != 3)){
-			// tenho esquerdo e direito
-			baixo_esquerdo = pixels[i+width-1];
-			esquerdo = pixels[i-1];
-			direito = pixels[i+1];
-			baixo_direito = pixels[i+width+1];
-			mean_luminance_adjances = (baixo + baixo_esquerdo + esquerdo + direito + baixo_direito)/5;
-			return (std::abs(intensity-mean_luminance_adjances))/std::abs(mean_luminance_adjances); 
-
-		}else if(i % (int) width-1 != 0 && !((i % (int) width) != 3)){
-			// tenho esquerdo
-			baixo_esquerdo = pixels[i+width-1];
-			esquerdo = pixels[i-1];
-			mean_luminance_adjances = (baixo + baixo_esquerdo + esquerdo)/3;
-			return (std::abs(intensity-mean_luminance_adjances))/std::abs(mean_luminance_adjances); 
-
-		}else if(!(i % (int) width-1 != 0) && (i % (int) width) != 3){
-			// tenho direito
-			baixo_direito = pixels[i+width+1];
-			direito = pixels[i+1];
-			mean_luminance_adjances = (baixo + baixo_direito + direito)/3;
-			return (std::abs(intensity-mean_luminance_adjances))/std::abs(mean_luminance_adjances); 
-		}
-	}else if(i > (width-1) && !(i < (num_pixels - width))){
-		//tenho parte de cima 
-		topo = pixels[i-width];
-
-		if(i % (int) width-1 != 0 && ((i % (int) width) != 3)){
-			// tenho esquerdo e direito
-			topo_esquerdo = pixels[i-width];
-			esquerdo = pixels[i-1];
-			direito = pixels[i+1];	
-			topo_direito = pixels[i-width+1];
-
-			mean_luminance_adjances = (topo + topo_esquerdo + esquerdo + topo_direito + direito)/5;
-			return (std::abs(intensity-mean_luminance_adjances))/std::abs(mean_luminance_adjances); 
-
-		}else if(i % (int) width-1 != 0 && !((i % (int) width) != 3)){
-			// tenho esquerdo
-			topo_esquerdo = pixels[i-width-1];
-			esquerdo = pixels[i-1];
-			mean_luminance_adjances = (topo + topo_esquerdo + esquerdo)/3;
-			return (std::abs(intensity-mean_luminance_adjances))/std::abs(mean_luminance_adjances); 
-
-		}else if(!(i % (int) width-1 != 0) && (i % (int) width) != 3){
-			// tenho direito
-			topo_direito = pixels[i-width+1];
-			direito = pixels[i+1];
-			mean_luminance_adjances = (topo + topo_direito + direito)/3;
-			return (std::abs(intensity-mean_luminance_adjances))/std::abs(mean_luminance_adjances); 
-		}
-	}
-	return 0;*/
+	return (topo_esquerdo*edges[0]+topo*edges[1]+topo_direito*edges[2]+esquerdo*edges[3]+middle_pixel*edges[4]
+	+ direito*edges[5] + baixo_esquerdo*edges[6] + baixo*edges[7] + baixo_direito*edges[8]);
 
 }

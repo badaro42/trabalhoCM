@@ -529,10 +529,15 @@ void ofApp::setFrames(){
 
 	contrastVal = 0;
 	int count = 0;
+	unsigned char* pixelsAux = pixels;
 	for(i = 0; i < movie.getHeight(); i++) {
 		for(j = 0; j < movie.getWidth(); j++) {
-			contrastVal += img.calculateContrast(i, j, count);
-			count++;
+			contrastVal += img.calculateContrast(i, j);
+			if(radio_button_position2 == ON){
+				//aplicar filter
+				pixelsAux[count] = img.getEdges(i, j); 
+				count++;
+			}
 		}
 	}
 	
@@ -544,11 +549,6 @@ void ofApp::setFrames(){
 	value_max = -1;
 	value_min = 100;
 
-	// calculo de contraste
-	/*aux.setPixels(pixels);
-	aux.setWidth((int) movie.getWidth());
-	aux.setNrPixels(num_pixels);*/
-
 	// calculate luminance for each rbg pixel
 	for (i = 0; i < num_pixels; i+=3){
 		float  red, green, blue, hue;
@@ -558,7 +558,6 @@ void ofApp::setFrames(){
 		//contrastVal += aux.calculateContrast(i);
 		mean_luminance += 0.2125*red + 0.7154*green + 0.0721*blue;
 		hue = img.calcColor(red, green, blue);
-
 		hue_total += hue; 
 	}
 	hue_total /= num_pixels;
@@ -567,7 +566,7 @@ void ofApp::setFrames(){
 	
 	cout << movie.getCurrentFrame() << ": Total de hue" << hue_total << "\n";
 
-	/*if(radio_button_position == ABOVE) 
+	if(radio_button_position == ABOVE) 
 	{
 		if(mean_luminance >= luminance 
 			&& nr_people >= number_of_people
@@ -596,11 +595,5 @@ void ofApp::setFrames(){
 			frames.push_back(movie.getCurrentFrame());			
 		}
 	}
-	if(radio_button_position2 == ON){
-		//aplicar filter
-		const int arr_size = 9;
-		int edges[arr_size] = {-1,-1,-1,-1,8,-1,-1,-1,-1};
-	}
-	*/
 }
 
