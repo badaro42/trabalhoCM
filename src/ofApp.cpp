@@ -9,6 +9,7 @@ const std::string ofApp::RANGE_SLIDER_NAME = "MTIME";
 //--------------------------------------------------------------
 void ofApp::setup(){
 
+	contrastVal = 0;
 	video_playing = false;
 	isFullScreen = false;
 
@@ -524,7 +525,6 @@ void ofApp::setFrames(){
 	*/
 	ofImage image;
 	image.setFromPixels(movie.getPixels(), movie.getWidth(), movie.getHeight(), OF_IMAGE_GRAYSCALE, true);
-
 	unsigned char * pixels2 = image.getPixels();
 	aux.setPixels(pixels2);
 	aux.setWidth((int) movie.getWidth());
@@ -552,7 +552,7 @@ void ofApp::setFrames(){
 		red = pixels[i];
 		green = pixels[i+1];
 		blue = pixels[i+2];
-		contrastVal += aux.calculateContrast(i);
+		//contrastVal += aux.calculateContrast(i);
 		mean_luminance += 0.2125*red + 0.7154*green + 0.0721*blue;
 		hue = aux.calcColor(red, green, blue);
 
@@ -560,11 +560,11 @@ void ofApp::setFrames(){
 	}
 	hue_total /= num_pixels;
 	mean_luminance /= (i/3);
-	contrastVal /= (i/3);
+	//contrastVal /= (i/3);
 	
 	cout << movie.getCurrentFrame() << ": Total de hue" << hue_total << "\n";
 
-	if(radio_button_position == ABOVE) 
+	/*if(radio_button_position == ABOVE) 
 	{
 		if(mean_luminance >= luminance 
 			&& nr_people >= number_of_people
@@ -598,6 +598,6 @@ void ofApp::setFrames(){
 		const int arr_size = 9;
 		int edges[arr_size] = {-1,-1,-1,-1,8,-1,-1,-1,-1};
 	}
-
+	*/
 }
 

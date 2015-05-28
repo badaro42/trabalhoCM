@@ -306,7 +306,7 @@ double Auxiliar::calculateContrast2(int i){
 
 	intensity = pixels[i];
 
-	if(i > (width*-1) && i < (num_pixels - width)){
+	if(i > (width-1) && i < (num_pixels - width)){
 		//tenho parte de cima e de baixo
 		baixo = pixels[i+width];
 		topo = pixels[i-width];
