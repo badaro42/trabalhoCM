@@ -5,7 +5,7 @@
 #include "ofxSwipeable.h"
 #include "ofxCvHaarFinder.h"
 #include <stdio.h>
-#include "Auxiliar.h"
+#include "Image.h"
 
 class ofApp : public ofBaseApp {
 

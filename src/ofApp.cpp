@@ -505,9 +505,6 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 void ofApp::setFrames(){
 
-	Auxiliar aux;
-	float selected_color = aux.calcColor(red, green, blue);
-
 	/* calculo do numero de pessoas na frame, ta a por a cena bue lenta*/
 	if(movie.getCurrentFrame() % 10 == 0) {
 		ofxCvHaarFinder haarFinder; 
@@ -519,21 +516,27 @@ void ofApp::setFrames(){
 
 	unsigned char * pixels = movie.getPixels();
 	int i = 0;
+	int j = 0;
 	int num_pixels = movie.getWidth()*movie.getHeight();
 
 	/* a testar, falta mudar for
 	*/
 	ofImage image;
 	image.setFromPixels(movie.getPixels(), movie.getWidth(), movie.getHeight(), OF_IMAGE_GRAYSCALE, true);
-	unsigned char * pixels2 = image.getPixels();
-	aux.setPixels(pixels2);
-	aux.setWidth((int) movie.getWidth());
-	aux.setNrPixels(num_pixels);
-	for(i = 0; i < movie.getHeight()*movie.getWidth(); i++) {
-			contrastVal += aux.calculateContrast2(i);
+	Image img = Image(image.getPixels(), movie.getWidth(), movie.getHeight());
+
+	float selected_color = img.calcColor(red, green, blue);
+
+	contrastVal = 0;
+	int count = 0;
+	for(i = 0; i < movie.getHeight(); i++) {
+		for(j = 0; j < movie.getWidth(); j++) {
+			contrastVal += img.calculateContrast(i, j, count);
+			count++;
+		}
 	}
 	
-	contrastVal /= i; 
+	contrastVal /= i*j; 
 	//conversao to HSV
 
 	float hue_total, saturation, value_max, value_min; 
@@ -554,7 +557,7 @@ void ofApp::setFrames(){
 		blue = pixels[i+2];
 		//contrastVal += aux.calculateContrast(i);
 		mean_luminance += 0.2125*red + 0.7154*green + 0.0721*blue;
-		hue = aux.calcColor(red, green, blue);
+		hue = img.calcColor(red, green, blue);
 
 		hue_total += hue; 
 	}
