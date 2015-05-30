@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ofxOpenCv.h"
+#include <opencv2/opencv.hpp>
 #include "ofMain.h"
 #include "ofxUI.h"
 #include "ofxSwipeable.h"
@@ -19,8 +21,10 @@ class ofApp : public ofBaseApp {
 		static const int BELOW = 1;
 		static const int RANGE = 2;
 
-		static const int ON = 0;
-		static const int OFF = 1;
+		static const int NONE = 0;
+		static const int ANY = 1;
+		static const int VERTICAL = 2;
+		static const int HORIZONTAL = 3;
 
 		static const std::string RANGE_SLIDER_NAME;
 
@@ -102,4 +106,9 @@ class ofApp : public ofBaseApp {
 		double contrastVal;
 		int nr_people;
 		int nr_edges;
+
+		string path; 
+		bool findObject;
+		bool hasObject; 
+		double match_object;
 };

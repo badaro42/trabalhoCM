@@ -85,9 +85,25 @@ double Image::calculateContrast(int i, int j){
 	return (std::abs(middle_pixel-mean_luminance_adjacentes))/std::abs(mean_luminance_adjacentes); 
 }
 
-int Image::getEdges(int i, int j){
-	const int arr_size = 9;
-	int edges[arr_size] = {-1,-1,-1,-1,8,-1,-1,-1,-1};
+std::vector<int> Image::getVector(int type) {
+	if(type == 1) {
+		static const int vec[] = {-1,-1,-1,-1,8,-1,-1,-1,-1};
+		std::vector<int> v(vec, vec+sizeof(vec)/sizeof(vec[0]));
+		return v;
+	}else if(type == 2){
+		static const int vec[] = {-1,0,1,-1,0,1,-1,0,1};
+		std::vector<int> v(vec, vec+sizeof(vec)/sizeof(vec[0]));
+		return v;
+	}else if(type == 3){
+		static const int vec[] = {-1,-1,-1,0,0,0,1,1,1};
+		std::vector<int> v(vec, vec+sizeof(vec)/sizeof(vec[0]));
+		return v;
+	}
+}
+
+int Image::getEdges(int i, int j, int type){
+
+	std::vector<int> edges = getVector(type);
 
 	double topo_esquerdo = getPixel(i-1,j-1);
 	double topo_direito = getPixel(i-1,j+1);
@@ -101,5 +117,43 @@ int Image::getEdges(int i, int j){
 
 	return (topo_esquerdo*edges[0]+topo*edges[1]+topo_direito*edges[2]+esquerdo*edges[3]+middle_pixel*edges[4]
 	+ direito*edges[5] + baixo_esquerdo*edges[6] + baixo*edges[7] + baixo_direito*edges[8]);
-
 }
+
+void Image::setobj(string path){
+	obj = ofImage(path);
+	obj.setFromPixels(obj.getPixels(), obj.getWidth(), obj.getHeight(), OF_IMAGE_GRAYSCALE, true);
+}
+
+ofImage Image::getObj(){
+	return obj;
+}
+
+int Image::match(ofImage img){
+
+	cv::SurfFeatureDetector detector(400);
+	vector<cv::KeyPoint> keypoints1, keypoints2;
+	cv::Mat img1(getHeight(), getWidth(), CV_8UC3, pixels);
+	cv::Mat img2(obj.getHeight(), obj.getWidth(), CV_8UC3, obj.getPixels());
+
+	detector.detect(img1, keypoints1);
+	detector.detect(img2, keypoints2);
+
+	cv::SurfDescriptorExtractor extractor;
+	cv::Mat descriptors1;
+	cv::Mat descriptors2;
+	extractor.compute(img1, keypoints1, descriptors1);
+	extractor.compute(img2, keypoints2, descriptors2);
+
+	cv::BruteForceMatcher<cv::L2<float>> matcher;
+	vector<cv::DMatch> matches;
+	matcher.match(descriptors1, descriptors2, matches);
+	return matches.size();
+	//return 0;
+}
+
+	
+
+
+
+
+

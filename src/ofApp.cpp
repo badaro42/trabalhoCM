@@ -9,9 +9,12 @@ const std::string ofApp::RANGE_SLIDER_NAME = "MTIME";
 //--------------------------------------------------------------
 void ofApp::setup(){
 
+	findObject = false;
+	hasObject = false;
 	contrastVal = 0;
 	video_playing = false;
 	isFullScreen = false;
+	match_object = 0;
 
 	choose_video_and_range_screen = true;
 	play_video_screen = false;
@@ -81,15 +84,13 @@ void ofApp::setup(){
 	range_maximum_percentage = 0.75;
 
     time = 0;
-
-	current_img = 0;
-	
+	match_object = 0;
+	current_img = 0;	
     red = 200; 
 	blue = 200; 
 	green = 200;
 	luminance = 0; 
 	contrast = 0;
-
     hideGUI = false;
 
 	ofSetVerticalSync(true);
@@ -291,10 +292,27 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 		radio_button_position = BELOW;
 	}else if (name == "Neighborhood"){
 		radio_button_position = RANGE;
-	}else if(name == "On"){
-		radio_button_position2 = ON;
-	}else if(name == "Off"){
-		radio_button_position2 = OFF;
+	}else if(name == "Vertical"){
+		radio_button_position2 = VERTICAL;
+	}else if(name == "Any Direction"){
+		radio_button_position2 = ANY;
+	}else if(name == "None"){
+		radio_button_position2 = NONE;
+	}else if(name == "Horizontal"){
+		radio_button_position2 = HORIZONTAL;
+	}else if(name == "Open Object"){
+		ofFileDialogResult openFileResult = ofSystemLoadDialog("Select a jpg or png"); 
+		//Check if the user opened a file
+		if (openFileResult.bSuccess){
+		ofLogVerbose("User selected a file");
+			path = openFileResult.getPath();
+			findObject = true; 
+		}else {
+			ofLogVerbose("User hit cancel");
+		}
+	}else if(name == "Object"){
+		int levels = int(e.getSlider()->getScaledValue());
+		e.getSlider()->setValue( levels );
 	}
 }
 
@@ -335,7 +353,6 @@ void ofApp::setGUI1()
 	gui1->addSlider("Red", 0.0, 255.0, &red)->setTriggerType(OFX_UI_TRIGGER_ALL);
 	gui1->addSlider("Green", 0.0, 255.0, &green)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
 	gui1->addSlider("Blue", 0.0, 255.0, &blue)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE);
-
 	
     /*gui1->addSpacer();
     gui1->setWidgetFontSize(OFX_UI_FONT_SMALL);
@@ -356,13 +373,17 @@ void ofApp::setGUI1()
 	gui1->addSlider("Luminance", 0.0, 255.0, &luminance)->setTriggerType(OFX_UI_TRIGGER_ALL);
 	gui1->addSlider("Contrast", 0.0, 100.0, &contrast)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
 	gui1->addSlider("People", 0.0, 50.0, &number_of_people)->setIncrement(1);
-	radio_options2.push_back("Off");
-	radio_options2.push_back("On");
+	radio_options2.push_back("None");
+	radio_options2.push_back("Vertical");
+	radio_options2.push_back("Horizontal");
+	radio_options2.push_back("Any Direction");
 	ofxUIRadio *radio2  = gui1->addRadio("Edges", radio_options2, OFX_UI_ORIENTATION_VERTICAL);
 	radio2->activateToggle(radio_options2[0]);
-	radio_button_position2 = OFF; 
-    
+	radio_button_position2 = NONE;     
     gui1->addSpacer();
+	gui1->addLabel("Object Finder:");
+	gui1->addButton("Open Object", false);
+	gui1->addSlider("Objects", 0.0, 10.0, &number_of_people)->setIncrement(1);
 
     /*gui1->addLabel("RANGE SLIDER");
 	gui1->addRangeSlider("RSLIDER", 0.0, 255.0, 50.0, 100.0);
@@ -477,7 +498,6 @@ void ofApp::mousePressed(int x, int y, int button){
 		movie.setFrame(int(range_minimum_percentage*movie.getTotalNumFrames()));
 		redraw_frame_flag = true;
 		video_playing = false;
-
 		cout << "botao de STOP HUEHUHE!!! min_frame: " << int(range_minimum_percentage*movie.getTotalNumFrames()) << "\n";
 	}
 
@@ -519,28 +539,25 @@ void ofApp::setFrames(){
 	int j = 0;
 	int num_pixels = movie.getWidth()*movie.getHeight();
 
-	/* a testar, falta mudar for
-	*/
 	ofImage image;
 	image.setFromPixels(movie.getPixels(), movie.getWidth(), movie.getHeight(), OF_IMAGE_GRAYSCALE, true);
-	Image img = Image(image.getPixels(), movie.getWidth(), movie.getHeight());
+	Image img = Image(image.getPixels(), image.getWidth(), image.getHeight());
 
 	float selected_color = img.calcColor(red, green, blue);
 
 	contrastVal = 0;
 	int count = 0;
+	
 	unsigned char* pixelsAux = pixels;
 	for(i = 0; i < movie.getHeight(); i++) {
 		for(j = 0; j < movie.getWidth(); j++) {
 			contrastVal += img.calculateContrast(i, j);
-			if(radio_button_position2 == ON){
-				//aplicar filter
-				pixelsAux[count] = img.getEdges(i, j); 
+			if(radio_button_position2 != NONE){
+				pixelsAux[count] = img.getEdges(i, j, radio_button_position2); 
 				count++;
 			}
 		}
 	}
-	
 	contrastVal /= i*j; 
 	//conversao to HSV
 
@@ -555,14 +572,12 @@ void ofApp::setFrames(){
 		red = pixels[i];
 		green = pixels[i+1];
 		blue = pixels[i+2];
-		//contrastVal += aux.calculateContrast(i);
 		mean_luminance += 0.2125*red + 0.7154*green + 0.0721*blue;
 		hue = img.calcColor(red, green, blue);
 		hue_total += hue; 
 	}
 	hue_total /= num_pixels;
 	mean_luminance /= (i/3);
-	//contrastVal /= (i/3);
 	
 	cout << movie.getCurrentFrame() << ": Total de hue" << hue_total << "\n";
 
@@ -572,8 +587,16 @@ void ofApp::setFrames(){
 			&& nr_people >= number_of_people
 			&& selected_color >= hue_total
 			&& contrastVal >= contrast){
+			if(findObject){
+				int matches = img.match(path);
+				if(matches >= match_object){
+					contador_de_frames++;
+					frames.push_back(movie.getCurrentFrame());
+				}
+			}else {
 				contador_de_frames++;
 				frames.push_back(movie.getCurrentFrame());
+			}
 		}
 	}
 	else if(radio_button_position == BELOW)  
@@ -582,8 +605,16 @@ void ofApp::setFrames(){
 			&& nr_people <= number_of_people
 			&& selected_color <= hue_total
 			&& contrastVal <= contrast){
-			contador_de_frames++;
-			frames.push_back(movie.getCurrentFrame());			
+			if(findObject){
+				int matches = img.match(path);
+				if(matches <= match_object){
+					contador_de_frames++;
+					frames.push_back(movie.getCurrentFrame());
+				}
+			}else {
+				contador_de_frames++;
+				frames.push_back(movie.getCurrentFrame());
+			}		
 		}
 	}
 	else{
@@ -591,8 +622,16 @@ void ofApp::setFrames(){
 			&& (nr_people <= number_of_people-5 || nr_people <= number_of_people+5)
 			&& (selected_color >= hue_total-10 || selected_color <= hue_total+10)
 			&& (contrastVal >= contrast-10 || contrastVal <= contrast+10)){
-			contador_de_frames++;
-			frames.push_back(movie.getCurrentFrame());			
+			if(findObject){
+				int matches = img.match(path);
+				if(matches >= match_object-10 || matches <= match_object+10){
+					contador_de_frames++;
+					frames.push_back(movie.getCurrentFrame());
+				}
+			}else {
+				contador_de_frames++;
+				frames.push_back(movie.getCurrentFrame());
+			}			
 		}
 	}
 }
