@@ -133,14 +133,13 @@ int Image::match(ofImage img){
 	cv::SurfFeatureDetector detector(400);
 	vector<cv::KeyPoint> keypoints1, keypoints2;
 	cv::Mat img1(getHeight(), getWidth(), CV_8UC3, pixels);
-	cv::Mat img2(obj.getHeight(), obj.getWidth(), CV_8UC3, obj.getPixels());
+	cv::Mat img2(img.getHeight(), img.getWidth(), CV_8UC3, img.getPixels());
 
 	detector.detect(img1, keypoints1);
 	detector.detect(img2, keypoints2);
 
 	cv::SurfDescriptorExtractor extractor;
-	cv::Mat descriptors1;
-	cv::Mat descriptors2;
+	cv::Mat descriptors1, descriptors2;
 	extractor.compute(img1, keypoints1, descriptors1);
 	extractor.compute(img2, keypoints2, descriptors2);
 
