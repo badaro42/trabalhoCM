@@ -18,6 +18,7 @@ private:
 	int width;  
 	int size;
 	ofImage obj;
+	int nr_edges;
 
 public:
 	Image(unsigned char * pix, int t_width, int t_height);	
@@ -29,13 +30,14 @@ public:
 	int getWidth();
 	int getHeight();
 	double getPixel(int x, int y);
-	int getEdges(int i, int j, int type);
+	int applyFilter(int i, int j, int type);
 	std::vector<int> getVector(int type);
 	float calcColor(float green, float red, float blue);
 	double calculateContrast(int x, int y); 
 	void setobj(string path);
 	ofImage getObj();
 	int match(ofImage img); 
+	int getEdges(int i, int j);
 };
 
 #endif

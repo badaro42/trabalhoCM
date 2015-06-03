@@ -194,6 +194,7 @@ void ofApp::draw(){
 		ofDrawBitmapString("caras: " + ofToString(nr_people), 275, 430);
 		ofDrawBitmapString("contrast: " + ofToString(contrastVal), 275, 450);
 		ofDrawBitmapString("objects: "  + ofToString(match_object), 275, 470);
+		ofDrawBitmapString("edges: " + ofToString(nr_edges), 275, 490);
 		
 		//ofDrawBitmapString("caras: " + ofToString(nr_people), 275, 430);
 		//paramos o video para que
@@ -554,16 +555,22 @@ void ofApp::setFrames(){
 	contrastVal = 0;
 	int count = 0;
 	
+	
+
+	
 	unsigned char* pixelsAux = pixels;
 	for(i = 0; i < movie.getHeight(); i++) {
 		for(j = 0; j < movie.getWidth(); j++) {
 			contrastVal += img.calculateContrast(i, j);
+			nr_edges += img.getEdges(i, j);
+			/* possivelmente será apagado*/
 			if(radio_button_position2 != NONE){
-				pixelsAux[count] = img.getEdges(i, j, radio_button_position2); 
+				pixelsAux[count] = img.applyFilter(i, j, radio_button_position2); 
 				count++;
 			}
 		}
 	}
+	nr_edges /= i*j;
 	contrastVal /= i*j; 
 	//conversao to HSV
 

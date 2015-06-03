@@ -78,6 +78,7 @@ double Image::calculateContrast(int i, int j){
 	mean_luminance_adjacentes = 
 		(baixo + topo + topo_esquerdo + baixo_esquerdo + 
 		esquerdo + direito + topo_direito + baixo_direito)/8;
+
 	if(mean_luminance_adjacentes >= 0 && mean_luminance_adjacentes < 1){
 		return mean_luminance_adjacentes;
 	}
@@ -101,7 +102,7 @@ std::vector<int> Image::getVector(int type) {
 	}
 }
 
-int Image::getEdges(int i, int j, int type){
+int Image::applyFilter(int i, int j, int type){
 
 	std::vector<int> edges = getVector(type);
 
@@ -150,6 +151,14 @@ int Image::match(ofImage img){
 	//return 0;
 }
 
+int Image::getEdges(int i, int j){
+	double pixel = getPixel(i,j);
+	//zero ou proximo
+	if(pixel >= 240)
+		return 1;
+	else 
+		return 0;
+}
 	
 
 
