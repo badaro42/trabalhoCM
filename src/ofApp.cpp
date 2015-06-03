@@ -193,6 +193,7 @@ void ofApp::draw(){
 		ofDrawBitmapString("luminance: " + ofToString(mean_luminance), 275, 410);
 		ofDrawBitmapString("caras: " + ofToString(nr_people), 275, 430);
 		ofDrawBitmapString("contrast: " + ofToString(contrastVal), 275, 450);
+		ofDrawBitmapString("objects: "  + ofToString(match_object), 275, 470);
 		
 		//ofDrawBitmapString("caras: " + ofToString(nr_people), 275, 430);
 		//paramos o video para que
@@ -313,6 +314,9 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 	}else if(name == "Object"){
 		int levels = int(e.getSlider()->getScaledValue());
 		e.getSlider()->setValue( levels );
+	}else if(name == "Edges"){
+		int levels = int(e.getSlider()->getScaledValue());
+		e.getSlider()->setValue( levels );
 	}
 }
 
@@ -373,6 +377,7 @@ void ofApp::setGUI1()
 	gui1->addSlider("Luminance", 0.0, 255.0, &luminance)->setTriggerType(OFX_UI_TRIGGER_ALL);
 	gui1->addSlider("Contrast", 0.0, 100.0, &contrast)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
 	gui1->addSlider("People", 0.0, 50.0, &number_of_people)->setIncrement(1);
+	gui1->addSlider("Edges", 0.0, 100.0, &number_of_edges)->setIncrement(1);
 	radio_options2.push_back("None");
 	radio_options2.push_back("Vertical");
 	radio_options2.push_back("Horizontal");
@@ -383,7 +388,7 @@ void ofApp::setGUI1()
     gui1->addSpacer();
 	gui1->addLabel("Object Finder:");
 	gui1->addButton("Open Object", false);
-	gui1->addSlider("Objects", 0.0, 10.0, &number_of_people)->setIncrement(1);
+	gui1->addSlider("Objects", 0.0, 10.0, &number_of_objects)->setIncrement(1);
 
     /*gui1->addLabel("RANGE SLIDER");
 	gui1->addRangeSlider("RSLIDER", 0.0, 255.0, 50.0, 100.0);
@@ -525,6 +530,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 void ofApp::setFrames(){
 
+	match_object = 0;
 	/* calculo do numero de pessoas na frame, ta a por a cena bue lenta*/
 	if(movie.getCurrentFrame() % 10 == 0) {
 		ofxCvHaarFinder haarFinder; 
@@ -581,22 +587,20 @@ void ofApp::setFrames(){
 	
 	cout << movie.getCurrentFrame() << ": Total de hue" << hue_total << "\n";
 
+	if(findObject){
+		match_object = img.match(path);
+		cout << "matching: " << match_object << "\n";
+	}
+
 	if(radio_button_position == ABOVE) 
 	{
 		if(mean_luminance >= luminance 
 			&& nr_people >= number_of_people
 			&& selected_color >= hue_total
-			&& contrastVal >= contrast){
-			if(findObject){
-				int matches = img.match(path);
-				if(matches >= match_object){
-					contador_de_frames++;
-					frames.push_back(movie.getCurrentFrame());
-				}
-			}else {
+			&& contrastVal >= contrast
+			&& (match_object >= number_of_objects && findObject)){
 				contador_de_frames++;
 				frames.push_back(movie.getCurrentFrame());
-			}
 		}
 	}
 	else if(radio_button_position == BELOW)  
@@ -604,34 +608,19 @@ void ofApp::setFrames(){
 		if(mean_luminance <= luminance 
 			&& nr_people <= number_of_people
 			&& selected_color <= hue_total
-			&& contrastVal <= contrast){
-			if(findObject){
-				int matches = img.match(path);
-				if(matches <= match_object){
-					contador_de_frames++;
-					frames.push_back(movie.getCurrentFrame());
-				}
-			}else {
+			&& contrastVal <= contrast
+			&& (match_object <= number_of_objects && findObject)){
 				contador_de_frames++;
 				frames.push_back(movie.getCurrentFrame());
 			}		
-		}
-	}
-	else{
+	}else{
 		if((mean_luminance >= luminance-10 || mean_luminance <= luminance+10) 
 			&& (nr_people <= number_of_people-5 || nr_people <= number_of_people+5)
 			&& (selected_color >= hue_total-10 || selected_color <= hue_total+10)
-			&& (contrastVal >= contrast-10 || contrastVal <= contrast+10)){
-			if(findObject){
-				int matches = img.match(path);
-				if(matches >= match_object-10 || matches <= match_object+10){
-					contador_de_frames++;
-					frames.push_back(movie.getCurrentFrame());
-				}
-			}else {
+			&& (contrastVal >= contrast-10 || contrastVal <= contrast+10)
+			&& (match_object >= number_of_objects-10 || match_object <= number_of_objects+10 && findObject)){
 				contador_de_frames++;
-				frames.push_back(movie.getCurrentFrame());
-			}			
+				frames.push_back(movie.getCurrentFrame());		
 		}
 	}
 }

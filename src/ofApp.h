@@ -56,7 +56,7 @@ class ofApp : public ofBaseApp {
 		ofxUISuperCanvas *gui1;
 		ofxUISuperCanvas *gui2;
 		bool hideGUI;
-		float red, green, blue, luminance, contrast, number_of_people, dominant_color, number_of_edges;
+		float red, green, blue, luminance, contrast, number_of_people, dominant_color, number_of_edges, number_of_objects;
 		vector<string> radio_options;
 		vector<string> radio_options2;
 
@@ -110,5 +110,5 @@ class ofApp : public ofBaseApp {
 		string path; 
 		bool findObject;
 		bool hasObject; 
-		double match_object;
+		int match_object;
 };
