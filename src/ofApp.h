@@ -105,7 +105,7 @@ class ofApp : public ofBaseApp {
 		int mean_luminance; 
 		double contrastVal;
 		int nr_people;
-		int nr_edges;
+		double nr_edges;
 
 		string path; 
 		bool findObject;

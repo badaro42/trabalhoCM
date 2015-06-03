@@ -152,12 +152,10 @@ int Image::match(ofImage img){
 }
 
 int Image::getEdges(int i, int j){
-	double pixel = getPixel(i,j);
 	//zero ou proximo
-	if(pixel >= 240)
+	if(getPixel(i,j) >= 240)
 		return 1;
-	else 
-		return 0;
+	return 0;
 }
 	
 

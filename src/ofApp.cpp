@@ -531,6 +531,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 void ofApp::setFrames(){
 
+	nr_edges = 0;
 	match_object = 0;
 	/* calculo do numero de pessoas na frame, ta a por a cena bue lenta*/
 	if(movie.getCurrentFrame() % 10 == 0) {
@@ -571,6 +572,7 @@ void ofApp::setFrames(){
 		}
 	}
 	nr_edges /= i*j;
+	nr_edges *= 100;
 	contrastVal /= i*j; 
 	//conversao to HSV
 
