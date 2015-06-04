@@ -620,6 +620,8 @@ void ofApp::setFrames(){
 	float value_max = -1;
 	float value_min = 100;
 
+	double gabor_stuff = 0.0;
+
 	unsigned char * pixels = movie.getPixels();
 
 	//DUAS IMAGENS IGUAIS, UMA A CORES OUTRA A P/B
@@ -655,10 +657,14 @@ void ofApp::setFrames(){
 
 			if(radio_button_position2 != NONE){
 				nr_edges += img.getEdges(i, j, radio_button_position2);
-				count++;
+				count++; //TODO: QUÉSTA MERDA!!!?????
 			}
 		}
 	}
+
+	//TODO: A CENA DO GABOR ESTÁ A DAR VALORES ENTRE 0.39 E 0.42!!!!!!
+	//gabor_stuff = img.calculateTexture();
+	cout << "GABOR: " << gabor_stuff << "\n";
 
 	//normalização dos dados :)
 	nr_edges /= i*j;

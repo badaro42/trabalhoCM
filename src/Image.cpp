@@ -114,8 +114,8 @@ int Image::match(ofImage img){
 	cv::BruteForceMatcher<cv::L2<float>> matcher;
 	vector<cv::DMatch> matches;
 	matcher.match(descriptors1, descriptors2, matches);
+
 	return matches.size();
-	//return 0;
 }
 
 //************************** EDGES EDGES EDGES ***********************************
