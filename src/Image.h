@@ -38,7 +38,7 @@ public:
 	void setobj(string path);
 	ofImage getObj();
 	int match(ofImage img); 
-	int getEdges(int i, int j);
+	int getEdges(int i, int j, int type);
 	double Image::calculateTexture();
 };
 

@@ -102,6 +102,9 @@ double Image::calculateContrast(int i, int j){
 	return (std::abs(middle_pixel-mean_luminance_adjacentes))/std::abs(mean_luminance_adjacentes); 
 }
 
+//type == 1: EDGES TODAS AS DIREÇOES;
+//type == 2: EDGES VERTICAIS;
+//type == 3: EDGES HORIZONTAIS;
 std::vector<int> Image::getVector(int type) {
 	if(type == 1) {
 		static const int vec[] = {-1,-1,-1,-1,8,-1,-1,-1,-1};
@@ -169,9 +172,11 @@ int Image::match(ofImage img){
 	//return 0;
 }
 
-int Image::getEdges(int i, int j){
+int Image::getEdges(int i, int j, int type){
+	int val = applyFilter(i, j, type);
+
 	//zero ou proximo
-	if(getPixel(i,j) >= 240)
+	if(val >= 240)
 		return 1;
 	return 0;
 }

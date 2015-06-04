@@ -577,10 +577,8 @@ void ofApp::setFrames(){
 	for(i = 0; i < movie.getHeight(); i++) {
 		for(j = 0; j < movie.getWidth(); j++) {
 			contrastVal += img.calculateContrast(i, j);
-			nr_edges += img.getEdges(i, j);
-			/* possivelmente será apagado*/
 			if(radio_button_position2 != NONE){
-				pixelsAux[count] = img.applyFilter(i, j, radio_button_position2); 
+				nr_edges += img.getEdges(i, j, radio_button_position2);
 				count++;
 			}
 		}
