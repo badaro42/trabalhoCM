@@ -237,6 +237,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 {
 	string name = e.getName();
 	int kind = e.getKind();
+	cout << kind << "\n";
 	cout << "got event from: " << name << endl;
 
     if(kind == OFX_UI_WIDGET_NUMBERDIALER)
@@ -298,35 +299,35 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 		int levels = int(e.getSlider()->getScaledValue());
 		e.getSlider()->setValue( levels );
 	}else if(name == "Above")
-	{
 		radio_button_position = ABOVE;
-	}else if(name == "Below")
-	{
+	else if(name == "Below")
 		radio_button_position = BELOW;
-	}else if (name == "Neighborhood"){
+	else if (name == "Neighborhood")
 		radio_button_position = RANGE;
-	}else if(name == "Vertical"){
+	else if(name == "Vertical")
 		radio_button_position2 = VERTICAL;
-	}else if(name == "Any Direction"){
+	else if(name == "Any Direction")
 		radio_button_position2 = ANY;
-	}else if(name == "None"){
+	else if(name == "None")
 		radio_button_position2 = NONE;
-	}else if(name == "Horizontal"){
+	else if(name == "Horizontal")
 		radio_button_position2 = HORIZONTAL;
-	}else if(name == "Open Object"){
+	else if(name == "Open Object" && e.getButton()->getValue() == 0) {
+		cout << "MERDA DOS OBJETOS" << "\n";
 		ofFileDialogResult openFileResult = ofSystemLoadDialog("Select a jpg or png"); 
 		//Check if the user opened a file
 		if (openFileResult.bSuccess){
-		ofLogVerbose("User selected a file");
+			ofLogVerbose("User selected a file");
 			path = openFileResult.getPath();
 			findObject = true; 
-		}else {
+		}else 
 			ofLogVerbose("User hit cancel");
-		}
-	}else if(name == "Object"){
+	}
+	else if(name == "Object"){
 		int levels = int(e.getSlider()->getScaledValue());
 		e.getSlider()->setValue( levels );
-	}else if(name == "Edges"){
+	}
+	else if(name == "Edges"){
 		int levels = int(e.getSlider()->getScaledValue());
 		e.getSlider()->setValue( levels );
 	}
@@ -343,11 +344,11 @@ void ofApp::exit()
 void ofApp::keyPressed(int key){
 	switch (key)
 	{            
-		case 'f':
+		/*case 'f':
 			ofToggleFullscreen();
 			isFullScreen = !isFullScreen;
 			entered_exited_fullscreen = true;
-			break;
+			break;*/
             
 		case 'h':
             gui1->toggleVisible();
