@@ -103,6 +103,12 @@ void ofApp::setup(){
 //UPDATE E' CHAMADO ANTES DO DRAW!!!!
 void ofApp::update(){	
 
+	int w = ofGetWidth();			  
+	int h = ofGetHeight();  
+
+	if(w != 1024 || h != 720) 
+		ofSetWindowShape(1024, 720);
+
 	//detecta quando o user muda o video que quer reproduzir!
 	if(current_img != img_swipe.getCurrent()) {
 		cout << "OLHA, DESTA FORMA PARECE QUE DA HIHI - " << current_img << "\n";
@@ -215,6 +221,11 @@ void ofApp::draw(){
 
 	//linhas para indicar a area onde é possivel fazer swipe com o rato
 	//DESACTIVAR ANTES DA ENTREGA!!!
+	/*ofLine(ofGetWidth()*0.4, ofGetHeight()*0.17, ofGetWidth()*0.4, ofGetHeight()*0.6); //vertical esquerda
+	ofLine(ofGetWidth()*0.9, ofGetHeight()*0.17, ofGetWidth()*0.9, ofGetHeight()*0.6); //vertical direita
+	ofLine(ofGetWidth()*0.38, ofGetHeight()*0.2, ofGetWidth()*0.92, ofGetHeight()*0.2);	//horizontal cima
+	ofLine(ofGetWidth()*0.38, ofGetHeight()*0.57, ofGetWidth()*0.92, ofGetHeight()*0.57); //horizontal baixo*/
+
 	ofLine(ofGetWidth()*0.4, ofGetHeight()*0.17, ofGetWidth()*0.4, ofGetHeight()*0.6); //vertical esquerda
 	ofLine(ofGetWidth()*0.9, ofGetHeight()*0.17, ofGetWidth()*0.9, ofGetHeight()*0.6); //vertical direita
 	ofLine(ofGetWidth()*0.38, ofGetHeight()*0.2, ofGetWidth()*0.92, ofGetHeight()*0.2);	//horizontal cima
@@ -547,9 +558,12 @@ void ofApp::setFrames(){
 	int j = 0;
 	int num_pixels = movie.getWidth()*movie.getHeight();
 
-	ofImage image;
-	image.setFromPixels(movie.getPixels(), movie.getWidth(), movie.getHeight(), OF_IMAGE_GRAYSCALE, true);
-	Image img = Image(image.getPixels(), image.getWidth(), image.getHeight());
+	//DUAS IMAGENS IGUAIS, UMA A CORES OUTRA A P/B
+	ofImage image_colorful;
+	ofImage image_grayscale;
+	image_grayscale.setFromPixels(movie.getPixels(), movie.getWidth(), movie.getHeight(), OF_IMAGE_GRAYSCALE, true);
+	image_colorful.setFromPixels(movie.getPixels(), movie.getWidth(), movie.getHeight(), OF_IMAGE_COLOR, true);
+	Image img = Image(image_colorful.getPixels(), image_grayscale.getPixels(), image_colorful.getWidth(), image_colorful.getHeight());
 
 	float selected_color = img.calcColor(red, green, blue);
 

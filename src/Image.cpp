@@ -1,8 +1,21 @@
 #include "Image.h"
 
-Image::Image(unsigned char * pix, int t_width, int t_height)
+#include <stdio.h>
+#include <tchar.h>
+#include <limits>
+ 
+// OpenCV
+#include "cv.h"
+#include "highgui.h"
+ 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
+
+Image::Image(unsigned char * pix_color, unsigned char * pix_gray, int t_width, int t_height)
 {
-	pixels = pix;
+	pixels_color = pix_color;
+	pixels_gray = pix_gray;
 	width = t_width;
 	height = t_height;
 	size = t_width*t_height;
@@ -30,6 +43,7 @@ float Image::calcColor(float green, float red, float blue){
 	else
 		hue_temp = ((red - green) / (delta + 1e-20f)) + 4;
 	hue = hue_temp * 60;
+
 	return hue;
 }
 
@@ -50,16 +64,18 @@ int Image::getWidth() {
 }
 
 double Image::getPixel(int i, int j) {
+	if(i < 0 && j < 0) //o primeiro pixel!
+		return pixels_gray[0];
 	if(j < 0) // nao temos esquerdo
-		return pixels[i*width];
+		return pixels_gray[i*width];
 	else if(j > width-1) // nao temos direito
-		return pixels[((i+1)*width)-1];
+		return pixels_gray[((i+1)*width)-1];
 	else if(i < 0) // nao temos topo
-		return pixels[j];
+		return pixels_gray[j];
 	else if(i > height-1) // nao temos baixo
-		return pixels[((height-1)*width)+j];
+		return pixels_gray[((height-1)*width)+j];
 	else
-		return pixels[(i*width)+j];
+		return pixels_gray[(i*width)+j];
 }
 
 
@@ -91,11 +107,13 @@ std::vector<int> Image::getVector(int type) {
 		static const int vec[] = {-1,-1,-1,-1,8,-1,-1,-1,-1};
 		std::vector<int> v(vec, vec+sizeof(vec)/sizeof(vec[0]));
 		return v;
-	}else if(type == 2){
+	}
+	else if(type == 2){
 		static const int vec[] = {-1,0,1,-1,0,1,-1,0,1};
 		std::vector<int> v(vec, vec+sizeof(vec)/sizeof(vec[0]));
 		return v;
-	}else if(type == 3){
+	}
+	else if(type == 3){
 		static const int vec[] = {-1,-1,-1,0,0,0,1,1,1};
 		std::vector<int> v(vec, vec+sizeof(vec)/sizeof(vec[0]));
 		return v;
@@ -116,7 +134,7 @@ int Image::applyFilter(int i, int j, int type){
 	double baixo = getPixel(i+1,j);
 	double middle_pixel = getPixel(i,j);
 
-	return (topo_esquerdo*edges[0]+topo*edges[1]+topo_direito*edges[2]+esquerdo*edges[3]+middle_pixel*edges[4]
+	return (topo_esquerdo*edges[0] + topo*edges[1] + topo_direito*edges[2] + esquerdo*edges[3] + middle_pixel*edges[4]
 	+ direito*edges[5] + baixo_esquerdo*edges[6] + baixo*edges[7] + baixo_direito*edges[8]);
 }
 
@@ -133,7 +151,7 @@ int Image::match(ofImage img){
 
 	cv::SurfFeatureDetector detector(400);
 	vector<cv::KeyPoint> keypoints1, keypoints2;
-	cv::Mat img1(getHeight(), getWidth(), CV_8UC3, pixels);
+	cv::Mat img1(getHeight(), getWidth(), CV_8UC3, pixels_gray);
 	cv::Mat img2(img.getHeight(), img.getWidth(), CV_8UC3, img.getPixels());
 
 	detector.detect(img1, keypoints1);
@@ -161,5 +179,73 @@ int Image::getEdges(int i, int j){
 
 
 
+ 
+ 
+//************************** GABOR GABOR GABOR ***********************************
 
+cv::Mat mkKernel(int kernel_size, double sigma, double theta, double lambda, double psi) {
+    int half_ks = (kernel_size-1)/2;
+    double theta_aux = theta*CV_PI/180;
+    double psi_aux = psi*CV_PI/180;
+    double delta = 2.0/(kernel_size-1);
+    double lambda_aux = lambda;
+    double sigma_aux = sigma/kernel_size;
+    double x_theta;
+    double y_theta;
 
+    cv::Mat kernel(kernel_size, kernel_size, CV_32F);
+
+    for (int y=-half_ks; y<=half_ks; y++)
+    {
+        for (int x=-half_ks; x<=half_ks; x++)
+        {
+            x_theta = x*delta*cos(theta_aux)+y*delta*sin(theta_aux);
+            y_theta = -x*delta*sin(theta_aux)+y*delta*cos(theta_aux);
+            kernel.at<float>(half_ks+y, half_ks+x) = 
+				(float)exp(-0.5*(pow(x_theta,2)+pow(y_theta,2))/pow(sigma_aux,2)) * cos(2*CV_PI*x_theta/lambda_aux + psi_aux);
+        }
+    }
+    return kernel;
+}
+ 
+double Image::calculateTexture(){
+    
+    int kernel_size=21;
+    int pos_lm = 50;
+    double sig = 5;
+    double lm = 0.5+pos_lm/100.0;
+    double ps = 90;
+    
+    double th = 0;
+    
+	cv::Mat dest(getHeight(), getWidth(), CV_8UC1, pixels_gray);
+	cv::Mat src(getHeight(), getWidth(), CV_8UC3, pixels_color);
+
+    double num = 0;
+    double num_total = 0;
+    for(; th <= 135; th += 45){
+        cv::Mat kernel = mkKernel(kernel_size, sig, th, lm, ps);
+        cv::filter2D(dest, src, CV_32F, kernel);
+        
+        ofImage imageOut = ofImage();
+        imageOut.setFromPixels((unsigned char *) IplImage(src).imageData, src.size().width, src.size().height, OF_IMAGE_GRAYSCALE);
+        
+        // contar numero de pixels acima de threshold - 240
+        int x = 0, width = imageOut.width, heigth = imageOut.height, y;
+        unsigned char* pixels = imageOut.getPixels();
+        num = 0;
+        for (; x < width; x++){
+            y = 0;
+            for(; y < heigth; y++){
+                
+                if(pixels[(y*width+x)] >= 240)
+                    num++;
+            }
+        }
+        num = num/(width*height);
+        num_total += num;
+    }
+    
+    // 4 imagens geradas
+    return num_total/4;
+}

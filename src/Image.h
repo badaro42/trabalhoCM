@@ -13,7 +13,8 @@
 class Image
 {
 private:
-	unsigned char * pixels;
+	unsigned char * pixels_color;
+	unsigned char * pixels_gray;
 	int height;
 	int width;  
 	int size;
@@ -21,7 +22,7 @@ private:
 	int nr_edges;
 
 public:
-	Image(unsigned char * pix, int t_width, int t_height);	
+	Image(unsigned char * pix_color, unsigned char * pix_gray, int t_width, int t_height);	
 	void setPixels(unsigned char * p);
 	void setWidth(int width);
 	void setHeight(int height);
@@ -38,6 +39,7 @@ public:
 	ofImage getObj();
 	int match(ofImage img); 
 	int getEdges(int i, int j);
+	double Image::calculateTexture();
 };
 
 #endif
