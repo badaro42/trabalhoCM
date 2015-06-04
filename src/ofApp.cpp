@@ -9,12 +9,18 @@ const std::string ofApp::RANGE_SLIDER_NAME = "MTIME";
 //--------------------------------------------------------------
 void ofApp::setup(){
 
+	resetValues();
+
+	dominant_color_enabled = false;
+	luminance_enabled = false;
+	contrast_enabled = false;
+	people_enabled = false;
+
 	findObject = false;
 	hasObject = false;
-	contrastVal = 0;
+	
 	video_playing = false;
 	isFullScreen = false;
-	match_object = 0;
 
 	choose_video_and_range_screen = true;
 	play_video_screen = false;
@@ -24,10 +30,6 @@ void ofApp::setup(){
 	entered_exited_fullscreen = false;
 	load_range_gui = true;
 	redraw_frame_flag = false;
-
-	contador_de_frames = 0;
-	mean_luminance = 0;
-	nr_people = 0;
 
 	ofDirectory dir;
 	ofVideoPlayer temp_video;
@@ -140,9 +142,20 @@ void ofApp::update(){
 	img_swipe.update(dt);
 }
 
+void ofApp::resetValues() {
+	contrastVal = 0;
+	contador_de_frames = 0;
+	mean_luminance = 0;
+	nr_people = 0;
+	nr_edges = 0;
+	match_object = 0;
+	hue_total = 0;
+}
+
 //--------------------------------------------------------------
 void ofApp::draw(){
-    ofBackground(red, green, blue, 255);
+	if(!dominant_color_enabled)
+		ofBackground(red, green, blue, 255);
 
 	//estamos no primeiro ecra, para escolher video e definir o range 
 	if(choose_video_and_range_screen) {
@@ -201,6 +214,7 @@ void ofApp::draw(){
 		ofDrawBitmapString("contrast: " + ofToString(contrastVal), 275, 450);
 		ofDrawBitmapString("objects: "  + ofToString(match_object), 275, 470);
 		ofDrawBitmapString("edges: " + ofToString(nr_edges), 275, 490);
+		ofDrawBitmapString("hue_total: " + ofToString(hue_total), 275, 510);
 		
 		//ofDrawBitmapString("caras: " + ofToString(nr_people), 275, 430);
 		//paramos o video para que
@@ -298,7 +312,8 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 	{
 		int levels = int(e.getSlider()->getScaledValue());
 		e.getSlider()->setValue( levels );
-	}else if(name == "Above")
+	}
+	else if(name == "Above")
 		radio_button_position = ABOVE;
 	else if(name == "Below")
 		radio_button_position = BELOW;
@@ -323,13 +338,41 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 		}else 
 			ofLogVerbose("User hit cancel");
 	}
-	else if(name == "Object"){
+	else if(name == "# of Objects"){
 		int levels = int(e.getSlider()->getScaledValue());
 		e.getSlider()->setValue( levels );
 	}
 	else if(name == "Edges"){
 		int levels = int(e.getSlider()->getScaledValue());
 		e.getSlider()->setValue( levels );
+	}
+	else if(name == "Luminance filter") {
+		int val = e.getToggle()->getValue();
+		if(val == 1)
+			luminance_enabled = true;
+		else
+			luminance_enabled = false;
+	}
+	else if(name == "Contrast filter") {
+		int val = e.getToggle()->getValue();
+		if(val == 1)
+			contrast_enabled = true;
+		else
+			contrast_enabled = false;
+	}
+	else if(name == "People filter") {
+		int val = e.getToggle()->getValue();
+		if(val == 1)
+			people_enabled = true;
+		else
+			people_enabled = false;
+	}
+	else if(name == "Dominant color filter") {
+		int val = e.getToggle()->getValue();
+		if(val == 1)
+			dominant_color_enabled = true;
+		else
+			dominant_color_enabled = false;
 	}
 }
 
@@ -361,55 +404,76 @@ void ofApp::keyPressed(int key){
 
 void ofApp::setGUI1()
 {	
-	gui1 = new ofxUISuperCanvas("CONTROLS", 5, 5, 250, 1500);
-    gui1->addSpacer();
-    gui1->addLabel("Press 'h' to hide interface", OFX_UI_FONT_SMALL);
-    
-    gui1->addSpacer();
-	gui1->addLabel("Edit Background Color:");
-	gui1->addSlider("Red", 0.0, 255.0, &red)->setTriggerType(OFX_UI_TRIGGER_ALL);
-	gui1->addSlider("Green", 0.0, 255.0, &green)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
-	gui1->addSlider("Blue", 0.0, 255.0, &blue)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE);
-	
-    /*gui1->addSpacer();
-    gui1->setWidgetFontSize(OFX_UI_FONT_SMALL);
-	gui1->addButton("BUTTON", false);
-	gui1->addToggle("TOGGLE", false);*/
-    
 	radio_options.push_back("Above");
 	radio_options.push_back("Below");
 	radio_options.push_back("Neighborhood");
 
-	gui1->addSpacer();
-	ofxUIRadio *radio  = gui1->addRadio("Radio Button", radio_options, OFX_UI_ORIENTATION_VERTICAL);
-	radio->activateToggle(radio_options[0]);
-	radio_button_position = 0;
-
-	gui1->addSpacer();
-	gui1->addLabel("Filter Criteria:");
-	gui1->addSlider("Luminance", 0.0, 255.0, &luminance)->setTriggerType(OFX_UI_TRIGGER_ALL);
-	gui1->addSlider("Contrast", 0.0, 100.0, &contrast)->setTriggerType(OFX_UI_TRIGGER_BEGIN|OFX_UI_TRIGGER_CHANGE|OFX_UI_TRIGGER_END);
-	gui1->addSlider("People", 0.0, 50.0, &number_of_people)->setIncrement(1);
-	gui1->addSlider("Edges", 0.0, 100.0, &number_of_edges)->setIncrement(1);
 	radio_options2.push_back("None");
 	radio_options2.push_back("Vertical");
 	radio_options2.push_back("Horizontal");
-	radio_options2.push_back("Any Direction");
-	ofxUIRadio *radio2  = gui1->addRadio("Edges", radio_options2, OFX_UI_ORIENTATION_VERTICAL);
-	radio2->activateToggle(radio_options2[0]);
-	radio_button_position2 = NONE;     
-    gui1->addSpacer();
-	gui1->addLabel("Object Finder:");
-	gui1->addButton("Open Object", false);
-	gui1->addSlider("Objects", 0.0, 10.0, &number_of_objects)->setIncrement(1);
+	radio_options2.push_back("All");
 
-    /*gui1->addLabel("RANGE SLIDER");
-	gui1->addRangeSlider("RSLIDER", 0.0, 255.0, 50.0, 100.0);
+	gui1 = new ofxUISuperCanvas("CONTROLS", 5, 5, 250, 1500);
+    gui1->addLabel("Press 'h' to hide interface", OFX_UI_FONT_SMALL);
     
-    string textString = "This widget is a text area widget. Use this when you need to display a paragraph of text. It takes care of formatting the text to fit the block.";
     gui1->addSpacer();
-    
-    gui1->addTextArea("textarea", textString, OFX_UI_FONT_SMALL);*/
+	gui1->addSpacer();
+
+	string textString = "Choose the ranger to be considered when apllying the filters.";    
+    gui1->addTextArea("textarea", textString, OFX_UI_FONT_SMALL);
+
+	ofxUIRadio *radio  = gui1->addRadio("Radio Button", radio_options, OFX_UI_ORIENTATION_HORIZONTAL);
+	radio->activateToggle(radio_options[0]);
+	radio_button_position = 0;
+	gui1->addSpacer();
+
+	//gui1->addLabel("Filter by dominant color");
+	gui1->addToggle("Dominant color filter", false);
+	gui1->addSlider("Red", 0.0, 255.0, &red)->setTriggerType(OFX_UI_TRIGGER_CHANGE);
+	gui1->addSlider("Green", 0.0, 255.0, &green)->setTriggerType(OFX_UI_TRIGGER_CHANGE);
+	gui1->addSlider("Blue", 0.0, 255.0, &blue)->setTriggerType(OFX_UI_TRIGGER_CHANGE);
+
+	gui1->addSpacer();
+	gui1->addToggle("Luminance filter", false);
+	ofxUISlider *slider1 = gui1->addSlider("Luminance", 0.0, 100.0, &luminance);
+	slider1->setTriggerType(OFX_UI_TRIGGER_ALL);
+	
+	gui1->addSpacer();
+	gui1->addToggle("Contrast filter", false);
+	ofxUISlider *slider2 = gui1->addSlider("Contrast", 0.0, 100.0, &contrast);
+	slider2->setTriggerType(OFX_UI_TRIGGER_ALL);
+	
+	gui1->addSpacer();
+	gui1->addToggle("People filter", false);
+	ofxUISlider *slider3 = gui1->addSlider("People", 0.0, 50.0, &number_of_people);
+	slider3->setTriggerType(OFX_UI_TRIGGER_ALL);
+
+	gui1->addSpacer();
+	ofxUIRadio *radio2  = gui1->addRadio("Edges", radio_options2, OFX_UI_ORIENTATION_HORIZONTAL);
+	radio2->activateToggle(radio_options2[0]);
+	radio_button_position2 = NONE;   
+	gui1->addSlider("Edges", 0.0, 100.0, &number_of_edges);
+
+    gui1->addSpacer();
+	gui1->addButton("Open Object", false);
+	ofxUISlider *slider4 = gui1->addSlider("# of Objects", 0.0, 20.0, &number_of_objects);
+	slider4->setTriggerType(OFX_UI_TRIGGER_ALL);
+
+	gui1->addSpacer();
+
+	/*gui1->addSpacer();
+    gui1->addLabel("VERTICAL SLIDERS"); 
+    gui1->addSlider("1", 0.0, 255.0, 100.0, 17, 64);
+    gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+	gui1->addSlider("2", 0.0, 255.0, 150.0, 17, 64);
+	gui1->addSlider("3", 0.0, 255.0, 200.0, 17, 64);
+	gui1->addSlider("4", 0.0, 255.0, 250.0, 17, 64);
+	gui1->addSlider("5", 0.0, 255.0, 250.0, 17, 64);
+	gui1->addSlider("6", 0.0, 255.0, 250.0, 17, 64);
+	gui1->addSlider("7", 0.0, 255.0, 250.0, 17, 64);
+	gui1->addSlider("8", 0.0, 255.0, 250.0, 17, 64);
+	gui1->addSlider("9", 0.0, 255.0, 250.0, 17, 64);
+	gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);*/
     
     gui1->autoSizeToFitWidgets();
 	ofAddListener(gui1->newGUIEvent,this,&ofApp::guiEvent);
@@ -484,6 +548,8 @@ void ofApp::mousePressed(int x, int y, int button){
 		play_video_screen = false;
 		choose_video_and_range_screen = true;
 		gui2->toggleVisible();
+
+		resetValues();
 		
 		cout << "botao de pause!!!\n";
 	}
@@ -545,19 +611,16 @@ void ofApp::setFrames(){
 
 	nr_edges = 0;
 	match_object = 0;
-	/* calculo do numero de pessoas na frame, ta a por a cena bue lenta*/
-	if(movie.getCurrentFrame() % 10 == 0) {
-		ofxCvHaarFinder haarFinder; 
-		haarFinder.setup("HaarFinder/haarcascade_frontalface_default.xml");
-		nr_people = haarFinder.findHaarObjects(movie.getPixelsRef());
-	}
+	contrastVal = 0;
+	hue_total = 0;
 
-	movie.getCurrentFrame();
-
-	unsigned char * pixels = movie.getPixels();
 	int i = 0;
 	int j = 0;
-	int num_pixels = movie.getWidth()*movie.getHeight();
+	int count = 0;
+	float value_max = -1;
+	float value_min = 100;
+
+	unsigned char * pixels = movie.getPixels();
 
 	//DUAS IMAGENS IGUAIS, UMA A CORES OUTRA A P/B
 	ofImage image_colorful;
@@ -566,63 +629,61 @@ void ofApp::setFrames(){
 	image_colorful.setFromPixels(movie.getPixels(), movie.getWidth(), movie.getHeight(), OF_IMAGE_COLOR, true);
 	Image img = Image(image_colorful.getPixels(), image_grayscale.getPixels(), image_colorful.getWidth(), image_colorful.getHeight());
 
+	unsigned char * teste1 = image_grayscale.getPixels();
+	unsigned char * teste2 = image_colorful.getPixels();
+
 	float selected_color = img.calcColor(red, green, blue);
+	
+	//apenas calcula de 10 em 10 frames e só se o filtro estiver ativo
+	if(movie.getCurrentFrame() % 10 == 0 && people_enabled) {
+		ofxCvHaarFinder haarFinder; 
+		haarFinder.setup("HaarFinder/haarcascade_frontalface_default.xml");
+		nr_people = haarFinder.findHaarObjects(movie.getPixelsRef());
+	}
 
-	contrastVal = 0;
-	int count = 0;
-	
-	
-
-	
-	unsigned char* pixelsAux = pixels;
+	//percorremos os pixeis todos e realizamos todos os calculos
 	for(i = 0; i < movie.getHeight(); i++) {
 		for(j = 0; j < movie.getWidth(); j++) {
-			contrastVal += img.calculateContrast(i, j);
+			if(luminance_enabled) 
+				mean_luminance += img.calculateLuminance(i, j);
+
+			if(dominant_color_enabled) 
+				hue_total += img.calcColorAux(i, j);
+
+			if(contrast_enabled)
+				contrastVal += img.calculateContrast(i, j);
+
 			if(radio_button_position2 != NONE){
 				nr_edges += img.getEdges(i, j, radio_button_position2);
 				count++;
 			}
 		}
 	}
+
+	//normalização dos dados :)
 	nr_edges /= i*j;
 	nr_edges *= 100;
 	contrastVal /= i*j; 
-	//conversao to HSV
+	mean_luminance /= i*j;
+	hue_total /= i*j;
 
-	float hue_total, saturation, value_max, value_min; 
-	hue_total = 0;
-	value_max = -1;
-	value_min = 100;
-
-	// calculate luminance for each rbg pixel
-	for (i = 0; i < num_pixels; i+=3){
-		float  red, green, blue, hue;
-		red = pixels[i];
-		green = pixels[i+1];
-		blue = pixels[i+2];
-		mean_luminance += 0.2125*red + 0.7154*green + 0.0721*blue;
-		hue = img.calcColor(red, green, blue);
-		hue_total += hue; 
-	}
-	hue_total /= num_pixels;
-	mean_luminance /= (i/3);
-	
-	cout << movie.getCurrentFrame() << ": Total de hue" << hue_total << "\n";
-
+	//PATTERN MATCHING - sift/surf
 	if(findObject){
 		match_object = img.match(path);
 		cout << "matching: " << match_object << "\n";
 	}
 
+	//SÓ GUARDA AS FRAMES QUE CUMPRAM O REQUISITO DOS FILTROS!!
 	if(radio_button_position == ABOVE) 
 	{
 		if(mean_luminance >= luminance 
 			&& nr_people >= number_of_people
 			&& selected_color >= hue_total
 			&& contrastVal >= contrast
-			&& (match_object >= number_of_objects && findObject)){
-				contador_de_frames++;
-				frames.push_back(movie.getCurrentFrame());
+			&& (match_object >= number_of_objects && findObject))
+		{
+			contador_de_frames++;
+			frames.push_back(movie.getCurrentFrame());
 		}
 	}
 	else if(radio_button_position == BELOW)  
@@ -631,18 +692,21 @@ void ofApp::setFrames(){
 			&& nr_people <= number_of_people
 			&& selected_color <= hue_total
 			&& contrastVal <= contrast
-			&& (match_object <= number_of_objects && findObject)){
-				contador_de_frames++;
-				frames.push_back(movie.getCurrentFrame());
-			}		
-	}else{
+			&& (match_object <= number_of_objects && findObject))
+		{
+			contador_de_frames++;
+			frames.push_back(movie.getCurrentFrame());
+		}		
+	}
+	else{
 		if((mean_luminance >= luminance-10 || mean_luminance <= luminance+10) 
 			&& (nr_people <= number_of_people-5 || nr_people <= number_of_people+5)
 			&& (selected_color >= hue_total-10 || selected_color <= hue_total+10)
 			&& (contrastVal >= contrast-10 || contrastVal <= contrast+10)
-			&& (match_object >= number_of_objects-10 || match_object <= number_of_objects+10 && findObject)){
-				contador_de_frames++;
-				frames.push_back(movie.getCurrentFrame());		
+			&& (match_object >= number_of_objects-10 || match_object <= number_of_objects+10 && findObject))
+		{
+			contador_de_frames++;
+			frames.push_back(movie.getCurrentFrame());		
 		}
 	}
 }

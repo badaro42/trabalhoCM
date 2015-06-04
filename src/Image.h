@@ -33,13 +33,15 @@ public:
 	double getPixel(int x, int y);
 	int applyFilter(int i, int j, int type);
 	std::vector<int> getVector(int type);
-	float calcColor(float green, float red, float blue);
+	float calcColorAux(int i, int j);
+	float calcColor(float red, float green, float blue);
 	double calculateContrast(int x, int y); 
 	void setobj(string path);
 	ofImage getObj();
 	int match(ofImage img); 
 	int getEdges(int i, int j, int type);
 	double Image::calculateTexture();
+	float calculateLuminance(int i, int j);
 };
 
 #endif

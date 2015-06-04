@@ -33,6 +33,7 @@ class ofApp : public ofBaseApp {
 		void draw();
 		void exit();
 
+		void resetValues();
 		void keyPressed(int key);
 		void keyReleased(int key);
 		void mouseMoved(int x, int y );
@@ -106,9 +107,16 @@ class ofApp : public ofBaseApp {
 		double contrastVal;
 		int nr_people;
 		double nr_edges;
+		double hue_total;
+
+		bool dominant_color_enabled;
+		bool luminance_enabled;
+		bool contrast_enabled;
+		bool people_enabled;
 
 		string path; 
 		bool findObject;
 		bool hasObject; 
+		bool gaborfilter;
 		int match_object;
 };

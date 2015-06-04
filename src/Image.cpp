@@ -21,18 +21,28 @@ Image::Image(unsigned char * pix_color, unsigned char * pix_gray, int t_width, i
 	size = t_width*t_height;
 }
 
-float Image::calcColor(float green, float red, float blue){
 
-	float max, min; 
+//************************** DOMINANT COLOR ***********************************
+
+float Image::calculateLuminance(int i, int j) {
+	int pos = i*width+j;
+	int r = pixels_color[pos];
+    int g = pixels_color[pos+1];
+    int b = pixels_color[pos+2];
+
+    return 0.213*r+0.715*g+0.072*b;
+}
+
+float Image::calcColor(float red, float green, float blue) {
+	float max, min, delta, hue_temp, hue;
+
 	red /= 255;
 	green /= 255;
 	blue /= 255;
-	float delta; 
 	max = std::max(red, std::max(green, blue));
 	min = std::min(red, std::min(green, blue));
 	delta = max - min;
 
-	float hue_temp, hue;
 	if (red == max) {
 		hue_temp = (green - blue) / (delta + 1e-20f);
 		if(hue_temp < 0.0)
@@ -47,37 +57,18 @@ float Image::calcColor(float green, float red, float blue){
 	return hue;
 }
 
-void Image::setWidth(int width1){
-	width = width1;
+float Image::calcColorAux(int i, int j){
+	int pos = i*width+j; 
+
+	float red = pixels_color[pos];
+	float green = pixels_color[pos+1];
+	float blue = pixels_color[pos+2];
+	
+	return calcColor(red, green, blue);
 }
 
-void Image::setHeight(int height1){
-	height = height1;
-}
 
-int Image::getHeight() {
-	return height;
-}
-
-int Image::getWidth() {
-	return width;
-}
-
-double Image::getPixel(int i, int j) {
-	if(i < 0 && j < 0) //o primeiro pixel!
-		return pixels_gray[0];
-	if(j < 0) // nao temos esquerdo
-		return pixels_gray[i*width];
-	else if(j > width-1) // nao temos direito
-		return pixels_gray[((i+1)*width)-1];
-	else if(i < 0) // nao temos topo
-		return pixels_gray[j];
-	else if(i > height-1) // nao temos baixo
-		return pixels_gray[((height-1)*width)+j];
-	else
-		return pixels_gray[(i*width)+j];
-}
-
+//************************** CONTRASTE CONTRASTE ***********************************
 
 double Image::calculateContrast(int i, int j){
 	double topo_esquerdo = getPixel(i-1,j-1);
@@ -102,53 +93,8 @@ double Image::calculateContrast(int i, int j){
 	return (std::abs(middle_pixel-mean_luminance_adjacentes))/std::abs(mean_luminance_adjacentes); 
 }
 
-//type == 1: EDGES TODAS AS DIREÇOES;
-//type == 2: EDGES VERTICAIS;
-//type == 3: EDGES HORIZONTAIS;
-std::vector<int> Image::getVector(int type) {
-	if(type == 1) {
-		static const int vec[] = {-1,-1,-1,-1,8,-1,-1,-1,-1};
-		std::vector<int> v(vec, vec+sizeof(vec)/sizeof(vec[0]));
-		return v;
-	}
-	else if(type == 2){
-		static const int vec[] = {-1,0,1,-1,0,1,-1,0,1};
-		std::vector<int> v(vec, vec+sizeof(vec)/sizeof(vec[0]));
-		return v;
-	}
-	else if(type == 3){
-		static const int vec[] = {-1,-1,-1,0,0,0,1,1,1};
-		std::vector<int> v(vec, vec+sizeof(vec)/sizeof(vec[0]));
-		return v;
-	}
-}
 
-int Image::applyFilter(int i, int j, int type){
-
-	std::vector<int> edges = getVector(type);
-
-	double topo_esquerdo = getPixel(i-1,j-1);
-	double topo_direito = getPixel(i-1,j+1);
-	double topo = getPixel(i-1,j);
-	double esquerdo = getPixel(i,j-1);
-	double direito = getPixel(i,j+1);
-	double baixo_esquerdo = getPixel(i+1,j-1);
-	double baixo_direito = getPixel(i+1,j+1);
-	double baixo = getPixel(i+1,j);
-	double middle_pixel = getPixel(i,j);
-
-	return (topo_esquerdo*edges[0] + topo*edges[1] + topo_direito*edges[2] + esquerdo*edges[3] + middle_pixel*edges[4]
-	+ direito*edges[5] + baixo_esquerdo*edges[6] + baixo*edges[7] + baixo_direito*edges[8]);
-}
-
-void Image::setobj(string path){
-	obj = ofImage(path);
-	obj.setFromPixels(obj.getPixels(), obj.getWidth(), obj.getHeight(), OF_IMAGE_GRAYSCALE, true);
-}
-
-ofImage Image::getObj(){
-	return obj;
-}
+//********************* IMAGE MATCHING (SIFT/SURF) *****************************
 
 int Image::match(ofImage img){
 
@@ -172,6 +118,8 @@ int Image::match(ofImage img){
 	//return 0;
 }
 
+//************************** EDGES EDGES EDGES ***********************************
+
 int Image::getEdges(int i, int j, int type){
 	int val = applyFilter(i, j, type);
 
@@ -180,11 +128,7 @@ int Image::getEdges(int i, int j, int type){
 		return 1;
 	return 0;
 }
-	
 
-
-
- 
  
 //************************** GABOR GABOR GABOR ***********************************
 
@@ -253,4 +197,86 @@ double Image::calculateTexture(){
     
     // 4 imagens geradas
     return num_total/4;
+}
+
+
+//************************** METODOS AUXILIARES ***********************************
+
+void Image::setWidth(int width1){
+	width = width1;
+}
+
+void Image::setHeight(int height1){
+	height = height1;
+}
+
+int Image::getHeight() {
+	return height;
+}
+
+int Image::getWidth() {
+	return width;
+}
+
+double Image::getPixel(int i, int j) {
+	if(i < 0 && j < 0) //o primeiro pixel!
+		return pixels_gray[0];
+	if(j < 0) // nao temos esquerdo
+		return pixels_gray[i*width];
+	else if(j > width-1) // nao temos direito
+		return pixels_gray[((i+1)*width)-1];
+	else if(i < 0) // nao temos topo
+		return pixels_gray[j];
+	else if(i > height-1) // nao temos baixo
+		return pixels_gray[((height-1)*width)+j];
+	else
+		return pixels_gray[(i*width)+j];
+}
+
+//type == 1: EDGES TODAS AS DIREÇOES;
+//type == 2: EDGES VERTICAIS;
+//type == 3: EDGES HORIZONTAIS;
+std::vector<int> Image::getVector(int type) {
+	if(type == 1) {
+		static const int vec[] = {-1,-1,-1,-1,8,-1,-1,-1,-1};
+		std::vector<int> v(vec, vec+sizeof(vec)/sizeof(vec[0]));
+		return v;
+	}
+	else if(type == 2){
+		static const int vec[] = {-1,0,1,-1,0,1,-1,0,1};
+		std::vector<int> v(vec, vec+sizeof(vec)/sizeof(vec[0]));
+		return v;
+	}
+	else if(type == 3){
+		static const int vec[] = {-1,-1,-1,0,0,0,1,1,1};
+		std::vector<int> v(vec, vec+sizeof(vec)/sizeof(vec[0]));
+		return v;
+	}
+}
+
+int Image::applyFilter(int i, int j, int type){
+
+	std::vector<int> edges = getVector(type);
+
+	double topo_esquerdo = getPixel(i-1,j-1);
+	double topo_direito = getPixel(i-1,j+1);
+	double topo = getPixel(i-1,j);
+	double esquerdo = getPixel(i,j-1);
+	double direito = getPixel(i,j+1);
+	double baixo_esquerdo = getPixel(i+1,j-1);
+	double baixo_direito = getPixel(i+1,j+1);
+	double baixo = getPixel(i+1,j);
+	double middle_pixel = getPixel(i,j);
+
+	return (topo_esquerdo*edges[0] + topo*edges[1] + topo_direito*edges[2] + esquerdo*edges[3] + middle_pixel*edges[4]
+	+ direito*edges[5] + baixo_esquerdo*edges[6] + baixo*edges[7] + baixo_direito*edges[8]);
+}
+
+void Image::setobj(string path){
+	obj = ofImage(path);
+	obj.setFromPixels(obj.getPixels(), obj.getWidth(), obj.getHeight(), OF_IMAGE_GRAYSCALE, true);
+}
+
+ofImage Image::getObj(){
+	return obj;
 }
