@@ -10,6 +10,8 @@ const std::string ofApp::RANGE_SLIDER_NAME = "MTIME";
 void ofApp::setup(){
 
 	resetValues();
+	gallery_selected_page = 0;
+	max_pages = 0;
 
 	dominant_color_enabled = false;
 	luminance_enabled = false;
@@ -32,8 +34,18 @@ void ofApp::setup(){
 	ofDirectory dir;
 	ofVideoPlayer temp_video;
 
-	back_button.loadImage("images/back_button.png");
+	back_button.loadImage("images/back.png");
 	back_button.resize(SMALL_BUTTON_WIDTH, SMALL_BUTTON_HEIGHT);
+
+	save_button.loadImage("images/save.png");
+	save_button.resize(SMALL_BUTTON_WIDTH, SMALL_BUTTON_HEIGHT);
+
+	next_button.loadImage("images/next.png");
+	next_button.resize(SMALL_BUTTON_WIDTH, SMALL_BUTTON_HEIGHT);
+
+	previous_button.loadImage("images/next.png");
+	previous_button.resize(SMALL_BUTTON_WIDTH, SMALL_BUTTON_HEIGHT);
+	previous_button.rotate90(2); // roda a imaagens 90 graus 2 vezes -> 180
 
 	play_pause_button.loadImage("images/play_pause_button.jpg");
 	play_pause_button.resize(SMALL_BUTTON_WIDTH, SMALL_BUTTON_HEIGHT);
@@ -109,6 +121,9 @@ void ofApp::setup(){
 	setGUI2(duration);
 	setGUI3();
 	setGUI4();
+	setGUI5();
+
+	gui5->toggleVisible(); //começa escondida!
 }
 
 //--------------------------------------------------------------
@@ -118,6 +133,7 @@ void ofApp::update(){
 	int w = ofGetWidth();			  
 	int h = ofGetHeight();  
 
+	//evita que seja feito resize à janela
 	if(w != 1024 || h != 720) 
 		ofSetWindowShape(1024, 720);
 
@@ -165,6 +181,26 @@ void ofApp::draw(){
 	if(!dominant_color_enabled)
 		ofBackground(red, green, blue, 255);
 
+	//desenha os quatros cantos à volta do video. apenas possivel nos 2 primeiros ecras
+	if(choose_video_and_range_screen || play_video_screen) {
+		ofSetColor(0);
+
+		//linhas para indicar a area onde é possivel fazer swipe com o rato
+		ofLine(ofGetWidth()*0.34, ofGetHeight()*0.24, ofGetWidth()*0.34, ofGetHeight()*0.24+75); //topo esquerdo vert.
+		ofLine(ofGetWidth()*0.34, ofGetHeight()*0.24, ofGetWidth()*0.34+75, ofGetHeight()*0.24); //topo esquerdo horiz.
+	
+		ofLine(ofGetWidth()*0.34, ofGetHeight()*0.79, ofGetWidth()*0.34+75, ofGetHeight()*0.79); //fundo esquerdo horiz.
+		ofLine(ofGetWidth()*0.34, ofGetHeight()*0.79, ofGetWidth()*0.34, ofGetHeight()*0.79-75); //fundo esquerdo vert.
+	
+		ofLine(ofGetWidth()*0.92, ofGetHeight()*0.24, ofGetWidth()*0.92, ofGetHeight()*0.24+75); //topo direito vert.
+		ofLine(ofGetWidth()*0.92, ofGetHeight()*0.24, ofGetWidth()*0.92-75, ofGetHeight()*0.24); //topo direito horiz.
+	
+		ofLine(ofGetWidth()*0.92, ofGetHeight()*0.79, ofGetWidth()*0.92-75, ofGetHeight()*0.79); //fundo direito horiz.
+		ofLine(ofGetWidth()*0.92, ofGetHeight()*0.79, ofGetWidth()*0.92, ofGetHeight()*0.79-75); //fundo direito vert.
+
+		ofSetColor(255);
+	}
+
 	//estamos no primeiro ecra, para escolher video e definir o range 
 	if(choose_video_and_range_screen) {
 		//desenha a cena do swipe com as imagens dos videos
@@ -186,7 +222,7 @@ void ofApp::draw(){
 		view_gallery_button.draw((ofGetWidth()*0.92)-GALLERY_BUTTON_WIDTH, 
 			ofGetHeight()*0.81);
 	
-		ofSetHexColor(0xFFFFFF);
+		ofSetColor(255);
 
 		//fazemos isto para desenhar a primeira frame quando o user escolhe o video
 		if(redraw_frame_flag)
@@ -194,9 +230,9 @@ void ofApp::draw(){
 		
 		movie.draw(ofGetWidth()*0.361, ofGetHeight()*0.27, FRAME_WIDTH, FRAME_HEIGHT);
 
-		ofSetHexColor(0x000000);
+		ofSetHexColor(0);
 
-		if(video_playing)
+		if(video_playing && movie.isFrameNew())
 			setFrames();
 
 		float right_gui_left_column = top_guis_final_point_width - top_guis_width + 4;
@@ -233,22 +269,64 @@ void ofApp::draw(){
 		}
 	}
 
-    ofSetColor(0);
+	//estamos no terceiro ecra, o da galeria, vamos mostrar as imagens
+	else if(gallery_screen) {
+		ofSetColor(255);
 
-	//linhas para indicar a area onde é possivel fazer swipe com o rato
-	ofLine(ofGetWidth()*0.34, ofGetHeight()*0.24, ofGetWidth()*0.34, ofGetHeight()*0.24+75); //topo esquerdo vert.
-	ofLine(ofGetWidth()*0.34, ofGetHeight()*0.24, ofGetWidth()*0.34+75, ofGetHeight()*0.24); //topo esquerdo horiz.
-	
-	ofLine(ofGetWidth()*0.34, ofGetHeight()*0.79, ofGetWidth()*0.34+75, ofGetHeight()*0.79); //fundo esquerdo horiz.
-	ofLine(ofGetWidth()*0.34, ofGetHeight()*0.79, ofGetWidth()*0.34, ofGetHeight()*0.79-75); //fundo esquerdo vert.
-	
-	ofLine(ofGetWidth()*0.92, ofGetHeight()*0.24, ofGetWidth()*0.92, ofGetHeight()*0.24+75); //topo direito vert.
-	ofLine(ofGetWidth()*0.92, ofGetHeight()*0.24, ofGetWidth()*0.92-75, ofGetHeight()*0.24); //topo direito horiz.
-	
-	ofLine(ofGetWidth()*0.92, ofGetHeight()*0.79, ofGetWidth()*0.92-75, ofGetHeight()*0.79); //fundo direito horiz.
-	ofLine(ofGetWidth()*0.92, ofGetHeight()*0.79, ofGetWidth()*0.92, ofGetHeight()*0.79-75); //fundo direito vert.
+		ofLine(ofGetWidth()*0.5, ofGetHeight()*0.79, 
+			ofGetWidth()*0.5, ofGetHeight()*0.89); //linha ao centro
+		ofLine(ofGetWidth()*0.25, ofGetHeight()*0.79, 
+			ofGetWidth()*0.25, ofGetHeight()*0.89); //linha a 25%
+		ofLine(ofGetWidth()*0.75, ofGetHeight()*0.79, 
+			ofGetWidth()*0.75, ofGetHeight()*0.89); //linha a 75%
 
-	ofSetColor(255);
+		back_button.draw(ofGetWidth()*0.2, 
+			ofGetHeight()*0.86);
+		previous_button.draw(ofGetWidth()*0.5 - SMALL_BUTTON_HEIGHT - SMALL_INTERVAL/2, 
+			ofGetHeight()*0.86);
+		next_button.draw(ofGetWidth()*0.5 + SMALL_INTERVAL/2, 
+			ofGetHeight()*0.86);
+		save_button.draw(ofGetWidth()*0.73, 
+			ofGetHeight()*0.86);
+
+		//indica em que elemento começa o ciclo
+		int curr_index = MAX_ITEMS_PER_PAGE*(gallery_selected_page-1);
+
+		if(gallery_selected_page == 2)
+			int x = curr_index;
+		
+		int img_width = 150;
+		int img_height = 125;
+		int init_width = 75;
+		int init_height = 165;
+
+		int row_width = 180;
+		int max_columns = 4;
+		int row = 1;
+		int elems_per_row = 5;
+
+		int top;
+		int diff = img_array.size() - curr_index;
+
+		//nao dá para encher a pagina toda!
+		if(diff < MAX_ITEMS_PER_PAGE)
+			top = diff%MAX_ITEMS_PER_PAGE;
+		else
+			top = MAX_ITEMS_PER_PAGE;
+
+		int i;
+		for(i = 0; i < top; i++) {
+			row = floor(i/elems_per_row);
+			img_array[curr_index].draw(init_width + (i%elems_per_row)*row_width, 
+				init_height + img_width*row, img_width, img_height);
+			curr_index++;
+		}
+
+		ofDrawBitmapString("img_array.size: " + ofToString(img_array.size()), 400, 75);
+		
+
+		ofSetColor(0);
+	}
 }
 
 void ofApp::guiEvent(ofxUIEventArgs &e)
@@ -496,6 +574,14 @@ void ofApp::setGUI4() {
 	gui4->addSpacer();
 }
 
+//GUI DA GALERIA: POR CIMA DAS IMAGENS, APENAS NO ECRA DA GALERIA
+void ofApp::setGUI5() {
+	gui5 = new ofxUISuperCanvas("Frames that match yout criteria", 
+		ofGetWidth()*0.2, 5, 
+		ofGetWidth()*0.6, ofGetHeight()*0.18);
+	gui5->addSpacer();
+}
+
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
 
@@ -517,82 +603,162 @@ void ofApp::mousePressed(int x, int y, int button){
 
 	float temp_stop_btn_width = start_width_play_btn + SMALL_BUTTON_WIDTH + SMALL_INTERVAL;
 
-	//swipe dentro do rectangulo das imagens do video - so no primeiro ecra - TÁ!
-	if((x >= ofGetWidth()*0.34) && (x <= ofGetWidth()*0.92) &&
-		(y >= ofGetHeight()*0.24) && (y <= ofGetHeight()*0.79) &&
-		choose_video_and_range_screen)
-	{
-		img_swipe.pressed(ofPoint(x,y)-position);
-		cout << "CENA DO SWIPE!!!!1!!!!" << "\n";
-    }
-	//botao para confirmar - so no primeiro ecra!! - TÁ!
-	else if((x >= ofGetWidth()*0.92 - LARGE_BUTTON_WIDTH) &&
-		(x <= ofGetWidth()*0.92) &&
-		(y >= ofGetHeight()*0.81) &&
-		(y <= ofGetHeight()*0.81 + LARGE_BUTTON_HEIGHT) &&
-		choose_video_and_range_screen) 
-	{
-		gui2->toggleVisible();
-		choose_video_and_range_screen = false;
-		play_video_screen = true;
-		load_video = true;
+	//primeiro ecra - escolha do video
+	if(choose_video_and_range_screen) {
+		//swipe dentro do rectangulo das imagens do video - so no primeiro ecra - TÁ!
+		if((x >= ofGetWidth()*0.34) && (x <= ofGetWidth()*0.92) &&
+			(y >= ofGetHeight()*0.24) && (y <= ofGetHeight()*0.79))
+		{
+			img_swipe.pressed(ofPoint(x,y)-position);
+			cout << "CENA DO SWIPE!!!!1!!!!" << "\n";
+		}
+		//botao para confirmar - so no primeiro ecra!! - TÁ!
+		else if((x >= ofGetWidth()*0.92 - LARGE_BUTTON_WIDTH) &&
+			(x <= ofGetWidth()*0.92) &&
+			(y >= ofGetHeight()*0.81) &&
+			(y <= ofGetHeight()*0.81 + LARGE_BUTTON_HEIGHT)) 
+		{
+			gui2->toggleVisible();
+			choose_video_and_range_screen = false;
+			play_video_screen = true;
+			load_video = true;
 
-		cout << "DENTRO DO BOTAO DE PLAY, POSICAO ACTUAL: " << img_swipe.getCurrent() << "\n";
+			cout << "DENTRO DO BOTAO DE PLAY, POSICAO ACTUAL: " << img_swipe.getCurrent() << "\n";
+		}
 	}
-	//botao de back - no segundo ecra!! - TÁ!
-	else if((x >= ofGetWidth()*0.34) && (x <= ofGetWidth()*0.34 + SMALL_BUTTON_WIDTH) &&
-		(y >= ofGetHeight()*0.81) && (y <= ofGetHeight()*0.81 + SMALL_BUTTON_HEIGHT) &&
-		play_video_screen) 
-	{
-		video_playing = false;
-		play_video_screen = false;
-		choose_video_and_range_screen = true;
-		gui2->toggleVisible();
 
-		resetValues();
-		
-		cout << "botao de BACK!!!\n";
-	}
-	//botao de PLAY/PAUSE - no segundo ecra!! - TÁ!
-	else if((x >= start_width_play_btn) &&
-		(x <= start_width_play_btn + SMALL_BUTTON_WIDTH) &&
-		(y >= ofGetHeight()*0.81) &&
-		(y <= ofGetHeight()*0.81 + SMALL_BUTTON_HEIGHT) &&
-		play_video_screen) 
-	{
-		if(movie.isPlaying()) {
-			movie.stop();
+	//segundo ecra - controlos do video
+	else if(play_video_screen) {
+			//botao de back - no segundo ecra!! - TÁ!
+		if((x >= ofGetWidth()*0.34) && (x <= ofGetWidth()*0.34 + SMALL_BUTTON_WIDTH) &&
+			(y >= ofGetHeight()*0.81) && (y <= ofGetHeight()*0.81 + SMALL_BUTTON_HEIGHT)) 
+		{
 			video_playing = false;
-		}
-		else {
-			movie.play();
-			video_playing = true;
-		}
+			play_video_screen = false;
+			choose_video_and_range_screen = true;
+			gui2->toggleVisible();
 
-		cout << "botao de play/pause kkkk!!!\n";
-	}
-	//botao de STOP - no segundo ecra!! - TÁ!
-	else if((x >= temp_stop_btn_width) &&
-		(x <= temp_stop_btn_width + SMALL_BUTTON_WIDTH) &&
-		(y >= ofGetHeight()*0.81) &&
-		(y <= ofGetHeight()*0.81 + SMALL_BUTTON_HEIGHT) &&
-		play_video_screen) 
-	{
-		movie.stop();
-		movie.setFrame(int(range_minimum_percentage*movie.getTotalNumFrames()));
-		redraw_frame_flag = true;
-		video_playing = false;
-		cout << "botao de STOP HUEHUHE!!! min_frame: " << int(range_minimum_percentage*movie.getTotalNumFrames()) << "\n";
-	}
-	//botao para ver a GALERIA - no segundo ecra!! - NÃO TÁ!
-	else if((x >= ofGetWidth()*0.92 - GALLERY_BUTTON_WIDTH) &&
-		(x <= ofGetWidth()*0.92) && (y >= ofGetHeight()*0.81) &&
-		(y <= ofGetHeight()*0.81 + SMALL_BUTTON_HEIGHT) &&
-		play_video_screen) 
-	{
-		cout << "botão da galeria!!!!!!!!!!!!!!111!!!!" << "\n";
+			resetValues();
+		
+			cout << "botao de BACK!!!\n";
+		}
+		//botao de PLAY/PAUSE - no segundo ecra!! - TÁ!
+		else if((x >= start_width_play_btn) &&
+			(x <= start_width_play_btn + SMALL_BUTTON_WIDTH) &&
+			(y >= ofGetHeight()*0.81) &&
+			(y <= ofGetHeight()*0.81 + SMALL_BUTTON_HEIGHT)) 
+		{
+			if(movie.isPlaying()) {
+				movie.stop();
+				video_playing = false;
+			}
+			else {
+				movie.play();
+				video_playing = true;
+			}
+
+			cout << "botao de play/pause kkkk!!!\n";
+		}
+		//botao de STOP - no segundo ecra!! - TÁ!
+		else if((x >= temp_stop_btn_width) &&
+			(x <= temp_stop_btn_width + SMALL_BUTTON_WIDTH) &&
+			(y >= ofGetHeight()*0.81) &&
+			(y <= ofGetHeight()*0.81 + SMALL_BUTTON_HEIGHT)) 
+		{
+			movie.stop();
+			movie.setFrame(int(range_minimum_percentage*movie.getTotalNumFrames()));
+			redraw_frame_flag = true;
+			video_playing = false;
+			cout << "botao de STOP HUEHUHE!!! min_frame: " << int(range_minimum_percentage*movie.getTotalNumFrames()) << "\n";
+		}
+		//botao para ver a GALERIA - no segundo ecra!! - TÁ!
+		else if((x >= ofGetWidth()*0.92 - GALLERY_BUTTON_WIDTH) &&
+			(x <= ofGetWidth()*0.92) && (y >= ofGetHeight()*0.81) &&
+			(y <= ofGetHeight()*0.81 + SMALL_BUTTON_HEIGHT)) 
+		{
+			cout << "botão da galeria!!!!!!!!!!!!!!111!!!!" << "\n";
+			gallery_screen = true;
+			video_playing = false;
+			play_video_screen = false;
+
+			max_pages = ceil(double(img_array.size())/double(MAX_ITEMS_PER_PAGE));
+			gallery_selected_page = 1;
+
+			gui1->toggleVisible(); //esconde
+			gui3->toggleVisible(); //esconde
+			gui4->toggleVisible(); //esconde
+			gui5->toggleVisible(); //mostra
+			resetValues();
+		}
 	}
 
+	//terceiro ecra - galeria de imagens
+	else if(gallery_screen) {
+		//botao de back - no terceiro ecra, o da galeria de imagens!! - NÃO TÁ!
+		if((x >= ofGetWidth()*0.2) && (x <= ofGetWidth()*0.2 + SMALL_BUTTON_WIDTH) &&
+			(y >= ofGetHeight()*0.86) && (y <= ofGetHeight()*0.86 + SMALL_BUTTON_HEIGHT)) 
+		{
+			gallery_screen = false;
+			play_video_screen = true;
+			load_video = true;
+			choose_video_and_range_screen = false;
+
+			gui1->toggleVisible(); //mostra
+			gui3->toggleVisible(); //mostra
+			gui4->toggleVisible(); //mostra 
+			gui5->toggleVisible(); //esconde
+		
+			cout << "botao de BACK TERCEIRO ECRA!!!\n";
+		}
+		//botao pagina anterior - TÁ!
+		else if((x >= ofGetWidth()*0.5 - SMALL_BUTTON_WIDTH - SMALL_INTERVAL/2) && 
+			(x <= ofGetWidth()*0.5 + SMALL_INTERVAL) &&
+			(y >= ofGetHeight()*0.86) && (y <= ofGetHeight()*0.86 + SMALL_BUTTON_HEIGHT)) 
+		{		
+			if(gallery_selected_page > 1)
+				gallery_selected_page--;
+			cout << "botao PAGINA ANTERIOR!\n";
+		}
+		//botao pagina seguinte - TÁ!
+		else if((x >= ofGetWidth()*0.5 + SMALL_INTERVAL) && 
+			(x <= ofGetWidth()*0.5 + SMALL_BUTTON_WIDTH + SMALL_INTERVAL/2) &&
+			(y >= ofGetHeight()*0.86) && (y <= ofGetHeight()*0.86 + SMALL_BUTTON_HEIGHT)) 
+		{		
+			//adicionámos algum ruido para evitar o caso em que temos 
+			//15 elementos no array (ou multiplo de 15)
+			//usando a formula abaixo, ia dar 1, o que dava 2 páginas, mas na realidade
+			//os 15 elementos cabem todos na mesma pagina.
+			//float div_aux = (img_array.size()/MAX_ITEMS_PER_PAGE) - 0.005;
+			//int max_pages = floor(div_aux) + 1;
+
+			cout << "IMG_ARRAY.SIZE(): " << img_array.size() << "\n";
+			cout << "MAX_ITEMS_PER_PAGE: " << MAX_ITEMS_PER_PAGE << "\n";
+			cout << "ceil da cena: " << max_pages << "\n";
+
+			if(gallery_selected_page < max_pages)
+				gallery_selected_page++;
+
+			cout << "[curr/max]: [" << gallery_selected_page << "/" << max_pages <<
+				"]; botao dPAGINA SEGUINTE!!!\n";
+		}
+		//botao para gravar imagens para o disco - TÁ!
+		else if((x >= ofGetWidth()*0.73) && 
+			(x <= ofGetWidth()*0.73 + SMALL_BUTTON_WIDTH) &&
+			(y >= ofGetHeight()*0.86) && (y <= ofGetHeight()*0.86 + SMALL_BUTTON_HEIGHT)) 
+		{		
+			cout << "botao para gravar as imagens pa disco!!!\n";
+
+			int i;
+			for(i = 0; i < img_array.size(); i++) {
+				ofImage img = img_array[i];
+				ofSaveImage(img.getPixelsRef(), "temp/img"+ofToString(i)+".png");
+			}
+		}
+	}
+
+	
+
+	
 }
 
 //--------------------------------------------------------------
@@ -630,7 +796,13 @@ void ofApp::setFrames(){
 
 	double gabor_stuff = 0.0;
 
+	ofImage img_test;
 	unsigned char * pixels = movie.getPixels();
+	if(movie.getCurrentFrame() >= 100 && movie.getCurrentFrame() < 115) {
+		img_test.setFromPixels(pixels, movie.getWidth(), movie.getHeight(), OF_IMAGE_COLOR, true);
+		img_array.push_back(img_test);
+		cout << movie.getCurrentFrame() << ": dentro da cena do array\n"; 
+	}
 
 	//DUAS IMAGENS IGUAIS, UMA A CORES OUTRA A P/B
 	ofImage image_colorful;

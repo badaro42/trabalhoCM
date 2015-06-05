@@ -8,14 +8,12 @@
 #include "ofxCvHaarFinder.h"
 #include <stdio.h>
 #include "Image.h"
+#include <math.h>
 
 class ofApp : public ofBaseApp {
 
 	public:
-		/*static const int LARGE_BUTTON_WIDTH = 350;
-		static const int BUTTON_HEIGHT = 110;
-		static const int SMALL_BUTTON_WIDTH = 110;
-		static const int SMALL_INTERVAL = 10;*/
+		static const int MAX_ITEMS_PER_PAGE = 15;
 
 		static const int GALLERY_BUTTON_WIDTH = 175;
 
@@ -59,6 +57,7 @@ class ofApp : public ofBaseApp {
 		void setGUI2(float duration);
 		void setGUI3();
 		void setGUI4();
+		void setGUI5();
 
 		void setFrames();
 		//float calcSelectedColor();
@@ -71,6 +70,7 @@ class ofApp : public ofBaseApp {
 		ofxUISuperCanvas *gui2;
 		ofxUISuperCanvas *gui3;
 		ofxUISuperCanvas *gui4;
+		ofxUISuperCanvas *gui5;
 		bool hideGUI;
 		float red, green, blue, luminance, contrast, number_of_people, dominant_color, number_of_edges, number_of_objects;
 		vector<string> radio_options;
@@ -88,6 +88,9 @@ class ofApp : public ofBaseApp {
 		//os varios botoes da app hehe
 		//ofImage play_button;
 		ofImage back_button;
+		ofImage save_button;
+		ofImage previous_button;
+		ofImage next_button;
 		ofImage play_pause_button;
 		ofImage stop_button;
 		ofImage confirm_button;
@@ -116,6 +119,8 @@ class ofApp : public ofBaseApp {
 		float top_guis_width;
 		float start_width_play_btn;
 
+		int max_pages;
+		int gallery_selected_page;
 		int current_img;
 		int contador_de_frames;
 		vector<int> frames; 
@@ -135,4 +140,6 @@ class ofApp : public ofBaseApp {
 		bool hasObject; 
 		bool gaborfilter;
 		int match_object;
+
+		vector<ofImage> img_array;
 };
