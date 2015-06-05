@@ -70,7 +70,7 @@ float Image::calcColorAux(int i, int j){
 
 //************************** CONTRASTE CONTRASTE ***********************************
 
-double Image::calculateContrast(int i, int j){
+float Image::calculateContrast(int i, int j){
 	double topo_esquerdo = getPixel(i-1,j-1);
 	double topo_direito = getPixel(i-1,j+1);
 	double topo = getPixel(i-1,j);

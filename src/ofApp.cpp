@@ -12,14 +12,15 @@ void ofApp::setup(){
 	resetValues();
 	gallery_selected_page = 0;
 	max_pages = 0;
+	can_update_frame = true;
 
 	dominant_color_enabled = false;
 	luminance_enabled = false;
 	contrast_enabled = false;
 	people_enabled = false;
+	gabor_enabled = false;
 
 	findObject = false;
-	hasObject = false;
 	
 	video_playing = false;
 
@@ -157,8 +158,10 @@ void ofApp::update(){
 		load_video = false;
 	}
 	//estamos no ecra do video e o video esta' a tocar, fazemos update
-	else if(play_video_screen) 
+	else if(play_video_screen && can_update_frame) {
+		cout << movie.getCurrentFrame() << "\n";
 		movie.update();
+	}
 
 	float t = ofGetElapsedTimef();
     float dt = t - time;
@@ -167,13 +170,16 @@ void ofApp::update(){
 }
 
 void ofApp::resetValues() {
-	contrastVal = 0;
 	contador_de_frames = 0;
+	
+	sliders_dominant_color = 0;
+	contrastVal = 0;
 	mean_luminance = 0;
 	nr_people = 0;
 	nr_edges = 0;
 	match_object = 0;
 	hue_total = 0;
+	gabor_value = 0;
 }
 
 //--------------------------------------------------------------
@@ -232,8 +238,11 @@ void ofApp::draw(){
 
 		ofSetHexColor(0);
 
-		if(video_playing && movie.isFrameNew())
-			setFrames();
+		if(video_playing && can_update_frame) {
+			if(movie.isFrameNew()) {
+				applyFiltersToFrame();
+			}
+		}
 
 		float right_gui_left_column = top_guis_final_point_width - top_guis_width + 4;
 		float right_gui_right_column = (top_guis_final_point_width - top_guis_width/2) + 2;
@@ -255,7 +264,7 @@ void ofApp::draw(){
 		ofDrawBitmapString("Edges %: " + ofToString(nr_edges), right_gui_left_column, ofGetHeight()*0.165);
 		ofDrawBitmapString("Hue (0-360): " + ofToString(int(hue_total)), right_gui_right_column, ofGetHeight()*0.065);
 		
-		//paramos o video para que
+		//paramos o video para que nao ande para a frente
 		if(redraw_frame_flag) {
 			movie.stop();
 			redraw_frame_flag = false;
@@ -323,8 +332,6 @@ void ofApp::draw(){
 		}
 
 		ofDrawBitmapString("img_array.size: " + ofToString(img_array.size()), 400, 75);
-		
-
 		ofSetColor(0);
 	}
 }
@@ -336,61 +343,15 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 	cout << kind << "\n";
 	cout << "got event from: " << name << endl;
 
-    if(kind == OFX_UI_WIDGET_NUMBERDIALER)
-    {
-        ofxUINumberDialer *n = (ofxUINumberDialer *) e.widget;
-        cout << n->getValue() << endl;
-    }
-	
-    if(name == "SAMPLER")
-    {
-        ofxUIImageSampler *is = (ofxUIImageSampler *) e.widget;
-        ofColor clr = is->getColor();
-        red = clr.r;
-        blue = clr.b;
-        green = clr.g;
-    }
-	else if(name == "BUTTON")
-	{
-		ofxUIButton *button = (ofxUIButton *) e.getButton();
-		//bdrawGrid = button->getValue();
-	}
-	else if(name == "TOGGLE")
-	{
-		ofxUIToggle *toggle = (ofxUIToggle *) e.getToggle();
-	}
-	//eventos do grupo de botoes relacionado com a performance
-	else if(kind == OFX_UI_WIDGET_RADIO)
-    {
-        ofxUIRadio *radio = (ofxUIRadio *) e.widget;
-        cout << radio->getName() << " value: " << radio->getValue() << " active name: " << radio->getActiveName() << endl; 
-	}
-	else if(name == RANGE_SLIDER_NAME)
+	if(name == RANGE_SLIDER_NAME)
 	{
 		ofxUIRangeSlider *slider = (ofxUIRangeSlider *) e.widget;
-		//cout << slider->getName() << " low [%; #] -> [" << slider->getPercentValueLow() <<
-		//	"; " << slider->getScaledValueLow() << "], high [%;#] -> [" <<
-		//	slider->getPercentValueHigh() << "; " << slider->getScaledValueHigh() << "];\n";
-
 		range_minimum_percentage = slider->getPercentValueLow();
 		range_maximum_percentage = slider->getPercentValueHigh();
 	}
-	else if(name == "People") //slider das pessoas
-	{
-		int levels = int(e.getSlider()->getScaledValue());
-		e.getSlider()->setValue( levels );
-	}
-	else if(name == "Edges") //slider das pessoas
-	{
-		int levels = int(e.getSlider()->getScaledValue());
-		e.getSlider()->setValue(levels);
-	}
-	else if(name == "Luminance") //slider da luminancia
-	{
-		int levels = int(e.getSlider()->getScaledValue());
-		e.getSlider()->setValue( levels );
-	}
-	else if(name == "Contrast") //slider do constraste
+	else if(name == "Red" || name == "Green" || name == "Blue" || name == "# of People" ||
+		name == "% of Edges" || name == "Luminance" || name == "Contrast" ||
+		name == "# of Objects" || name == "% of Texture") //coloca o step do slider de 1 em 1!
 	{
 		int levels = int(e.getSlider()->getScaledValue());
 		e.getSlider()->setValue( levels );
@@ -403,30 +364,22 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 		radio_button_position = RANGE;
 	else if(name == "Vertical")
 		radio_button_position2 = VERTICAL;
-	else if(name == "Any Direction")
+	else if(name == "All")
 		radio_button_position2 = ANY;
 	else if(name == "None")
 		radio_button_position2 = NONE;
 	else if(name == "Horizontal")
 		radio_button_position2 = HORIZONTAL;
 	else if(name == "Open Object" && e.getButton()->getValue() == 0) {
-		cout << "MERDA DOS OBJETOS" << "\n";
 		ofFileDialogResult openFileResult = ofSystemLoadDialog("Select a jpg or png"); 
 		//Check if the user opened a file
 		if (openFileResult.bSuccess){
 			ofLogVerbose("User selected a file");
 			path = openFileResult.getPath();
 			findObject = true; 
-		}else 
+		}
+		else 
 			ofLogVerbose("User hit cancel");
-	}
-	else if(name == "# of Objects"){
-		int levels = int(e.getSlider()->getScaledValue());
-		e.getSlider()->setValue( levels );
-	}
-	else if(name == "Edges"){
-		int levels = int(e.getSlider()->getScaledValue());
-		e.getSlider()->setValue( levels );
 	}
 	else if(name == "Luminance filter") {
 		int val = e.getToggle()->getValue();
@@ -456,12 +409,23 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 		else
 			dominant_color_enabled = false;
 	}
+	else if(name == "Gabor filter") {
+		int val = e.getToggle()->getValue();
+		if(val == 1)
+			gabor_enabled = true;
+		else
+			gabor_enabled = false;
+	}
 }
 
 //--------------------------------------------------------------
 void ofApp::exit()
 {    
 	delete gui1;
+	delete gui2;
+	delete gui3;
+	delete gui4;
+	delete gui5;
 
 }
 
@@ -507,13 +471,13 @@ void ofApp::setGUI1()
 	gui1->addSpacer();
 	gui1->addSpacer();
 	gui1->addToggle("Dominant color filter", false);
-	gui1->addSlider("Red", 0.0, 255.0, &red)->setTriggerType(OFX_UI_TRIGGER_CHANGE);
-	gui1->addSlider("Green", 0.0, 255.0, &green)->setTriggerType(OFX_UI_TRIGGER_CHANGE);
-	gui1->addSlider("Blue", 0.0, 255.0, &blue)->setTriggerType(OFX_UI_TRIGGER_CHANGE);
+	gui1->addSlider("Red", 0.0, 255.0, &red)->setTriggerType(OFX_UI_TRIGGER_ALL);
+	gui1->addSlider("Green", 0.0, 255.0, &green)->setTriggerType(OFX_UI_TRIGGER_ALL);
+	gui1->addSlider("Blue", 0.0, 255.0, &blue)->setTriggerType(OFX_UI_TRIGGER_ALL);
 
 	gui1->addSpacer();
 	gui1->addToggle("Luminance filter", false);
-	ofxUISlider *slider1 = gui1->addSlider("Luminance", 0.0, 100.0, &luminance);
+	ofxUISlider *slider1 = gui1->addSlider("Luminance", 0.0, 255.0, &luminance);
 	slider1->setTriggerType(OFX_UI_TRIGGER_ALL);
 	
 	gui1->addSpacer();
@@ -523,14 +487,19 @@ void ofApp::setGUI1()
 	
 	gui1->addSpacer();
 	gui1->addToggle("People filter", false);
-	ofxUISlider *slider3 = gui1->addSlider("People", 0.0, 50.0, &number_of_people);
+	ofxUISlider *slider3 = gui1->addSlider("# of People", 0.0, 50.0, &number_of_people);
 	slider3->setTriggerType(OFX_UI_TRIGGER_ALL);
 
 	gui1->addSpacer();
 	ofxUIRadio *radio2  = gui1->addRadio("Edges", radio_options2, OFX_UI_ORIENTATION_HORIZONTAL);
 	radio2->activateToggle(radio_options2[0]);
 	radio_button_position2 = NONE;   
-	gui1->addSlider("Edges", 0.0, 100.0, &number_of_edges);
+	gui1->addSlider("% of Edges", 0.0, 100.0, &number_of_edges);
+
+	gui1->addSpacer();
+	gui1->addToggle("Gabor filter", false);
+	ofxUISlider *slider5 = gui1->addSlider("% of Texture", 0.0, 100.0, &gabor_filter);
+	slider5->setTriggerType(OFX_UI_TRIGGER_ALL);
 
     gui1->addSpacer();
 	gui1->addButton("Open Object", false);
@@ -724,13 +693,6 @@ void ofApp::mousePressed(int x, int y, int button){
 			(x <= ofGetWidth()*0.5 + SMALL_BUTTON_WIDTH + SMALL_INTERVAL/2) &&
 			(y >= ofGetHeight()*0.86) && (y <= ofGetHeight()*0.86 + SMALL_BUTTON_HEIGHT)) 
 		{		
-			//adicionámos algum ruido para evitar o caso em que temos 
-			//15 elementos no array (ou multiplo de 15)
-			//usando a formula abaixo, ia dar 1, o que dava 2 páginas, mas na realidade
-			//os 15 elementos cabem todos na mesma pagina.
-			//float div_aux = (img_array.size()/MAX_ITEMS_PER_PAGE) - 0.005;
-			//int max_pages = floor(div_aux) + 1;
-
 			cout << "IMG_ARRAY.SIZE(): " << img_array.size() << "\n";
 			cout << "MAX_ITEMS_PER_PAGE: " << MAX_ITEMS_PER_PAGE << "\n";
 			cout << "ceil da cena: " << max_pages << "\n";
@@ -781,7 +743,9 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 }
 
-void ofApp::setFrames(){
+void ofApp::applyFiltersToFrame(){
+
+	can_update_frame = false;
 
 	nr_edges = 0;
 	match_object = 0;
@@ -794,15 +758,15 @@ void ofApp::setFrames(){
 	float value_max = -1;
 	float value_min = 100;
 
-	double gabor_stuff = 0.0;
-
 	ofImage img_test;
 	unsigned char * pixels = movie.getPixels();
-	if(movie.getCurrentFrame() >= 100 && movie.getCurrentFrame() < 115) {
+
+	//TESTE TESTE TESTE - APAGAR DEPOIS
+	/*if(movie.getCurrentFrame() >= 100 && movie.getCurrentFrame() < 115) {
 		img_test.setFromPixels(pixels, movie.getWidth(), movie.getHeight(), OF_IMAGE_COLOR, true);
 		img_array.push_back(img_test);
 		cout << movie.getCurrentFrame() << ": dentro da cena do array\n"; 
-	}
+	}*/
 
 	//DUAS IMAGENS IGUAIS, UMA A CORES OUTRA A P/B
 	ofImage image_colorful;
@@ -814,7 +778,7 @@ void ofApp::setFrames(){
 	unsigned char * teste1 = image_grayscale.getPixels();
 	unsigned char * teste2 = image_colorful.getPixels();
 
-	float selected_color = img.calcColor(red, green, blue);
+	sliders_dominant_color = img.calcColor(red, green, blue);
 	
 	//apenas calcula de 10 em 10 frames e só se o filtro estiver ativo
 	if(movie.getCurrentFrame() % 10 == 0 && people_enabled) {
@@ -843,8 +807,10 @@ void ofApp::setFrames(){
 	}
 
 	//TODO: A CENA DO GABOR ESTÁ A DAR VALORES ENTRE 0.039 E 0.042!!!!!!
-	//gabor_stuff = img.calculateTexture();
-	//cout << "GABOR: " << gabor_stuff << "\n";
+	if(gabor_enabled) {
+		gabor_value = img.calculateTexture();
+		cout << "GABOR: " << gabor_value << "\n";
+	}
 
 	//normalização dos dados :)
 	nr_edges /= i*j;
@@ -853,16 +819,73 @@ void ofApp::setFrames(){
 	mean_luminance /= i*j;
 	hue_total /= i*j;
 
+	cout << radio_button_position2 << "\n";
+	cout << "[edges] sliders - filter: " << number_of_edges << " - " << nr_edges << "\n";
+
 	//PATTERN MATCHING - sift/surf
 	if(findObject){
 		match_object = img.match(path);
 		cout << "matching: " << match_object << "\n";
 	}
 
-	//SÓ GUARDA AS FRAMES QUE CUMPRAM O REQUISITO DOS FILTROS!!
+	bool result = saveFrame();
+
+	can_update_frame = true;
+}
+
+bool ofApp::saveFrame() {
+	//o range pretendido é para valores ACIMA do definido nos sliders
 	if(radio_button_position == ABOVE) 
 	{
-		if(mean_luminance >= luminance 
+		//se filtro ativado, ver se valores estao no alcance
+		if(luminance_enabled) { //luminancia
+			if(mean_luminance < luminance) //valores estao fora, retorna logo false
+				return false;
+		}
+		if(people_enabled) { //contagem de pessoas
+			if(nr_people < number_of_people) 
+				return false;
+		}
+		if(dominant_color_enabled) { //cor dominante - hue
+			if(hue_total < sliders_dominant_color)
+				return false;
+		}
+		if(contrast_enabled) { //contraste
+			if(contrastVal < contrast) 
+				return false;
+		}
+		if(findObject) { //pattern matching - sift
+			if(match_object < number_of_objects) 
+				return false;
+		}
+		if(gabor_filter) { //texturas - gabor
+			if(gabor_value < gabor_filter) 
+				return false;
+		}
+		if(radio_button_position2 != NONE) { //contornos
+			if(nr_edges < number_of_edges) 
+				return false;
+		}
+
+		cout << "FRAME PASSOU, GUARDAR!\n";
+		return true;
+	}
+	//o range pretendido é para valores ABAIXO do definido nos sliders
+	else if(radio_button_position == BELOW) {
+
+
+
+	}
+	//o range pretendido é para valores À VOLTA do definido nos sliders
+	else if(radio_button_position == RANGE) {
+
+
+
+	}
+	
+
+		/*if(mean_luminance >= luminance)
+
 			&& nr_people >= number_of_people
 			&& selected_color >= hue_total
 			&& contrastVal >= contrast
@@ -894,6 +917,6 @@ void ofApp::setFrames(){
 			contador_de_frames++;
 			frames.push_back(movie.getCurrentFrame());		
 		}
-	}
+	}*/
 }
 

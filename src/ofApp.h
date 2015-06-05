@@ -59,12 +59,9 @@ class ofApp : public ofBaseApp {
 		void setGUI4();
 		void setGUI5();
 
-		void setFrames();
-		//float calcSelectedColor();
+		void applyFiltersToFrame();
+		bool saveFrame();
 	
-		//customization stuff
-		//int fast_or_beauty_option; //0 - faster; 1 - slower
-
 		//cenas da barra lateral e do background
 		ofxUISuperCanvas *gui1;
 		ofxUISuperCanvas *gui2;
@@ -72,7 +69,6 @@ class ofApp : public ofBaseApp {
 		ofxUISuperCanvas *gui4;
 		ofxUISuperCanvas *gui5;
 		bool hideGUI;
-		float red, green, blue, luminance, contrast, number_of_people, dominant_color, number_of_edges, number_of_objects;
 		vector<string> radio_options;
 		vector<string> radio_options2;
 
@@ -123,23 +119,39 @@ class ofApp : public ofBaseApp {
 		int gallery_selected_page;
 		int current_img;
 		int contador_de_frames;
+
+		vector<ofImage> img_array;
 		vector<int> frames; 
+
+		//variaveis p/ calculo dos valores dos filtros
 		int mean_luminance; 
 		double contrastVal;
 		int nr_people;
+		int match_object;
 		double nr_edges;
 		double hue_total;
+		double sliders_dominant_color;
+		double gabor_value;
 
+		//variaveis dos sliders - float
+		float red;
+		float green;
+		float blue;
+		float luminance;
+		float contrast; 
+		float gabor_filter;
+		float number_of_people;
+		float number_of_edges;
+		float number_of_objects;
+		
+		//toggle da UI da esquerda
 		bool dominant_color_enabled;
 		bool luminance_enabled;
 		bool contrast_enabled;
 		bool people_enabled;
+		bool gabor_enabled;
+		bool findObject;
 
 		string path; 
-		bool findObject;
-		bool hasObject; 
-		bool gaborfilter;
-		int match_object;
-
-		vector<ofImage> img_array;
+		bool can_update_frame;
 };

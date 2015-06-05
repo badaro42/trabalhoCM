@@ -35,7 +35,7 @@ public:
 	std::vector<int> getVector(int type);
 	float calcColorAux(int i, int j);
 	float calcColor(float red, float green, float blue);
-	double calculateContrast(int x, int y); 
+	float calculateContrast(int x, int y); 
 	void setobj(string path);
 	ofImage getObj();
 	int match(ofImage img); 
