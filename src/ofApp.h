@@ -12,11 +12,21 @@
 class ofApp : public ofBaseApp {
 
 	public:
-		static const int LARGE_BUTTON_WIDTH = 350;
+		/*static const int LARGE_BUTTON_WIDTH = 350;
 		static const int BUTTON_HEIGHT = 110;
 		static const int SMALL_BUTTON_WIDTH = 110;
+		static const int SMALL_INTERVAL = 10;*/
+
+		static const int GALLERY_BUTTON_WIDTH = 175;
+
+		static const int LARGE_BUTTON_WIDTH = 110;
+		static const int LARGE_BUTTON_HEIGHT = 110;
+
+		static const int SMALL_BUTTON_HEIGHT = 75;
+		static const int SMALL_BUTTON_WIDTH = 75;
 		static const int SMALL_INTERVAL = 10;
 
+		
 		static const int ABOVE = 0;
 		static const int BELOW = 1;
 		static const int RANGE = 2;
@@ -47,8 +57,11 @@ class ofApp : public ofBaseApp {
 		void guiEvent(ofxUIEventArgs &e);
 		void setGUI1();
 		void setGUI2(float duration);
+		void setGUI3();
+		void setGUI4();
 
 		void setFrames();
+		//float calcSelectedColor();
 	
 		//customization stuff
 		//int fast_or_beauty_option; //0 - faster; 1 - slower
@@ -56,6 +69,8 @@ class ofApp : public ofBaseApp {
 		//cenas da barra lateral e do background
 		ofxUISuperCanvas *gui1;
 		ofxUISuperCanvas *gui2;
+		ofxUISuperCanvas *gui3;
+		ofxUISuperCanvas *gui4;
 		bool hideGUI;
 		float red, green, blue, luminance, contrast, number_of_people, dominant_color, number_of_edges, number_of_objects;
 		vector<string> radio_options;
@@ -67,7 +82,6 @@ class ofApp : public ofBaseApp {
 
 		//cenas do video
 		ofVideoPlayer movie;
-		bool isFullScreen;
 		vector<string> video_paths;
 		vector<float> movies_duration;
 
@@ -94,13 +108,15 @@ class ofApp : public ofBaseApp {
 		bool redraw_frame_flag;
 		bool load_range_gui;
 		bool load_video;
-		bool entered_exited_fullscreen;
 		int radio_button_position; 
 		int radio_button_position2; 
-		float calcSelectedColor();
+		
+		float top_guis_start_point_width;
+		float top_guis_final_point_width;
+		float top_guis_width;
+		float start_width_play_btn;
 
 		int current_img;
-
 		int contador_de_frames;
 		vector<int> frames; 
 		int mean_luminance; 

@@ -168,7 +168,9 @@ double Image::calculateTexture(){
     double th = 0;
     
 	cv::Mat dest(getHeight(), getWidth(), CV_8UC1, pixels_gray);
+	//cv::Mat dest;
 	cv::Mat src(getHeight(), getWidth(), CV_8UC3, pixels_color);
+	//cvtColor(src, dest, CV_RGB2GRAY);
 
     double num = 0;
     double num_total = 0;
@@ -180,18 +182,19 @@ double Image::calculateTexture(){
         imageOut.setFromPixels((unsigned char *) IplImage(src).imageData, src.size().width, src.size().height, OF_IMAGE_GRAYSCALE);
         
         // contar numero de pixels acima de threshold - 240
-        int x = 0, width = imageOut.width, heigth = imageOut.height, y;
+        int x, y; 
+		int width = imageOut.width;
+		int heigth = imageOut.height;
+	
         unsigned char* pixels = imageOut.getPixels();
         num = 0;
-        for (; x < width; x++){
-            y = 0;
-            for(; y < heigth; y++){
-                
+        for (x = 0; x < width; x++){
+            for(y = 0; y < heigth; y++){
                 if(pixels[(y*width+x)] >= 240)
                     num++;
             }
         }
-        num = num/(width*height);
+        num /= (width*height);
         num_total += num;
     }
     

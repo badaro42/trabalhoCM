@@ -1,8 +1,8 @@
 #include "ofApp.h"
 
-#define FRAME_WIDTH 600
-#define FRAME_HEIGHT 440
-#define FADE_SIZE 50
+#define FRAME_WIDTH 550
+#define FRAME_HEIGHT 350
+#define FADE_SIZE 150
 
 const std::string ofApp::RANGE_SLIDER_NAME = "MTIME";
 
@@ -20,14 +20,12 @@ void ofApp::setup(){
 	hasObject = false;
 	
 	video_playing = false;
-	isFullScreen = false;
 
 	choose_video_and_range_screen = true;
 	play_video_screen = false;
 	gallery_screen = false;
 
 	load_video = false;
-	entered_exited_fullscreen = false;
 	load_range_gui = true;
 	redraw_frame_flag = false;
 
@@ -35,19 +33,19 @@ void ofApp::setup(){
 	ofVideoPlayer temp_video;
 
 	back_button.loadImage("images/back_button.png");
-	back_button.resize(SMALL_BUTTON_WIDTH, BUTTON_HEIGHT);
+	back_button.resize(SMALL_BUTTON_WIDTH, SMALL_BUTTON_HEIGHT);
 
 	play_pause_button.loadImage("images/play_pause_button.jpg");
-	play_pause_button.resize(SMALL_BUTTON_WIDTH, BUTTON_HEIGHT);
+	play_pause_button.resize(SMALL_BUTTON_WIDTH, SMALL_BUTTON_HEIGHT);
 
 	stop_button.loadImage("images/stop_button.jpg");
-	stop_button.resize(SMALL_BUTTON_WIDTH, BUTTON_HEIGHT);
+	stop_button.resize(SMALL_BUTTON_WIDTH, SMALL_BUTTON_HEIGHT);
 
 	confirm_button.loadImage("images/apply_button.png");
-	confirm_button.resize(SMALL_BUTTON_WIDTH, BUTTON_HEIGHT);
+	confirm_button.resize(LARGE_BUTTON_WIDTH, LARGE_BUTTON_HEIGHT);
 	
 	view_gallery_button.loadImage("images/view_gallery.jpg");
-	view_gallery_button.resize(LARGE_BUTTON_WIDTH, BUTTON_HEIGHT);
+	view_gallery_button.resize(GALLERY_BUTTON_WIDTH, SMALL_BUTTON_HEIGHT);
     
     int nFiles = dir.listDir("movies");
 
@@ -70,14 +68,18 @@ void ofApp::setup(){
 			int middleFrame = temp_video.getTotalNumFrames()/2;
 			temp_video.setFrame(middleFrame);
 
-			frames[i].setFromPixels(temp_video.getPixels(), 
-				temp_video.getWidth(), temp_video.getHeight(),
+			ofImage temp_img;
+			temp_img.setFromPixels(temp_video.getPixels(), temp_video.getWidth(), temp_video.getHeight(), OF_IMAGE_COLOR, true);
+			temp_img.resize(FRAME_WIDTH, FRAME_HEIGHT);
+
+			frames[i].setFromPixels(temp_img.getPixels(), 
+				temp_img.getWidth(), temp_img.getHeight(),
 				OF_IMAGE_COLOR);
 		}
 		img_swipe.setIndicatorStyle(0.9f,7,0.05f);
 		img_swipe.load(frames,FRAME_WIDTH,FRAME_HEIGHT,FADE_SIZE);
-		img_swipe.setAnchorPercent(0.5,0.7);
-		position.set(ofGetWidth()*0.65,ofGetHeight()*0.5);
+		img_swipe.setAnchorPercent(0.5,0.45);
+		position.set(ofGetWidth()*0.63,ofGetHeight()*0.49);
 	}
 
 	//a duraçao do primeiro filme
@@ -97,8 +99,16 @@ void ofApp::setup(){
 
 	ofSetVerticalSync(true);
 
+	top_guis_start_point_width = ofGetWidth()*0.30;
+	top_guis_final_point_width = ofGetWidth()*0.96;
+	top_guis_width = ((top_guis_final_point_width - top_guis_start_point_width)/2) - 20;
+
+	start_width_play_btn = ofGetWidth()*0.34 + 2*SMALL_BUTTON_WIDTH + 2*SMALL_INTERVAL;
+	 
 	setGUI1();
 	setGUI2(duration);
+	setGUI3();
+	setGUI4();
 }
 
 //--------------------------------------------------------------
@@ -130,11 +140,9 @@ void ofApp::update(){
 		redraw_frame_flag = true;
 		load_video = false;
 	}
-
 	//estamos no ecra do video e o video esta' a tocar, fazemos update
-	else if(play_video_screen) {
+	else if(play_video_screen) 
 		movie.update();
-	}
 
 	float t = ofGetElapsedTimef();
     float dt = t - time;
@@ -160,33 +168,23 @@ void ofApp::draw(){
 	//estamos no primeiro ecra, para escolher video e definir o range 
 	if(choose_video_and_range_screen) {
 		//desenha a cena do swipe com as imagens dos videos
-		if(isFullScreen)
-			img_swipe.draw(ofGetWidth()*0.65, ofGetHeight()*0.5);
-		else
-			img_swipe.draw(position.x, position.y);
+		img_swipe.draw(position.x, position.y);
 
 		//desenha o botao para confirmar o range
-		confirm_button.draw((ofGetWidth()*0.9) - SMALL_BUTTON_WIDTH, ofGetHeight()*0.65);
-
-		if(entered_exited_fullscreen) {
-			cout << "ENTRAMOS OU SAIMOS DO FULLSCREEN\n";
-
-			delete gui2;
-			setGUI2(movies_duration[current_img]);
-			entered_exited_fullscreen = false;
-		}
+		confirm_button.draw((ofGetWidth()*0.92) - LARGE_BUTTON_WIDTH, ofGetHeight()*0.81);
 	}
 
 	//estamos no segundo ecra, o do video
 	else if(play_video_screen) {
-		back_button.draw((ofGetWidth()*0.65)-(1.5*SMALL_BUTTON_WIDTH)-SMALL_INTERVAL, 
-			ofGetHeight()*0.62);
-		play_pause_button.draw(ofGetWidth()*0.65-(SMALL_BUTTON_WIDTH/2), 
-			ofGetHeight()*0.62);
-		stop_button.draw(ofGetWidth()*0.65+(SMALL_BUTTON_WIDTH/2)+SMALL_INTERVAL, 
-			ofGetHeight()*0.62);
-		view_gallery_button.draw((ofGetWidth()*0.65)-(1.5*SMALL_BUTTON_WIDTH)-SMALL_INTERVAL, 
-			ofGetHeight()*0.8);
+
+		back_button.draw(ofGetWidth()*0.34, 
+			ofGetHeight()*0.81);
+		play_pause_button.draw(start_width_play_btn, 
+			ofGetHeight()*0.81);
+		stop_button.draw(start_width_play_btn + SMALL_BUTTON_WIDTH + SMALL_INTERVAL, 
+			ofGetHeight()*0.81);
+		view_gallery_button.draw((ofGetWidth()*0.92)-GALLERY_BUTTON_WIDTH, 
+			ofGetHeight()*0.81);
 	
 		ofSetHexColor(0xFFFFFF);
 
@@ -194,29 +192,33 @@ void ofApp::draw(){
 		if(redraw_frame_flag)
 			movie.play();
 		
-		movie.draw(ofGetWidth()*0.65-movie.getWidth()/2,
-			ofGetHeight()*0.38-movie.getHeight()/2);
+		movie.draw(ofGetWidth()*0.361, ofGetHeight()*0.27, FRAME_WIDTH, FRAME_HEIGHT);
 
 		ofSetHexColor(0x000000);
 
 		if(video_playing)
 			setFrames();
 
-		//cout << "Contador de frames:" << contador_de_frames << "\n";
-		//cout << "Contador de pessoas" << nr_people << "\n";
-		ofDrawBitmapString("range chosen: from " + ofToString(int(range_minimum_percentage*movie.getTotalNumFrames())) + 
-			" to " + ofToString(int(range_maximum_percentage*movie.getTotalNumFrames())),275,330);
-		ofDrawBitmapString("frame: " + ofToString(movie.getCurrentFrame()) + "/"+ofToString(movie.getTotalNumFrames()),275,350);
-		ofDrawBitmapString("duration: " + ofToString(movie.getPosition()*movie.getDuration(),2) + "/"+ofToString(movie.getDuration(),2),275,370);
-		ofDrawBitmapString("speed: " + ofToString(movie.getSpeed(),2),275,390);
-		ofDrawBitmapString("luminance: " + ofToString(mean_luminance), 275, 410);
-		ofDrawBitmapString("caras: " + ofToString(nr_people), 275, 430);
-		ofDrawBitmapString("contrast: " + ofToString(contrastVal), 275, 450);
-		ofDrawBitmapString("objects: "  + ofToString(match_object), 275, 470);
-		ofDrawBitmapString("edges: " + ofToString(nr_edges), 275, 490);
-		ofDrawBitmapString("hue_total: " + ofToString(hue_total), 275, 510);
+		float right_gui_left_column = top_guis_final_point_width - top_guis_width + 4;
+		float right_gui_right_column = (top_guis_final_point_width - top_guis_width/2) + 2;
+
+		//strings dos metadados do video
+		ofDrawBitmapString("Video path: " + movie.getMoviePath(), ofGetWidth()*0.304, ofGetHeight()*0.065);
+		ofDrawBitmapString("Range chosen: " + ofToString(int(range_minimum_percentage*movie.getTotalNumFrames())) + 
+			" to " + ofToString(int(range_maximum_percentage*movie.getTotalNumFrames())) + ".",ofGetWidth()*0.304, ofGetHeight()*0.090);
+		ofDrawBitmapString("Frame (current/total): " + ofToString(movie.getCurrentFrame()) + "/"+ofToString(movie.getTotalNumFrames()), ofGetWidth()*0.304, ofGetHeight()*0.115);
+		ofDrawBitmapString("Duration (current/total): " + ofToString(movie.getPosition()*movie.getDuration(),2) + "/"+ofToString(movie.getDuration(),2), 
+			ofGetWidth()*0.304, ofGetHeight()*0.140);
+		ofDrawBitmapString("Speed: " + ofToString(movie.getSpeed(),2),ofGetWidth()*0.304, ofGetHeight()*0.165);
 		
-		//ofDrawBitmapString("caras: " + ofToString(nr_people), 275, 430);
+		//strings dos dos valores dos filtros aplicados
+		ofDrawBitmapString("# faces: " + ofToString(nr_people), right_gui_left_column, ofGetHeight()*0.065);
+		ofDrawBitmapString("Luminance: " + ofToString(mean_luminance), right_gui_left_column, ofGetHeight()*0.090);
+		ofDrawBitmapString("# objects: "  + ofToString(match_object), right_gui_left_column, ofGetHeight()*0.115);
+		ofDrawBitmapString("Contrast: " + ofToString(contrastVal), right_gui_left_column, ofGetHeight()*0.140);
+		ofDrawBitmapString("Edges %: " + ofToString(nr_edges), right_gui_left_column, ofGetHeight()*0.165);
+		ofDrawBitmapString("Hue (0-360): " + ofToString(int(hue_total)), right_gui_right_column, ofGetHeight()*0.065);
+		
 		//paramos o video para que
 		if(redraw_frame_flag) {
 			movie.stop();
@@ -231,20 +233,22 @@ void ofApp::draw(){
 		}
 	}
 
-    ofSetColor(255);
+    ofSetColor(0);
 
 	//linhas para indicar a area onde é possivel fazer swipe com o rato
-	//DESACTIVAR ANTES DA ENTREGA!!!
-	/*ofLine(ofGetWidth()*0.4, ofGetHeight()*0.17, ofGetWidth()*0.4, ofGetHeight()*0.6); //vertical esquerda
-	ofLine(ofGetWidth()*0.9, ofGetHeight()*0.17, ofGetWidth()*0.9, ofGetHeight()*0.6); //vertical direita
-	ofLine(ofGetWidth()*0.38, ofGetHeight()*0.2, ofGetWidth()*0.92, ofGetHeight()*0.2);	//horizontal cima
-	ofLine(ofGetWidth()*0.38, ofGetHeight()*0.57, ofGetWidth()*0.92, ofGetHeight()*0.57); //horizontal baixo*/
+	ofLine(ofGetWidth()*0.34, ofGetHeight()*0.24, ofGetWidth()*0.34, ofGetHeight()*0.24+75); //topo esquerdo vert.
+	ofLine(ofGetWidth()*0.34, ofGetHeight()*0.24, ofGetWidth()*0.34+75, ofGetHeight()*0.24); //topo esquerdo horiz.
+	
+	ofLine(ofGetWidth()*0.34, ofGetHeight()*0.79, ofGetWidth()*0.34+75, ofGetHeight()*0.79); //fundo esquerdo horiz.
+	ofLine(ofGetWidth()*0.34, ofGetHeight()*0.79, ofGetWidth()*0.34, ofGetHeight()*0.79-75); //fundo esquerdo vert.
+	
+	ofLine(ofGetWidth()*0.92, ofGetHeight()*0.24, ofGetWidth()*0.92, ofGetHeight()*0.24+75); //topo direito vert.
+	ofLine(ofGetWidth()*0.92, ofGetHeight()*0.24, ofGetWidth()*0.92-75, ofGetHeight()*0.24); //topo direito horiz.
+	
+	ofLine(ofGetWidth()*0.92, ofGetHeight()*0.79, ofGetWidth()*0.92-75, ofGetHeight()*0.79); //fundo direito horiz.
+	ofLine(ofGetWidth()*0.92, ofGetHeight()*0.79, ofGetWidth()*0.92, ofGetHeight()*0.79-75); //fundo direito vert.
 
-	ofLine(ofGetWidth()*0.4, ofGetHeight()*0.17, ofGetWidth()*0.4, ofGetHeight()*0.6); //vertical esquerda
-	ofLine(ofGetWidth()*0.9, ofGetHeight()*0.17, ofGetWidth()*0.9, ofGetHeight()*0.6); //vertical direita
-	ofLine(ofGetWidth()*0.38, ofGetHeight()*0.2, ofGetWidth()*0.92, ofGetHeight()*0.2);	//horizontal cima
-	ofLine(ofGetWidth()*0.38, ofGetHeight()*0.57, ofGetWidth()*0.92, ofGetHeight()*0.57); //horizontal baixo
-
+	ofSetColor(255);
 }
 
 void ofApp::guiEvent(ofxUIEventArgs &e)
@@ -386,13 +390,7 @@ void ofApp::exit()
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
 	switch (key)
-	{            
-		/*case 'f':
-			ofToggleFullscreen();
-			isFullScreen = !isFullScreen;
-			entered_exited_fullscreen = true;
-			break;*/
-            
+	{                        
 		case 'h':
             gui1->toggleVisible();
 			break;
@@ -402,6 +400,7 @@ void ofApp::keyPressed(int key){
 	}
 }
 
+//GUI DOS CONTROLOS: LADO ESQUERDO DA APP
 void ofApp::setGUI1()
 {	
 	radio_options.push_back("Above");
@@ -417,17 +416,18 @@ void ofApp::setGUI1()
     gui1->addLabel("Press 'h' to hide interface", OFX_UI_FONT_SMALL);
     
     gui1->addSpacer();
-	gui1->addSpacer();
+	gui1->addTextArea("textarea", 
+		"Start by choosing a video. To do that, swipe left/right on the bounding box. You can change the filters applied to the video frames at any given moment.", OFX_UI_FONT_SMALL);
 
+	gui1->addSpacer();
 	string textString = "Choose the ranger to be considered when apllying the filters.";    
     gui1->addTextArea("textarea", textString, OFX_UI_FONT_SMALL);
-
 	ofxUIRadio *radio  = gui1->addRadio("Radio Button", radio_options, OFX_UI_ORIENTATION_HORIZONTAL);
 	radio->activateToggle(radio_options[0]);
 	radio_button_position = 0;
-	gui1->addSpacer();
 
-	//gui1->addLabel("Filter by dominant color");
+	gui1->addSpacer();
+	gui1->addSpacer();
 	gui1->addToggle("Dominant color filter", false);
 	gui1->addSlider("Red", 0.0, 255.0, &red)->setTriggerType(OFX_UI_TRIGGER_CHANGE);
 	gui1->addSlider("Green", 0.0, 255.0, &green)->setTriggerType(OFX_UI_TRIGGER_CHANGE);
@@ -460,42 +460,40 @@ void ofApp::setGUI1()
 	slider4->setTriggerType(OFX_UI_TRIGGER_ALL);
 
 	gui1->addSpacer();
-
-	/*gui1->addSpacer();
-    gui1->addLabel("VERTICAL SLIDERS"); 
-    gui1->addSlider("1", 0.0, 255.0, 100.0, 17, 64);
-    gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-	gui1->addSlider("2", 0.0, 255.0, 150.0, 17, 64);
-	gui1->addSlider("3", 0.0, 255.0, 200.0, 17, 64);
-	gui1->addSlider("4", 0.0, 255.0, 250.0, 17, 64);
-	gui1->addSlider("5", 0.0, 255.0, 250.0, 17, 64);
-	gui1->addSlider("6", 0.0, 255.0, 250.0, 17, 64);
-	gui1->addSlider("7", 0.0, 255.0, 250.0, 17, 64);
-	gui1->addSlider("8", 0.0, 255.0, 250.0, 17, 64);
-	gui1->addSlider("9", 0.0, 255.0, 250.0, 17, 64);
-	gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);*/
-    
     gui1->autoSizeToFitWidgets();
 	ofAddListener(gui1->newGUIEvent,this,&ofApp::guiEvent);
 }
 
+//GUI DO RANGE DO VIDEO: POR BAIXO DO VIDEO, APENAS PRIMEIRO ECRA
 void ofApp::setGUI2(float duration)
 {
-	gui2 = new ofxUISuperCanvas("", ofGetWidth()*0.4, ofGetHeight()*0.65, 
-		ofGetWidth()*0.5 - SMALL_INTERVAL - SMALL_BUTTON_WIDTH, BUTTON_HEIGHT);   
+	gui2 = new ofxUISuperCanvas("", ofGetWidth()*0.34, ofGetHeight()*0.81, 
+		ofGetWidth()*0.56 - SMALL_INTERVAL - LARGE_BUTTON_WIDTH, LARGE_BUTTON_HEIGHT);   
     gui2->addLabel("Movie Time Interval");
+
 	gui2->addSpacer();
 	gui2->addTextArea("textarea", 
 		"Choose the desired range. Press the button to confirm.", OFX_UI_FONT_SMALL);
 	gui2->addSpacer();
 	gui2->addRangeSlider(RANGE_SLIDER_NAME, 0.0, duration, 
 		range_minimum_percentage*duration, range_maximum_percentage*duration);
-
-	//cout << "[range_min; range_max; min_frame; max_frame] -> [" << range_minimum <<
-	//	"; " << range_maximum << "; " << min_frame << "; " << max_frame << "]\n";
        
-    //gui2->autoSizeToFitWidgets();
 	ofAddListener(gui2->newGUIEvent,this,&ofApp::guiEvent);
+}
+
+//GUI DA INFO DO VIDEO: POR CIMA DO VIDEO, À ESQUERDA, APENAS ECRA DO VIDEO A TOCAR
+void ofApp::setGUI3() {
+	gui3 = new ofxUISuperCanvas("Selected movie metadata", 
+		top_guis_start_point_width, 5, top_guis_width, ofGetHeight()*0.18);
+	gui3->addSpacer();
+}
+
+//GUI DOS VALORES DOS FILTROS: POR CIMA DO VIDEO, À DIREITA, APENAS ECRA DO VIDEO A TOCAR
+void ofApp::setGUI4() {
+	gui4 = new ofxUISuperCanvas("Filter values (updated for each frame)", 
+		top_guis_final_point_width - top_guis_width, 5, 
+		top_guis_width, ofGetHeight()*0.18);
+	gui4->addSpacer();
 }
 
 //--------------------------------------------------------------
@@ -516,18 +514,22 @@ void ofApp::mouseDragged(int x, int y, int button){
 //------------------------------------------------------------
 //so é possivel fazer swipe dentro da area do video!
 void ofApp::mousePressed(int x, int y, int button){
-	//swipe dentro do rectangulo das imagens do video - so no primeiro ecra
-	if((x >= ofGetWidth()*0.4) && (x <= ofGetWidth()*0.9) &&
-		(y >= ofGetHeight()*0.2) && (y <= ofGetHeight()*0.57) &&
+
+	float temp_stop_btn_width = start_width_play_btn + SMALL_BUTTON_WIDTH + SMALL_INTERVAL;
+
+	//swipe dentro do rectangulo das imagens do video - so no primeiro ecra - TÁ!
+	if((x >= ofGetWidth()*0.34) && (x <= ofGetWidth()*0.92) &&
+		(y >= ofGetHeight()*0.24) && (y <= ofGetHeight()*0.79) &&
 		choose_video_and_range_screen)
 	{
 		img_swipe.pressed(ofPoint(x,y)-position);
+		cout << "CENA DO SWIPE!!!!1!!!!" << "\n";
     }
-	//botao para confirmar - so no primeiro ecra!!
-	else if((x >= ofGetWidth()*0.9 - SMALL_BUTTON_WIDTH) &&
-		(x <= ofGetWidth()*0.9) &&
-		(y >= ofGetHeight()*0.65) &&
-		(y <= ofGetHeight()*0.65 + BUTTON_HEIGHT) &&
+	//botao para confirmar - so no primeiro ecra!! - TÁ!
+	else if((x >= ofGetWidth()*0.92 - LARGE_BUTTON_WIDTH) &&
+		(x <= ofGetWidth()*0.92) &&
+		(y >= ofGetHeight()*0.81) &&
+		(y <= ofGetHeight()*0.81 + LARGE_BUTTON_HEIGHT) &&
 		choose_video_and_range_screen) 
 	{
 		gui2->toggleVisible();
@@ -537,11 +539,9 @@ void ofApp::mousePressed(int x, int y, int button){
 
 		cout << "DENTRO DO BOTAO DE PLAY, POSICAO ACTUAL: " << img_swipe.getCurrent() << "\n";
 	}
-	//botao de back - no segundo ecra!!
-	else if((x >= ofGetWidth()*0.65 - 1.5*SMALL_BUTTON_WIDTH - SMALL_INTERVAL) &&
-		(x <= ofGetWidth()*0.65 - SMALL_BUTTON_WIDTH/2 - SMALL_INTERVAL) &&
-		(y >= ofGetHeight()*0.62) &&
-		(y <= ofGetHeight()*0.62 + BUTTON_HEIGHT) &&
+	//botao de back - no segundo ecra!! - TÁ!
+	else if((x >= ofGetWidth()*0.34) && (x <= ofGetWidth()*0.34 + SMALL_BUTTON_WIDTH) &&
+		(y >= ofGetHeight()*0.81) && (y <= ofGetHeight()*0.81 + SMALL_BUTTON_HEIGHT) &&
 		play_video_screen) 
 	{
 		video_playing = false;
@@ -551,13 +551,13 @@ void ofApp::mousePressed(int x, int y, int button){
 
 		resetValues();
 		
-		cout << "botao de pause!!!\n";
+		cout << "botao de BACK!!!\n";
 	}
-	//botao de PLAY/PAUSE - no segundo ecra!!
-	else if((x >= ofGetWidth()*0.65 - SMALL_BUTTON_WIDTH/2) &&
-		(x <= ofGetWidth()*0.65 + SMALL_BUTTON_WIDTH/2) &&
-		(y >= ofGetHeight()*0.62) &&
-		(y <= ofGetHeight()*0.62 + BUTTON_HEIGHT) &&
+	//botao de PLAY/PAUSE - no segundo ecra!! - TÁ!
+	else if((x >= start_width_play_btn) &&
+		(x <= start_width_play_btn + SMALL_BUTTON_WIDTH) &&
+		(y >= ofGetHeight()*0.81) &&
+		(y <= ofGetHeight()*0.81 + SMALL_BUTTON_HEIGHT) &&
 		play_video_screen) 
 	{
 		if(movie.isPlaying()) {
@@ -571,11 +571,11 @@ void ofApp::mousePressed(int x, int y, int button){
 
 		cout << "botao de play/pause kkkk!!!\n";
 	}
-	//botao de STOP - no segundo ecra!!
-	else if((x >= (ofGetWidth()*0.65) + (SMALL_BUTTON_WIDTH/2) + SMALL_INTERVAL) &&
-		(x <= (ofGetWidth()*0.65) + (1.5*SMALL_BUTTON_WIDTH) + SMALL_INTERVAL) &&
-		(y >= ofGetHeight()*0.62) &&
-		(y <= ofGetHeight()*0.62 + BUTTON_HEIGHT) &&
+	//botao de STOP - no segundo ecra!! - TÁ!
+	else if((x >= temp_stop_btn_width) &&
+		(x <= temp_stop_btn_width + SMALL_BUTTON_WIDTH) &&
+		(y >= ofGetHeight()*0.81) &&
+		(y <= ofGetHeight()*0.81 + SMALL_BUTTON_HEIGHT) &&
 		play_video_screen) 
 	{
 		movie.stop();
@@ -583,6 +583,14 @@ void ofApp::mousePressed(int x, int y, int button){
 		redraw_frame_flag = true;
 		video_playing = false;
 		cout << "botao de STOP HUEHUHE!!! min_frame: " << int(range_minimum_percentage*movie.getTotalNumFrames()) << "\n";
+	}
+	//botao para ver a GALERIA - no segundo ecra!! - NÃO TÁ!
+	else if((x >= ofGetWidth()*0.92 - GALLERY_BUTTON_WIDTH) &&
+		(x <= ofGetWidth()*0.92) && (y >= ofGetHeight()*0.81) &&
+		(y <= ofGetHeight()*0.81 + SMALL_BUTTON_HEIGHT) &&
+		play_video_screen) 
+	{
+		cout << "botão da galeria!!!!!!!!!!!!!!111!!!!" << "\n";
 	}
 
 }
@@ -662,9 +670,9 @@ void ofApp::setFrames(){
 		}
 	}
 
-	//TODO: A CENA DO GABOR ESTÁ A DAR VALORES ENTRE 0.39 E 0.42!!!!!!
+	//TODO: A CENA DO GABOR ESTÁ A DAR VALORES ENTRE 0.039 E 0.042!!!!!!
 	//gabor_stuff = img.calculateTexture();
-	cout << "GABOR: " << gabor_stuff << "\n";
+	//cout << "GABOR: " << gabor_stuff << "\n";
 
 	//normalização dos dados :)
 	nr_edges /= i*j;
