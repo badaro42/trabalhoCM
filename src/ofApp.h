@@ -61,8 +61,8 @@ class ofApp : public ofBaseApp {
 		void setGUI6();
 
 		string getFilterString(bool var);
-		void applyFiltersToFrame();
-		void applyFiltersToFrame222(ofImage img);
+		//void applyFiltersToFrame();
+		void applyFiltersToFrame(ofImage img);
 		bool saveFrame();
 	
 		//cenas da barra lateral e do background
@@ -155,7 +155,9 @@ class ofApp : public ofBaseApp {
 		bool contrast_enabled;
 		bool people_enabled;
 		bool gabor_enabled;
-		bool findObject;
+		bool object_match_enabled;
+
+		bool object_loaded;
 
 		ofImage objFinder; 
 		bool can_update_frame;

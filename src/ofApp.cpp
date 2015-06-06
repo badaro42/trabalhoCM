@@ -20,7 +20,9 @@ void ofApp::setup(){
 	contrast_enabled = false;
 	people_enabled = false;
 	gabor_enabled = false;
-	findObject = false;
+	object_match_enabled = false;
+
+	object_loaded = false;
 	
 	video_playing = false;
 
@@ -207,6 +209,11 @@ void ofApp::draw(){
 		ofLine(ofGetWidth()*0.92, ofGetHeight()*0.79, ofGetWidth()*0.92-75, ofGetHeight()*0.79); //fundo direito horiz.
 		ofLine(ofGetWidth()*0.92, ofGetHeight()*0.79, ofGetWidth()*0.92, ofGetHeight()*0.79-75); //fundo direito vert.
 
+		if(object_loaded)
+			ofDrawBitmapString("[File loaded]", ofGetWidth()*0.12, ofGetHeight()*0.822);
+		else
+			ofDrawBitmapString("[No file loaded]", ofGetWidth()*0.12, ofGetHeight()*0.822);
+
 		ofSetColor(255);
 	}
 
@@ -278,6 +285,8 @@ void ofApp::draw(){
 		else
 			lol = true;
 
+		bool is_active = object_match_enabled && object_loaded;
+
 		//strings dos dos valores dos filtros aplicados
 		ofDrawBitmapString(getFilterString(dominant_color_enabled) + 
 			" Dominant color", right_gui_left_column, ofGetHeight()*0.065);
@@ -291,7 +300,7 @@ void ofApp::draw(){
 			" Edges", right_gui_right_column, ofGetHeight()*0.065);
 		ofDrawBitmapString(getFilterString(gabor_enabled) + 
 			" Texture", right_gui_right_column, ofGetHeight()*0.100);
-		ofDrawBitmapString(getFilterString(findObject) + 
+		ofDrawBitmapString(getFilterString(is_active) + 
 			" Match", right_gui_right_column, ofGetHeight()*0.135);
 		ofDrawBitmapString(getFilterString(quality_filter_enabled) + 
 			" Quality", right_gui_right_column, ofGetHeight()*0.170);
@@ -302,10 +311,6 @@ void ofApp::draw(){
 			redraw_frame_flag = false;
 		}
 
-
-		int teste1 = (int(range_maximum_percentage*movie.getTotalNumFrames()));
-		cout << "CURR_FRAME: " << movie.getCurrentFrame() << "; RANGE_MAX: " << teste1 << "\n";
-
 		//chegamos ao ultimo frame escolhido pelo utilizador
 		//uma vez que o filme esta em loop, apontamos para o min do range
 		if(movie.getCurrentFrame() >= (int(range_maximum_percentage*movie.getTotalNumFrames()))) {
@@ -315,7 +320,7 @@ void ofApp::draw(){
 
 			int i;
 			for(i = 0; i < video_frames.size(); i++) {
-				applyFiltersToFrame222(video_frames[i]);
+				applyFiltersToFrame(video_frames[i]);
 			}
 
 			cout << video_frames.size() << "\n";
@@ -327,12 +332,12 @@ void ofApp::draw(){
 	else if(gallery_screen) {
 		ofSetColor(255);
 
-		ofLine(ofGetWidth()*0.5, ofGetHeight()*0.79, 
+		/*ofLine(ofGetWidth()*0.5, ofGetHeight()*0.79, 
 			ofGetWidth()*0.5, ofGetHeight()*0.89); //linha ao centro
 		ofLine(ofGetWidth()*0.25, ofGetHeight()*0.79, 
 			ofGetWidth()*0.25, ofGetHeight()*0.89); //linha a 25%
 		ofLine(ofGetWidth()*0.75, ofGetHeight()*0.79, 
-			ofGetWidth()*0.75, ofGetHeight()*0.89); //linha a 75%
+			ofGetWidth()*0.75, ofGetHeight()*0.89);*/ //linha a 75%
 
 		back_button.draw(ofGetWidth()*0.2, 
 			ofGetHeight()*0.86);
@@ -420,7 +425,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 		if (openFileResult.bSuccess){
 			ofLogVerbose("User selected a file");
 			objFinder.loadImage(openFileResult.getPath());
-			findObject = true; 
+			object_loaded = true; 
 		}
 		else 
 			ofLogVerbose("User hit cancel");
@@ -466,6 +471,13 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 			quality_filter_enabled = true;
 		else
 			quality_filter_enabled = false;
+	}
+	else if(name == "Object match filter") {
+		int val = e.getToggle()->getValue();
+		if(val == 1)
+			object_match_enabled = true;
+		else
+			object_match_enabled = false;
 	}
 }
 
@@ -813,7 +825,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 }
 
-void ofApp::applyFiltersToFrame222(ofImage img2){
+void ofApp::applyFiltersToFrame(ofImage img2){
 
 	can_update_frame = false;
 
@@ -827,16 +839,6 @@ void ofApp::applyFiltersToFrame222(ofImage img2){
 	int count = 0;
 	float value_max = -1;
 	float value_min = 100;
-
-	//ofImage img_test;
-	//unsigned char * pixels = movie.getPixels();
-
-	//TESTE TESTE TESTE - APAGAR DEPOIS
-	/*if(movie.getCurrentFrame() >= 100 && movie.getCurrentFrame() < 115) {
-		img_test.setFromPixels(pixels, movie.getWidth(), movie.getHeight(), OF_IMAGE_COLOR, true);
-		img_array.push_back(img_test);
-		cout << movie.getCurrentFrame() << ": dentro da cena do array\n"; 
-	}*/
 
 	//DUAS IMAGENS IGUAIS, UMA A CORES OUTRA A P/B
 	ofImage image_colorful;
@@ -890,7 +892,7 @@ void ofApp::applyFiltersToFrame222(ofImage img2){
 	cout << "[edges] sliders - filter: " << number_of_edges << " - " << nr_edges << "\n";
 
 	//PATTERN MATCHING - sift/surf
-	if(findObject){
+	if(object_loaded && object_match_enabled){
 		match_object = img.match(image_colorful, objFinder);
 
 		if(match_object > 0)
@@ -905,96 +907,6 @@ void ofApp::applyFiltersToFrame222(ofImage img2){
 
 	can_update_frame = true;
 }
-
-/*void ofApp::applyFiltersToFrame(){
-
-	can_update_frame = false;
-
-	nr_edges = 0;
-	match_object = 0;
-	contrastVal = 0;
-	hue_total = 0;
-
-	int i = 0;
-	int j = 0;
-	int count = 0;
-	float value_max = -1;
-	float value_min = 100;
-
-	ofImage img_test;
-	unsigned char * pixels = movie.getPixels();
-
-	//TESTE TESTE TESTE - APAGAR DEPOIS
-	//if(movie.getCurrentFrame() >= 100 && movie.getCurrentFrame() < 115) {
-	//	img_test.setFromPixels(pixels, movie.getWidth(), movie.getHeight(), OF_IMAGE_COLOR, true);
-	//	img_array.push_back(img_test);
-	//	cout << movie.getCurrentFrame() << ": dentro da cena do array\n"; 
-	//}
-
-	//DUAS IMAGENS IGUAIS, UMA A CORES OUTRA A P/B
-	ofImage image_colorful;
-	ofImage image_grayscale;
-	image_grayscale.setFromPixels(movie.getPixels(), movie.getWidth(), movie.getHeight(), OF_IMAGE_GRAYSCALE, true);
-	image_colorful.setFromPixels(movie.getPixels(), movie.getWidth(), movie.getHeight(), OF_IMAGE_COLOR, true);
-	Image img = Image(image_colorful.getPixels(), image_grayscale.getPixels(), image_colorful.getWidth(), image_colorful.getHeight());
-
-	unsigned char * teste1 = image_grayscale.getPixels();
-	unsigned char * teste2 = image_colorful.getPixels();
-
-	sliders_dominant_color = img.calcColor(red, green, blue);
-	
-	//apenas calcula de 10 em 10 frames e só se o filtro estiver ativo
-	if(movie.getCurrentFrame() % 10 == 0 && people_enabled) {
-		ofxCvHaarFinder haarFinder; 
-		haarFinder.setup("HaarFinder/haarcascade_frontalface_default.xml");
-		nr_people = haarFinder.findHaarObjects(movie.getPixelsRef());
-	}
-
-	//percorremos os pixeis todos e realizamos todos os calculos
-	for(i = 0; i < movie.getHeight(); i++) {
-		for(j = 0; j < movie.getWidth(); j++) {
-			if(luminance_enabled) 
-				mean_luminance += img.calculateLuminance(i, j);
-
-			if(dominant_color_enabled) 
-				hue_total += img.calcColorAux(i, j);
-
-			if(contrast_enabled)
-				contrastVal += img.calculateContrast(i, j);
-
-			if(radio_button_position2 != NONE){
-				nr_edges += img.getEdges(i, j, radio_button_position2);
-				count++; //TODO: QUÉSTA MERDA!!!?????
-			}
-		}
-	}
-
-	//TODO: A CENA DO GABOR ESTÁ A DAR VALORES ENTRE 0.039 E 0.042!!!!!!
-	if(gabor_enabled) {
-		gabor_value = img.calculateTexture();
-		cout << "GABOR: " << gabor_value << "\n";
-	}
-
-	//normalização dos dados :)
-	nr_edges /= i*j;
-	nr_edges *= 100;
-	contrastVal /= i*j; 
-	mean_luminance /= i*j;
-	hue_total /= i*j;
-
-	cout << radio_button_position2 << "\n";
-	cout << "[edges] sliders - filter: " << number_of_edges << " - " << nr_edges << "\n";
-
-	//PATTERN MATCHING - sift/surf
-	if(findObject){
-		match_object = img.match(path);
-		cout << "matching: " << match_object << "\n";
-	}
-
-	bool result = saveFrame();
-
-	can_update_frame = true;
-}*/
 
 string ofApp::getFilterString(bool var) {
 	if(var)
@@ -1011,103 +923,148 @@ bool ofApp::saveFrame() {
 	{
 		//se filtro ativado, ver se valores estao no alcance
 		if(luminance_enabled) { //luminancia
-			if(mean_luminance < luminance) //valores estao fora, retorna logo false
-				return false;
-			else
+			if(mean_luminance > luminance) //valores estao fora, retorna logo false
 				result = true;
+			else
+				return false;
 		}
 		if(people_enabled) { //contagem de pessoas
-			if(nr_people < number_of_people) 
-				return false;
-			else
+			if(nr_people > number_of_people) 
 				result = true;
+			else
+				return false;
 		}
 		if(dominant_color_enabled) { //cor dominante - hue
-			if(hue_total < sliders_dominant_color)
-				return false;
-			else
+			if(hue_total > sliders_dominant_color)
 				result = true;
+			else
+				return false;
 		}
 		if(contrast_enabled) { //contraste
-			if(contrastVal < contrast) 
-				return false;
-			else
+			if(contrastVal > contrast) 
 				result = true;
+			else
+				return false;
 		}
-		if(findObject) { //pattern matching - sift
-			if(match_object <= number_of_objects) 
-				return false;
-			else
+		if(object_loaded) { //pattern matching - sift
+			if(match_object > number_of_objects)
 				result = true;
+			else
+				return false;
 		}
 		if(gabor_filter) { //texturas - gabor
-			if(gabor_value < gabor_filter) 
-				return false;
-			else
+			if(gabor_value > gabor_filter) 
 				result = true;
+			else
+				return false;
 		}
 		if(radio_button_position2 != NONE) { //contornos
-			if(nr_edges < number_of_edges) 
-				return false;
-			else
+			if(nr_edges > number_of_edges) 
 				result = true;
+			else
+				return false;
 		}
-
-		// ora bem, guardamos a frame ou nao?
-		if(result) {
-			cout << "FRAME PASSOU, GUARDAR!\n";
-			return true;
-		}
-		else
-			return false;
 	}
 	//o range pretendido é para valores ABAIXO do definido nos sliders
 	else if(radio_button_position == BELOW) {
-
-
-
+		//se filtro ativado, ver se valores estao no alcance
+		if(luminance_enabled) { //luminancia
+			if(mean_luminance < luminance) //valores estao fora, retorna logo false
+				result = true;
+			else
+				return false;
+		}
+		if(people_enabled) { //contagem de pessoas
+			if(nr_people < number_of_people) 
+				result = true;
+			else
+				return false;
+		}
+		if(dominant_color_enabled) { //cor dominante - hue
+			if(hue_total < sliders_dominant_color)
+				result = true;
+			else
+				return false;
+		}
+		if(contrast_enabled) { //contraste
+			if(contrastVal < contrast) 
+				result = true;
+			else
+				return false;
+		}
+		if(object_loaded) { //pattern matching - sift
+			if(match_object < number_of_objects) 
+				result = true;
+			else
+				return false;
+		}
+		if(gabor_filter) { //texturas - gabor
+			if(gabor_value < gabor_filter) 
+				result = true;
+			else
+				return false;
+		}
+		if(radio_button_position2 != NONE) { //contornos
+			if(nr_edges < number_of_edges) 
+				result = true;
+			else
+				return false;
+		}
 	}
 	//o range pretendido é para valores À VOLTA do definido nos sliders
 	else if(radio_button_position == RANGE) {
 
-
-
-	}
-	
-
-		/*if(mean_luminance >= luminance)
-
-			&& nr_people >= number_of_people
-			&& selected_color >= hue_total
-			&& contrastVal >= contrast
-			&& (match_object >= number_of_objects && findObject))
-		{
-			contador_de_frames++;
-			frames.push_back(movie.getCurrentFrame());
+		//se filtro ativado, ver se valores estao no alcance
+		if(luminance_enabled) { //luminancia -> [-10;10]
+			if(mean_luminance >= luminance-10 && mean_luminance <= luminance+10)
+				result = true;
+			else
+				return false;
 		}
-	}
-	else if(radio_button_position == BELOW)  
-	{
-		if(mean_luminance <= luminance 
-			&& nr_people <= number_of_people
-			&& selected_color <= hue_total
-			&& contrastVal <= contrast
-			&& (match_object <= number_of_objects && findObject))
-		{
-			contador_de_frames++;
-			frames.push_back(movie.getCurrentFrame());
-		}		
-	}
-	else{
-		if((mean_luminance >= luminance-10 || mean_luminance <= luminance+10) 
-			&& (nr_people <= number_of_people-5 || nr_people <= number_of_people+5)
-			&& (selected_color >= hue_total-10 || selected_color <= hue_total+10)
-			&& (contrastVal >= contrast-10 || contrastVal <= contrast+10)
-			&& (match_object >= number_of_objects-10 || match_object <= number_of_objects+10 && findObject))
-		{
-			contador_de_frames++;
-			frames.push_back(movie.getCurrentFrame());		
+		if(people_enabled) { //contagem de pessoas -> [-3;3]
+			if(nr_people >= number_of_people-3 && nr_people <= number_of_people+3) 
+				result = true;
+			else
+				return false;
 		}
-	}*/
+		if(dominant_color_enabled) { //cor dominante - hue -> [-20;20]
+			if(hue_total >= sliders_dominant_color-20 && hue_total <= sliders_dominant_color+20)
+				result = true;
+			else
+				return false;
+		}
+		if(contrast_enabled) { //contraste -> [-0.5;0.5]
+			if(contrastVal >= contrast-0.5 && contrastVal <= contrast+0.5) 
+				result = true;
+			else
+				return false;
+		}
+		if(object_loaded) { //pattern matching - sift -> [-5;5]
+			if(match_object >= number_of_objects-5 && match_object <= number_of_objects+5) 
+				result = true;
+			else
+				return false;
+		}
+		if(gabor_filter) { //texturas - gabor -> [-2;2]
+			if(gabor_value >= gabor_filter-2 && gabor_value <= gabor_filter+2) 
+				result = true;
+			else
+				return false;
+		}
+		if(radio_button_position2 != NONE) { //contornos -> [-5;5]
+			if(nr_edges >= number_of_edges-5 && nr_edges <= number_of_edges+5) 
+				result = true;
+			else
+				return false;
+		}
+
+	}
+
+	// ora bem, guardamos a frame ou nao?
+	if(result) {
+		cout << "FRAME PASSOU, GUARDAR!\n";
+		return true;
+	}
+	else
+		return false;
 }
-
