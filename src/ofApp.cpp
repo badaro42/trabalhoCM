@@ -1074,14 +1074,13 @@ bool ofApp::saveFrame() {
 				return false;
 		}		
 		if(quality_filter_enabled) { //texturas - gabor
-			if(_quality >= quality_perc-5 && _quality <= quality_perc+5) 
+			if(img_quality >= quality_perc-5 && img_quality <= quality_perc+5) 
 				result = true;
 			else
 				return false;
 		}
 	}
 
-	// ora bem, guardamos a frame ou nao?
 	if(result) {
 		cout << "FRAME PASSOU, GUARDAR!\n";
 		return true;
