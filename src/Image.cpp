@@ -96,14 +96,11 @@ float Image::calculateContrast(int i, int j){
 
 //********************* IMAGE MATCHING (SIFT/SURF) *****************************
 
-int Image::match(string path){
-	ofImage img;
-	img.loadImage(path);
-	img.setFromPixels(img.getPixels(), img.getWidth(), img.getHeight(), OF_IMAGE_GRAYSCALE, false);
+int Image::match(ofImage frame, ofImage img){
 	cv::SurfFeatureDetector detector(400);
 	vector<cv::KeyPoint> keypoints1, keypoints2;
-	cv::Mat img1(getHeight(), getWidth(), CV_8UC1, pixels_gray);
-	cv::Mat img2(img.getHeight(), img.getWidth(), CV_8UC1, img.getPixels());
+	cv::Mat img1(frame.getHeight(), frame.getWidth(), CV_8UC3, frame.getPixels());
+	cv::Mat img2(img.getHeight(), img.getWidth(), CV_8UC3, img.getPixels());
 
 	detector.detect(img1, keypoints1);
 	detector.detect(img2, keypoints2);
@@ -280,11 +277,3 @@ int Image::applyFilter(int i, int j, int type){
 	+ direito*edges[5] + baixo_esquerdo*edges[6] + baixo*edges[7] + baixo_direito*edges[8]);
 }
 
-void Image::setobj(string path){
-	obj = ofImage(path);
-	obj.setFromPixels(obj.getPixels(), obj.getWidth(), obj.getHeight(), OF_IMAGE_GRAYSCALE, true);
-}
-
-ofImage Image::getObj(){
-	return obj;
-}

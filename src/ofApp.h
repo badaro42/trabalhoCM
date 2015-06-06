@@ -157,7 +157,7 @@ class ofApp : public ofBaseApp {
 		bool gabor_enabled;
 		bool findObject;
 
-		string path; 
+		ofImage objFinder; 
 		bool can_update_frame;
 
 		vector<ofImage> video_frames;
