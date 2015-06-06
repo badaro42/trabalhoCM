@@ -58,6 +58,7 @@ class ofApp : public ofBaseApp {
 		void setGUI3();
 		void setGUI4();
 		void setGUI5();
+		void setGUI6();
 
 		void applyFiltersToFrame();
 		void applyFiltersToFrame222(ofImage img);
@@ -69,6 +70,7 @@ class ofApp : public ofBaseApp {
 		ofxUISuperCanvas *gui3;
 		ofxUISuperCanvas *gui4;
 		ofxUISuperCanvas *gui5;
+		ofxUISuperCanvas *gui6;
 		bool hideGUI;
 		vector<string> radio_options;
 		vector<string> radio_options2;

@@ -118,12 +118,15 @@ void ofApp::setup(){
 
 	start_width_play_btn = ofGetWidth()*0.34 + 2*SMALL_BUTTON_WIDTH + 2*SMALL_INTERVAL;
 	 
-	setGUI1();
-	setGUI2(duration);
-	setGUI3();
-	setGUI4();
-	setGUI5();
+	setGUI1(); //barra lateral
+	setGUI2(duration); //gui do range do video
+	setGUI3(); //gui do topo esquerdo - apenas no ecra do video a tocar
+	setGUI4(); //gui do topo direito - apenas no ecra do video a tocar
+	setGUI5(); //gui da galeria
+	setGUI6(); //gui da pagina inicial - mostra info sobre a app.
 
+	gui3->toggleVisible(); //começa escondida!
+	gui4->toggleVisible(); //começa escondida!
 	gui5->toggleVisible(); //começa escondida!
 }
 
@@ -214,6 +217,16 @@ void ofApp::draw(){
 
 		//desenha o botao para confirmar o range
 		confirm_button.draw((ofGetWidth()*0.92) - LARGE_BUTTON_WIDTH, ofGetHeight()*0.81);
+	
+		ofSetColor(0);
+
+		ofDrawBitmapString("Start by choosing a video. To do that, swipe left/right on the bounding box.", ofGetWidth()*0.304, ofGetHeight()*0.065);
+		ofDrawBitmapString("You can change the filters applied to the video frames at any given moment.", ofGetWidth()*0.304, ofGetHeight()*0.090);
+		ofDrawBitmapString("Then, choose the desired range to be processed and confirm it with the", ofGetWidth()*0.304, ofGetHeight()*0.125);
+		ofDrawBitmapString("button on the right.", ofGetWidth()*0.304, ofGetHeight()*0.15);
+		//ofDrawBitmapString("", ofGetWidth()*0.304, ofGetHeight()*0.15);
+		
+		ofSetColor(255);
 	}
 
 	//estamos no segundo ecra, o do video
@@ -475,9 +488,6 @@ void ofApp::setGUI1()
     gui1->addLabel("Press 'h' to hide interface", OFX_UI_FONT_SMALL);
     
     gui1->addSpacer();
-	gui1->addTextArea("textarea", 
-		"Start by choosing a video. To do that, swipe left/right on the bounding box. You can change the filters applied to the video frames at any given moment.", OFX_UI_FONT_SMALL);
-
 	gui1->addSpacer();
 	string textString = "Choose the ranger to be considered when apllying the filters.";    
     gui1->addTextArea("textarea", textString, OFX_UI_FONT_SMALL);
@@ -519,6 +529,7 @@ void ofApp::setGUI1()
 	slider5->setTriggerType(OFX_UI_TRIGGER_ALL);
 
     gui1->addSpacer();
+	gui1->addToggle("Object match filter", false);
 	gui1->addButton("Open Object", false);
 	ofxUISlider *slider4 = gui1->addSlider("# of Objects", 0.0, 20.0, &number_of_objects);
 	slider4->setTriggerType(OFX_UI_TRIGGER_ALL);
@@ -562,10 +573,17 @@ void ofApp::setGUI4() {
 
 //GUI DA GALERIA: POR CIMA DAS IMAGENS, APENAS NO ECRA DA GALERIA
 void ofApp::setGUI5() {
-	gui5 = new ofxUISuperCanvas("Frames that match yout criteria", 
+	gui5 = new ofxUISuperCanvas("Frames that match your criteria", 
 		ofGetWidth()*0.2, 5, 
 		ofGetWidth()*0.6, ofGetHeight()*0.18);
 	gui5->addSpacer();
+}
+
+//GUI DA INFO DO VIDEO: POR CIMA DO VIDEO, À ESQUERDA, APENAS ECRA DO VIDEO A TOCAR
+void ofApp::setGUI6() {
+	gui6 = new ofxUISuperCanvas("How to use this application", 
+		top_guis_start_point_width, 5, ofGetWidth()*0.66, ofGetHeight()*0.18);
+	gui6->addSpacer();
 }
 
 //--------------------------------------------------------------
@@ -604,7 +622,11 @@ void ofApp::mousePressed(int x, int y, int button){
 			(y >= ofGetHeight()*0.81) &&
 			(y <= ofGetHeight()*0.81 + LARGE_BUTTON_HEIGHT)) 
 		{
-			gui2->toggleVisible();
+			gui2->toggleVisible(); //esconde
+			gui3->toggleVisible(); //mostra
+			gui4->toggleVisible(); //mostra
+			gui6->toggleVisible(); //esconde
+
 			choose_video_and_range_screen = false;
 			play_video_screen = true;
 			load_video = true;
@@ -622,7 +644,11 @@ void ofApp::mousePressed(int x, int y, int button){
 			video_playing = false;
 			play_video_screen = false;
 			choose_video_and_range_screen = true;
-			gui2->toggleVisible();
+			
+			gui2->toggleVisible(); //mostra
+			gui3->toggleVisible(); //esconde
+			gui4->toggleVisible(); //esconde
+			gui6->toggleVisible(); //mostra
 
 			resetValues();
 		
