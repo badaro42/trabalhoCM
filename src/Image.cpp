@@ -292,20 +292,21 @@ int Image::applyFilter(int i, int j, int type){
 double Image::calculateQuality(){
 
 	int i;
-	int count = 0;
-	double size = (width*height);
-	double res = 0.0;
+	int count = 0; //nr de cores diferentes
+	//double size = (width*height);
+	//double res = 0.0;
 	//double hue_vector_norm[361];
 	for(i = 0; i < 361; i++) {
 		//hue_vector_norm[i] = hue_vector[i]/(width*height);	
-		res += hue_vector[i]/size;
+		//res += hue_vector[i]/size;
 		if(hue_vector[i] > 0)
 			count++;
 	}
+	//res /= count;
+	double temp_edges = nr_edges;
+	temp_edges /= width*height;
+	double colors = count/360;
 
-	res /= count;
-
-	nr_edges; 
-	return 1;
+	return colors*0.5 + temp_edges*0.5;
 }
 

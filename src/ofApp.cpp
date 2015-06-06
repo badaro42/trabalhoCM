@@ -883,9 +883,13 @@ void ofApp::applyFiltersToFrame(ofImage img2){
 		cout << "GABOR (%): " << gabor_value*100 << "\n";
 	}
 
-	double img_quality;
+	double img_quality = 0.0;
 	if(quality_filter_enabled)
 		img_quality = img.calculateQuality();
+
+	cout << "QUALITY: " << img_quality << "\n";
+	if(img_quality > 0.5)
+		bool b1 = true;
 
 	//normalização dos dados :)
 	nr_edges /= i*j;
