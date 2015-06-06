@@ -400,7 +400,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 		range_maximum_percentage = slider->getPercentValueHigh();
 	}
 	else if(name == "Red" || name == "Green" || name == "Blue" || name == "# of People" ||
-		name == "% of Edges" || name == "Luminance" || name == "# of Objects") //coloca o step do slider de 1 em 1!
+		name == "% of Edges" || name == "Luminance" || name == "# of Objects" || name == "% of Quality") //coloca o step do slider de 1 em 1!
 	{
 		int levels = int(e.getSlider()->getScaledValue());
 		e.getSlider()->setValue( levels );
@@ -569,6 +569,8 @@ void ofApp::setGUI1()
 
 	gui1->addSpacer();
 	gui1->addToggle("Quality-based filter", false);
+	ofxUISlider *slider6 = gui1->addSlider("% of Quality", 0.0, 100.0, &quality_perc);
+	slider6->setTriggerType(OFX_UI_TRIGGER_ALL);
 	gui1->addSpacer();
 
     gui1->autoSizeToFitWidgets();
@@ -798,11 +800,7 @@ void ofApp::mousePressed(int x, int y, int button){
 				ofSaveImage(img.getPixelsRef(), "temp/img"+ofToString(i)+".png");
 			}
 		}
-	}
-
-	
-
-	
+	}	
 }
 
 //--------------------------------------------------------------
@@ -833,6 +831,7 @@ void ofApp::applyFiltersToFrame(ofImage img2){
 	match_object = 0;
 	contrastVal = 0;
 	hue_total = 0;
+	img_quality = 0.0;
 
 	int i = 0;
 	int j = 0;
@@ -883,7 +882,6 @@ void ofApp::applyFiltersToFrame(ofImage img2){
 		cout << "GABOR (%): " << gabor_value*100 << "\n";
 	}
 
-	double img_quality = 0.0;
 	if(quality_filter_enabled)
 		img_quality = img.calculateQuality();
 
@@ -970,6 +968,12 @@ bool ofApp::saveFrame() {
 			else
 				return false;
 		}
+		if(quality_filter_enabled) { //texturas - gabor
+			if(img_quality > quality_perc) 
+				result = true;
+			else
+				return false;
+		}
 	}
 	//o range pretendido é para valores ABAIXO do definido nos sliders
 	else if(radio_button_position == BELOW) {
@@ -1012,6 +1016,12 @@ bool ofApp::saveFrame() {
 		}
 		if(radio_button_position2 != NONE) { //contornos
 			if(nr_edges < number_of_edges) 
+				result = true;
+			else
+				return false;
+		}
+		if(quality_filter_enabled) { //texturas - gabor
+			if(img_quality < quality_perc) 
 				result = true;
 			else
 				return false;
@@ -1062,8 +1072,13 @@ bool ofApp::saveFrame() {
 				result = true;
 			else
 				return false;
+		}		
+		if(quality_filter_enabled) { //texturas - gabor
+			if(_quality >= quality_perc-5 && _quality <= quality_perc+5) 
+				result = true;
+			else
+				return false;
 		}
-
 	}
 
 	// ora bem, guardamos a frame ou nao?

@@ -136,6 +136,7 @@ class ofApp : public ofBaseApp {
 		double hue_total;
 		double sliders_dominant_color;
 		double gabor_value;
+		double img_quality;
 
 		//variaveis dos sliders - float
 		float red;
@@ -147,6 +148,7 @@ class ofApp : public ofBaseApp {
 		float number_of_people;
 		float number_of_edges;
 		float number_of_objects;
+		float quality_perc;
 		
 		//toggle da UI da esquerda
 		bool quality_filter_enabled;
