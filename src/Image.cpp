@@ -20,6 +20,7 @@ Image::Image(unsigned char * pix_color, unsigned char * pix_gray, int t_width, i
 	height = t_height;
 	size = t_width*t_height;
 	nr_edges = 0;
+	
 	for(int i = 0; i < 361; i++)
 		hue_vector[i] = 0;
 }
@@ -30,10 +31,10 @@ Image::Image(unsigned char * pix_color, unsigned char * pix_gray, int t_width, i
 float Image::calculateLuminance(int i, int j) {
 	int pos = i*width+j;
 	int r = pixels_color[pos];
-    int g = pixels_color[pos+1];
-    int b = pixels_color[pos+2];
+    	int g = pixels_color[pos+1];
+    	int b = pixels_color[pos+2];
 
-    return 0.213*r+0.715*g+0.072*b;
+    	return 0.213*r+0.715*g+0.072*b;
 }
 
 float Image::calcColor(float red, float green, float blue) {
@@ -58,11 +59,8 @@ float Image::calcColor(float red, float green, float blue) {
 	hue = hue_temp * 60;
 
 	int add_hue = int(hue);
-
-	if(add_hue > 330)
-		bool b = true;
-
 	hue_vector[add_hue]++;
+	
 	return hue;
 }
 
@@ -95,9 +93,9 @@ float Image::calculateContrast(int i, int j){
 		(baixo + topo + topo_esquerdo + baixo_esquerdo + 
 		esquerdo + direito + topo_direito + baixo_direito)/8;
 
-	if(mean_luminance_adjacentes >= 0 && mean_luminance_adjacentes < 1){
+	// para evitar divisões por zero (ou valores proximos disso)
+	if(mean_luminance_adjacentes >= 0 && mean_luminance_adjacentes < 1)
 		return mean_luminance_adjacentes;
-	}
 
 	return (std::abs(middle_pixel-mean_luminance_adjacentes))/std::abs(mean_luminance_adjacentes); 
 }
@@ -132,7 +130,7 @@ int Image::match(ofImage img){
 int Image::getEdges(int i, int j, int type){
 	int val = applyFilter(i, j, type);
 
-	//zero ou proximo
+	//branco ou proximo
 	if(val >= 240){
 		nr_edges++;
 		return 1;
@@ -146,72 +144,65 @@ int Image::getEdges(int i, int j, int type){
 cv::Mat mkKernel(int kernel_size, double sigma, double theta, double lambda, double psi) {
     
 	int half_ks = (kernel_size-1)/2;
-    double theta_aux = theta*CV_PI/180;
-    double psi_aux = psi*CV_PI/180;
-    double delta = 2.0/(kernel_size-1);
-    double lambda_aux = lambda;
-    double sigma_aux = sigma/kernel_size;
-    double x_theta;
-    double y_theta;
-
-    cv::Mat kernel(kernel_size, kernel_size, CV_32F);
-
-    for (int y=-half_ks; y<=half_ks; y++)
-    {
-        for (int x=-half_ks; x<=half_ks; x++)
-        {
-            x_theta = x*delta*cos(theta_aux) + y*delta*sin(theta_aux);
-
-            y_theta = -x*delta*sin(theta_aux) + y*delta*cos(theta_aux);
-
-            kernel.at<float>(half_ks+y, half_ks+x) = 
+	double theta_aux = theta*CV_PI/180;
+	double psi_aux = psi*CV_PI/180;
+	double delta = 2.0/(kernel_size-1);
+	double lambda_aux = lambda;
+	double sigma_aux = sigma/kernel_size;
+	double x_theta;
+	double y_theta;
+	
+	cv::Mat kernel(kernel_size, kernel_size, CV_32F);
+	for (int y=-half_ks; y<=half_ks; y++) {
+        	for (int x=-half_ks; x<=half_ks; x++) {
+            		x_theta = x*delta*cos(theta_aux) + y*delta*sin(theta_aux);
+			y_theta = -x*delta*sin(theta_aux) + y*delta*cos(theta_aux);
+			kernel.at<float>(half_ks+y, half_ks+x) = 
 				(float)exp(-0.5*(pow(x_theta,2)+pow(y_theta,2))/pow(sigma_aux,2)) * 
 				cos(2*CV_PI*x_theta/lambda_aux + psi_aux);
-        }
-    }
-    return kernel;
+        	}
+    	}
+    	return kernel;
 }
  
 double Image::calculateTexture(){
     
-    int kernel_size=21;
-    int pos_lm = 50;
-    double sig = 5;
-    double lm = 0.5+pos_lm/100.0;
-    double ps = 90;
-    
-    double th = 0;
+	int kernel_size=21;
+	int pos_lm = 50;
+	double sig = 5;
+	double lm = 0.5+pos_lm/100.0;
+	double ps = 90;
+	double th = 0;
 
 	cv::Mat dest;
 	cv::Mat src(getHeight(), getWidth(), CV_8UC3, pixels_color);
 	cvtColor(src, dest, CV_RGB2GRAY);
 
-    double num = 0;
-    double num_total = 0;
-    for(; th <= 135; th += 45){
-        cv::Mat kernel = mkKernel(kernel_size, sig, th, lm, ps);
-        cv::filter2D(dest, src, CV_32F, kernel);
+	double num = 0;
+    	double num_total = 0;
+    	for(; th <= 135; th += 45){
+        	cv::Mat kernel = mkKernel(kernel_size, sig, th, lm, ps);
+        	cv::filter2D(dest, src, CV_32F, kernel);
         
-        ofImage imageOut = ofImage();
-        imageOut.setFromPixels((unsigned char *) IplImage(src).imageData, src.size().width, src.size().height, OF_IMAGE_GRAYSCALE);
-        
-        // contar numero de pixels acima de threshold - 240
-        int x, y; 
+	        ofImage imageOut = ofImage();
+	        imageOut.setFromPixels((unsigned char *) IplImage(src).imageData, src.size().width, src.size().height, OF_IMAGE_GRAYSCALE);
+	        
+	        // contar numero de pixels acima de threshold - 240
+	        int x, y; 
 		int width = imageOut.width;
 		int heigth = imageOut.height;
 	
-        unsigned char* pixels = imageOut.getPixels();
-        num = 0;
-        for (x = 0; x < width; x++){
-            for(y = 0; y < heigth; y++){
-                if(pixels[(y*width+x)] >= 240)
-                    num++;
-            }
-        }
-        num /= (width*height);
-        num_total += num;
+	        unsigned char* pixels = imageOut.getPixels();
+	        num = 0;
+	        for (x = 0; x < width; x++){
+			for(y = 0; y < heigth; y++){
+			if(pixels[(y*width+x)] >= 240)
+				num++;
+			}
+	        }
+	        num /= (width*height);
+	        num_total += num;
     }
-    
     // 4 imagens geradas
     return num_total/4;
 }
@@ -250,7 +241,7 @@ double Image::getPixel(int i, int j) {
 		return pixels_gray[(i*width)+j];
 }
 
-//type == 1: EDGES TODAS AS DIRE�OES;
+//type == 1: EDGES TODAS AS DIREÇOES;
 //type == 2: EDGES VERTICAIS;
 //type == 3: EDGES HORIZONTAIS;
 std::vector<int> Image::getVector(int type) {
@@ -286,23 +277,17 @@ int Image::applyFilter(int i, int j, int type){
 	double middle_pixel = getPixel(i,j);
 
 	return (topo_esquerdo*edges[0] + topo*edges[1] + topo_direito*edges[2] + esquerdo*edges[3] + middle_pixel*edges[4]
-	+ direito*edges[5] + baixo_esquerdo*edges[6] + baixo*edges[7] + baixo_direito*edges[8]);
+		+ direito*edges[5] + baixo_esquerdo*edges[6] + baixo*edges[7] + baixo_direito*edges[8]);
 }
 
 double Image::calculateQuality(){
 
 	int i;
 	int count = 0; //nr de cores diferentes
-	//double size = (width*height);
-	//double res = 0.0;
-	//double hue_vector_norm[361];
 	for(i = 0; i < 361; i++) {
-		//hue_vector_norm[i] = hue_vector[i]/(width*height);	
-		//res += hue_vector[i]/size;
 		if(hue_vector[i] > 0)
 			count++;
 	}
-	//res /= count;
 	double temp_edges = nr_edges;
 	temp_edges /= width*height;
 	double colors = count/360;
