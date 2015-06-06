@@ -892,10 +892,6 @@ void ofApp::applyFiltersToFrame222(ofImage img2){
 	//PATTERN MATCHING - sift/surf
 	if(findObject){
 		match_object = img.match(image_colorful, objFinder);
-
-		if(match_object > 0)
-			bool b = true;
-
 		cout << "matching: " << match_object << "\n";
 	}
 
