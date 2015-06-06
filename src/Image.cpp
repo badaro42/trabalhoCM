@@ -96,8 +96,9 @@ float Image::calculateContrast(int i, int j){
 
 //********************* IMAGE MATCHING (SIFT/SURF) *****************************
 
-int Image::match(ofImage img){
-
+int Image::match(string path){
+	ofImage img;
+	img.loadImage(path);
 	cv::SurfFeatureDetector detector(400);
 	vector<cv::KeyPoint> keypoints1, keypoints2;
 	cv::Mat img1(getHeight(), getWidth(), CV_8UC3, pixels_gray);
