@@ -405,7 +405,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 		//Check if the user opened a file
 		if (openFileResult.bSuccess){
 			ofLogVerbose("User selected a file");
-			path = openFileResult.getPath();
+			objFinder.loadImage(openFileResult.getPath());
 			findObject = true; 
 		}
 		else 
@@ -821,9 +821,6 @@ void ofApp::applyFiltersToFrame222(ofImage img2){
 	image_colorful.setFromPixels(img2.getPixels(), img2.getWidth(), img2.getHeight(), OF_IMAGE_COLOR, true);
 	Image img = Image(image_colorful.getPixels(), image_grayscale.getPixels(), image_colorful.getWidth(), image_colorful.getHeight());
 
-	unsigned char * teste1 = image_grayscale.getPixels();
-	unsigned char * teste2 = image_colorful.getPixels();
-
 	sliders_dominant_color = img.calcColor(red, green, blue);
 	
 	//apenas calcula de 10 em 10 frames e só se o filtro estiver ativo
@@ -870,7 +867,7 @@ void ofApp::applyFiltersToFrame222(ofImage img2){
 
 	//PATTERN MATCHING - sift/surf
 	if(findObject){
-		match_object = img.match(path);
+		match_object = img.match(image_colorful, objFinder);
 
 		if(match_object > 0)
 			bool b = true;
