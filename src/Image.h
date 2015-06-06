@@ -35,7 +35,7 @@ public:
 	float calcColor(float red, float green, float blue);
 	float calculateContrast(int x, int y); 
 	ofImage getObj();
-	int match(ofImage frame, ofImage img); 
+	int match(ofImage img); 
 	int getEdges(int i, int j, int type);
 	double Image::calculateTexture();
 	float calculateLuminance(int i, int j);

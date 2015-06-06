@@ -893,7 +893,7 @@ void ofApp::applyFiltersToFrame(ofImage img2){
 
 	//PATTERN MATCHING - sift/surf
 	if(object_loaded && object_match_enabled){
-		match_object = img.match(image_colorful, objFinder);
+		match_object = img.match(objFinder);
 		cout << "matching: " << match_object << "\n";
 	}
 
