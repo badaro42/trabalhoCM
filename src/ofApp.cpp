@@ -274,9 +274,13 @@ void ofApp::draw(){
 			redraw_frame_flag = false;
 		}
 
+
+		int teste1 = (int(range_maximum_percentage*movie.getTotalNumFrames()));
+		cout << "CURR_FRAME: " << movie.getCurrentFrame() << "; RANGE_MAX: " << teste1 << "\n";
+
 		//chegamos ao ultimo frame escolhido pelo utilizador
 		//uma vez que o filme esta em loop, apontamos para o min do range
-		if(movie.getCurrentFrame() == (int(range_maximum_percentage*movie.getTotalNumFrames()))) {
+		if(movie.getCurrentFrame() >= (int(range_maximum_percentage*movie.getTotalNumFrames()))) {
 			cout << "CHEGAMOS AO FRAME MAXIMO ESCOLHIDO PELO USER!!!\n";
 			movie.setFrame(int(range_minimum_percentage*movie.getTotalNumFrames()));
 			movie.stop();
@@ -495,7 +499,7 @@ void ofApp::setGUI1()
 	
 	gui1->addSpacer();
 	gui1->addToggle("Contrast filter", false);
-	ofxUISlider *slider2 = gui1->addSlider("Contrast", 0.0, 100.0, &contrast);
+	ofxUISlider *slider2 = gui1->addSlider("Contrast", 0.0, 10.0, &contrast);
 	slider2->setTriggerType(OFX_UI_TRIGGER_ALL);
 	
 	gui1->addSpacer();
@@ -511,7 +515,7 @@ void ofApp::setGUI1()
 
 	gui1->addSpacer();
 	gui1->addToggle("Gabor filter", false);
-	ofxUISlider *slider5 = gui1->addSlider("% of Texture", 0.0, 100.0, &gabor_filter);
+	ofxUISlider *slider5 = gui1->addSlider("% of Texture", 0.0, 15.0, &gabor_filter);
 	slider5->setTriggerType(OFX_UI_TRIGGER_ALL);
 
     gui1->addSpacer();
@@ -825,7 +829,7 @@ void ofApp::applyFiltersToFrame222(ofImage img2){
 	//TODO: A CENA DO GABOR ESTÁ A DAR VALORES ENTRE 0.039 E 0.042!!!!!!
 	if(gabor_enabled) {
 		gabor_value = img.calculateTexture();
-		cout << "GABOR: " << gabor_value << "\n";
+		cout << "GABOR (%): " << gabor_value*100 << "\n";
 	}
 
 	//normalização dos dados :)
@@ -946,6 +950,8 @@ void ofApp::applyFiltersToFrame222(ofImage img2){
 }*/
 
 bool ofApp::saveFrame() {
+	bool result = false;
+
 	//o range pretendido é para valores ACIMA do definido nos sliders
 	if(radio_button_position == ABOVE) 
 	{
@@ -953,34 +959,53 @@ bool ofApp::saveFrame() {
 		if(luminance_enabled) { //luminancia
 			if(mean_luminance < luminance) //valores estao fora, retorna logo false
 				return false;
+			else
+				result = true;
 		}
 		if(people_enabled) { //contagem de pessoas
 			if(nr_people < number_of_people) 
 				return false;
+			else
+				result = true;
 		}
 		if(dominant_color_enabled) { //cor dominante - hue
 			if(hue_total < sliders_dominant_color)
 				return false;
+			else
+				result = true;
 		}
 		if(contrast_enabled) { //contraste
 			if(contrastVal < contrast) 
 				return false;
+			else
+				result = true;
 		}
 		if(findObject) { //pattern matching - sift
-			if(match_object < number_of_objects) 
+			if(match_object <= number_of_objects) 
 				return false;
+			else
+				result = true;
 		}
 		if(gabor_filter) { //texturas - gabor
 			if(gabor_value < gabor_filter) 
 				return false;
+			else
+				result = true;
 		}
 		if(radio_button_position2 != NONE) { //contornos
 			if(nr_edges < number_of_edges) 
 				return false;
+			else
+				result = true;
 		}
 
-		cout << "FRAME PASSOU, GUARDAR!\n";
-		return true;
+		// ora bem, guardamos a frame ou nao?
+		if(result) {
+			cout << "FRAME PASSOU, GUARDAR!\n";
+			return true;
+		}
+		else
+			return false;
 	}
 	//o range pretendido é para valores ABAIXO do definido nos sliders
 	else if(radio_button_position == BELOW) {

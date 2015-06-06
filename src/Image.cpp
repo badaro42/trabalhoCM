@@ -99,7 +99,7 @@ float Image::calculateContrast(int i, int j){
 int Image::match(string path){
 	ofImage img;
 	img.loadImage(path);
-	img.setFromPixels(obj.getPixels(), obj.getWidth(), obj.getHeight(), OF_IMAGE_GRAYSCALE, true);
+	img.setFromPixels(img.getPixels(), img.getWidth(), img.getHeight(), OF_IMAGE_GRAYSCALE, false);
 	cv::SurfFeatureDetector detector(400);
 	vector<cv::KeyPoint> keypoints1, keypoints2;
 	cv::Mat img1(getHeight(), getWidth(), CV_8UC1, pixels_gray);
@@ -135,7 +135,8 @@ int Image::getEdges(int i, int j, int type){
 //************************** GABOR GABOR GABOR ***********************************
 
 cv::Mat mkKernel(int kernel_size, double sigma, double theta, double lambda, double psi) {
-    int half_ks = (kernel_size-1)/2;
+    
+	int half_ks = (kernel_size-1)/2;
     double theta_aux = theta*CV_PI/180;
     double psi_aux = psi*CV_PI/180;
     double delta = 2.0/(kernel_size-1);
@@ -150,10 +151,13 @@ cv::Mat mkKernel(int kernel_size, double sigma, double theta, double lambda, dou
     {
         for (int x=-half_ks; x<=half_ks; x++)
         {
-            x_theta = x*delta*cos(theta_aux)+y*delta*sin(theta_aux);
-            y_theta = -x*delta*sin(theta_aux)+y*delta*cos(theta_aux);
+            x_theta = x*delta*cos(theta_aux) + y*delta*sin(theta_aux);
+
+            y_theta = -x*delta*sin(theta_aux) + y*delta*cos(theta_aux);
+
             kernel.at<float>(half_ks+y, half_ks+x) = 
-				(float)exp(-0.5*(pow(x_theta,2)+pow(y_theta,2))/pow(sigma_aux,2)) * cos(2*CV_PI*x_theta/lambda_aux + psi_aux);
+				(float)exp(-0.5*(pow(x_theta,2)+pow(y_theta,2))/pow(sigma_aux,2)) * 
+				cos(2*CV_PI*x_theta/lambda_aux + psi_aux);
         }
     }
     return kernel;
@@ -168,11 +172,10 @@ double Image::calculateTexture(){
     double ps = 90;
     
     double th = 0;
-    
-	cv::Mat dest(getHeight(), getWidth(), CV_8UC1, pixels_gray);
-	//cv::Mat dest;
+
+	cv::Mat dest;
 	cv::Mat src(getHeight(), getWidth(), CV_8UC3, pixels_color);
-	//cvtColor(src, dest, CV_RGB2GRAY);
+	cvtColor(src, dest, CV_RGB2GRAY);
 
     double num = 0;
     double num_total = 0;
