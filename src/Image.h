@@ -38,7 +38,7 @@ public:
 	float calculateContrast(int x, int y); 
 	void setobj(string path);
 	ofImage getObj();
-	int match(ofImage img); 
+	int match(string img); 
 	int getEdges(int i, int j, int type);
 	double Image::calculateTexture();
 	float calculateLuminance(int i, int j);
