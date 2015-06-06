@@ -60,6 +60,7 @@ class ofApp : public ofBaseApp {
 		void setGUI5();
 
 		void applyFiltersToFrame();
+		void applyFiltersToFrame222(ofImage img);
 		bool saveFrame();
 	
 		//cenas da barra lateral e do background
@@ -154,4 +155,6 @@ class ofApp : public ofBaseApp {
 
 		string path; 
 		bool can_update_frame;
+
+		vector<ofImage> video_frames;
 };

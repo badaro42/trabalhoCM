@@ -159,7 +159,7 @@ void ofApp::update(){
 	}
 	//estamos no ecra do video e o video esta' a tocar, fazemos update
 	else if(play_video_screen && can_update_frame) {
-		cout << movie.getCurrentFrame() << "\n";
+		//cout << movie.getCurrentFrame() << "\n";
 		movie.update();
 	}
 
@@ -240,7 +240,11 @@ void ofApp::draw(){
 
 		if(video_playing && can_update_frame) {
 			if(movie.isFrameNew()) {
-				applyFiltersToFrame();
+				//applyFiltersToFrame();
+				cout << movie.getCurrentFrame() << "\n";
+				ofImage img;
+				img.setFromPixels(movie.getPixels(), movie.getWidth(), movie.getHeight(), OF_IMAGE_COLOR);
+				video_frames.push_back(img);
 			}
 		}
 
@@ -275,6 +279,15 @@ void ofApp::draw(){
 		if(movie.getCurrentFrame() == (int(range_maximum_percentage*movie.getTotalNumFrames()))) {
 			cout << "CHEGAMOS AO FRAME MAXIMO ESCOLHIDO PELO USER!!!\n";
 			movie.setFrame(int(range_minimum_percentage*movie.getTotalNumFrames()));
+			movie.stop();
+
+			int i;
+			for(i = 0; i < video_frames.size(); i++) {
+				applyFiltersToFrame222(video_frames[i]);
+			}
+
+			cout << video_frames.size() << "\n";
+			video_frames.clear();
 		}
 	}
 
@@ -638,6 +651,9 @@ void ofApp::mousePressed(int x, int y, int button){
 			movie.setFrame(int(range_minimum_percentage*movie.getTotalNumFrames()));
 			redraw_frame_flag = true;
 			video_playing = false;
+
+			img_array.clear();
+
 			cout << "botao de STOP HUEHUHE!!! min_frame: " << int(range_minimum_percentage*movie.getTotalNumFrames()) << "\n";
 		}
 		//botao para ver a GALERIA - no segundo ecra!! - TÁ!
@@ -743,7 +759,103 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 }
 
-void ofApp::applyFiltersToFrame(){
+void ofApp::applyFiltersToFrame222(ofImage img2){
+
+	can_update_frame = false;
+
+	nr_edges = 0;
+	match_object = 0;
+	contrastVal = 0;
+	hue_total = 0;
+
+	int i = 0;
+	int j = 0;
+	int count = 0;
+	float value_max = -1;
+	float value_min = 100;
+
+	//ofImage img_test;
+	//unsigned char * pixels = movie.getPixels();
+
+	//TESTE TESTE TESTE - APAGAR DEPOIS
+	/*if(movie.getCurrentFrame() >= 100 && movie.getCurrentFrame() < 115) {
+		img_test.setFromPixels(pixels, movie.getWidth(), movie.getHeight(), OF_IMAGE_COLOR, true);
+		img_array.push_back(img_test);
+		cout << movie.getCurrentFrame() << ": dentro da cena do array\n"; 
+	}*/
+
+	//DUAS IMAGENS IGUAIS, UMA A CORES OUTRA A P/B
+	ofImage image_colorful;
+	ofImage image_grayscale;
+	image_grayscale.setFromPixels(img2.getPixels(), img2.getWidth(), img2.getHeight(), OF_IMAGE_GRAYSCALE, true);
+	image_colorful.setFromPixels(img2.getPixels(), img2.getWidth(), img2.getHeight(), OF_IMAGE_COLOR, true);
+	Image img = Image(image_colorful.getPixels(), image_grayscale.getPixels(), image_colorful.getWidth(), image_colorful.getHeight());
+
+	unsigned char * teste1 = image_grayscale.getPixels();
+	unsigned char * teste2 = image_colorful.getPixels();
+
+	sliders_dominant_color = img.calcColor(red, green, blue);
+	
+	//apenas calcula de 10 em 10 frames e só se o filtro estiver ativo
+	if(movie.getCurrentFrame() % 10 == 0 && people_enabled) {
+		ofxCvHaarFinder haarFinder; 
+		haarFinder.setup("HaarFinder/haarcascade_frontalface_default.xml");
+		nr_people = haarFinder.findHaarObjects(movie.getPixelsRef());
+	}
+
+	//percorremos os pixeis todos e realizamos todos os calculos
+	for(i = 0; i < movie.getHeight(); i++) {
+		for(j = 0; j < movie.getWidth(); j++) {
+			if(luminance_enabled) 
+				mean_luminance += img.calculateLuminance(i, j);
+
+			if(dominant_color_enabled) 
+				hue_total += img.calcColorAux(i, j);
+
+			if(contrast_enabled)
+				contrastVal += img.calculateContrast(i, j);
+
+			if(radio_button_position2 != NONE){
+				nr_edges += img.getEdges(i, j, radio_button_position2);
+				count++; //TODO: QUÉSTA MERDA!!!?????
+			}
+		}
+	}
+
+	//TODO: A CENA DO GABOR ESTÁ A DAR VALORES ENTRE 0.039 E 0.042!!!!!!
+	if(gabor_enabled) {
+		gabor_value = img.calculateTexture();
+		cout << "GABOR: " << gabor_value << "\n";
+	}
+
+	//normalização dos dados :)
+	nr_edges /= i*j;
+	nr_edges *= 100;
+	contrastVal /= i*j; 
+	mean_luminance /= i*j;
+	hue_total /= i*j;
+
+	cout << radio_button_position2 << "\n";
+	cout << "[edges] sliders - filter: " << number_of_edges << " - " << nr_edges << "\n";
+
+	//PATTERN MATCHING - sift/surf
+	if(findObject){
+		match_object = img.match(path);
+
+		if(match_object > 0)
+			bool b = true;
+
+		cout << "matching: " << match_object << "\n";
+	}
+
+	bool result = saveFrame();
+	if(result)
+		img_array.push_back(img2);
+
+	can_update_frame = true;
+}
+
+/*void ofApp::applyFiltersToFrame(){
 
 	can_update_frame = false;
 
@@ -762,11 +874,11 @@ void ofApp::applyFiltersToFrame(){
 	unsigned char * pixels = movie.getPixels();
 
 	//TESTE TESTE TESTE - APAGAR DEPOIS
-	/*if(movie.getCurrentFrame() >= 100 && movie.getCurrentFrame() < 115) {
-		img_test.setFromPixels(pixels, movie.getWidth(), movie.getHeight(), OF_IMAGE_COLOR, true);
-		img_array.push_back(img_test);
-		cout << movie.getCurrentFrame() << ": dentro da cena do array\n"; 
-	}*/
+	//if(movie.getCurrentFrame() >= 100 && movie.getCurrentFrame() < 115) {
+	//	img_test.setFromPixels(pixels, movie.getWidth(), movie.getHeight(), OF_IMAGE_COLOR, true);
+	//	img_array.push_back(img_test);
+	//	cout << movie.getCurrentFrame() << ": dentro da cena do array\n"; 
+	//}
 
 	//DUAS IMAGENS IGUAIS, UMA A CORES OUTRA A P/B
 	ofImage image_colorful;
@@ -831,7 +943,7 @@ void ofApp::applyFiltersToFrame(){
 	bool result = saveFrame();
 
 	can_update_frame = true;
-}
+}*/
 
 bool ofApp::saveFrame() {
 	//o range pretendido é para valores ACIMA do definido nos sliders
