@@ -99,10 +99,11 @@ float Image::calculateContrast(int i, int j){
 int Image::match(string path){
 	ofImage img;
 	img.loadImage(path);
+	img.setFromPixels(obj.getPixels(), obj.getWidth(), obj.getHeight(), OF_IMAGE_GRAYSCALE, true);
 	cv::SurfFeatureDetector detector(400);
 	vector<cv::KeyPoint> keypoints1, keypoints2;
-	cv::Mat img1(getHeight(), getWidth(), CV_8UC3, pixels_gray);
-	cv::Mat img2(img.getHeight(), img.getWidth(), CV_8UC3, img.getPixels());
+	cv::Mat img1(getHeight(), getWidth(), CV_8UC1, pixels_gray);
+	cv::Mat img2(img.getHeight(), img.getWidth(), CV_8UC1, img.getPixels());
 
 	detector.detect(img1, keypoints1);
 	detector.detect(img2, keypoints2);
