@@ -60,6 +60,7 @@ class ofApp : public ofBaseApp {
 		void setGUI5();
 		void setGUI6();
 
+		string getFilterString(bool var);
 		void applyFiltersToFrame();
 		void applyFiltersToFrame222(ofImage img);
 		bool saveFrame();
@@ -148,6 +149,7 @@ class ofApp : public ofBaseApp {
 		float number_of_objects;
 		
 		//toggle da UI da esquerda
+		bool quality_filter_enabled;
 		bool dominant_color_enabled;
 		bool luminance_enabled;
 		bool contrast_enabled;

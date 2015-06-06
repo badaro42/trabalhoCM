@@ -14,12 +14,12 @@ void ofApp::setup(){
 	max_pages = 0;
 	can_update_frame = true;
 
+	quality_filter_enabled = false;
 	dominant_color_enabled = false;
 	luminance_enabled = false;
 	contrast_enabled = false;
 	people_enabled = false;
 	gabor_enabled = false;
-
 	findObject = false;
 	
 	video_playing = false;
@@ -224,7 +224,6 @@ void ofApp::draw(){
 		ofDrawBitmapString("You can change the filters applied to the video frames at any given moment.", ofGetWidth()*0.304, ofGetHeight()*0.090);
 		ofDrawBitmapString("Then, choose the desired range to be processed and confirm it with the", ofGetWidth()*0.304, ofGetHeight()*0.125);
 		ofDrawBitmapString("button on the right.", ofGetWidth()*0.304, ofGetHeight()*0.15);
-		//ofDrawBitmapString("", ofGetWidth()*0.304, ofGetHeight()*0.15);
 		
 		ofSetColor(255);
 	}
@@ -273,14 +272,30 @@ void ofApp::draw(){
 			ofGetWidth()*0.304, ofGetHeight()*0.140);
 		ofDrawBitmapString("Speed: " + ofToString(movie.getSpeed(),2),ofGetWidth()*0.304, ofGetHeight()*0.165);
 		
+		bool lol;
+		if(radio_button_position2 == NONE)
+			lol = false;
+		else
+			lol = true;
+
 		//strings dos dos valores dos filtros aplicados
-		ofDrawBitmapString("# faces: " + ofToString(nr_people), right_gui_left_column, ofGetHeight()*0.065);
-		ofDrawBitmapString("Luminance: " + ofToString(mean_luminance), right_gui_left_column, ofGetHeight()*0.090);
-		ofDrawBitmapString("# objects: "  + ofToString(match_object), right_gui_left_column, ofGetHeight()*0.115);
-		ofDrawBitmapString("Contrast: " + ofToString(contrastVal), right_gui_left_column, ofGetHeight()*0.140);
-		ofDrawBitmapString("Edges %: " + ofToString(nr_edges), right_gui_left_column, ofGetHeight()*0.165);
-		ofDrawBitmapString("Hue (0-360): " + ofToString(int(hue_total)), right_gui_right_column, ofGetHeight()*0.065);
-		
+		ofDrawBitmapString(getFilterString(dominant_color_enabled) + 
+			" Dominant color", right_gui_left_column, ofGetHeight()*0.065);
+		ofDrawBitmapString(getFilterString(luminance_enabled) + 
+			" Luminance", right_gui_left_column, ofGetHeight()*0.100);
+		ofDrawBitmapString(getFilterString(contrast_enabled) + 
+			" Contrast", right_gui_left_column, ofGetHeight()*0.135);
+		ofDrawBitmapString(getFilterString(people_enabled) + 
+			" People", right_gui_left_column, ofGetHeight()*0.170);
+		ofDrawBitmapString(getFilterString(lol) + 
+			" Edges", right_gui_right_column, ofGetHeight()*0.065);
+		ofDrawBitmapString(getFilterString(gabor_enabled) + 
+			" Texture", right_gui_right_column, ofGetHeight()*0.100);
+		ofDrawBitmapString(getFilterString(findObject) + 
+			" Match", right_gui_right_column, ofGetHeight()*0.135);
+		ofDrawBitmapString(getFilterString(quality_filter_enabled) + 
+			" Quality", right_gui_right_column, ofGetHeight()*0.170);
+
 		//paramos o video para que nao ande para a frente
 		if(redraw_frame_flag) {
 			movie.stop();
@@ -380,8 +395,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 		range_maximum_percentage = slider->getPercentValueHigh();
 	}
 	else if(name == "Red" || name == "Green" || name == "Blue" || name == "# of People" ||
-		name == "% of Edges" || name == "Luminance" || name == "Contrast" ||
-		name == "# of Objects" || name == "% of Texture") //coloca o step do slider de 1 em 1!
+		name == "% of Edges" || name == "Luminance" || name == "# of Objects") //coloca o step do slider de 1 em 1!
 	{
 		int levels = int(e.getSlider()->getScaledValue());
 		e.getSlider()->setValue( levels );
@@ -446,6 +460,13 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 		else
 			gabor_enabled = false;
 	}
+	else if(name == "Quality-based filter") {
+		int val = e.getToggle()->getValue();
+		if(val == 1)
+			quality_filter_enabled = true;
+		else
+			quality_filter_enabled = false;
+	}
 }
 
 //--------------------------------------------------------------
@@ -456,7 +477,7 @@ void ofApp::exit()
 	delete gui3;
 	delete gui4;
 	delete gui5;
-
+	delete gui6;
 }
 
 //--------------------------------------------------------------
@@ -535,6 +556,9 @@ void ofApp::setGUI1()
 	slider4->setTriggerType(OFX_UI_TRIGGER_ALL);
 
 	gui1->addSpacer();
+	gui1->addToggle("Quality-based filter", false);
+	gui1->addSpacer();
+
     gui1->autoSizeToFitWidgets();
 	ofAddListener(gui1->newGUIEvent,this,&ofApp::guiEvent);
 }
@@ -565,7 +589,7 @@ void ofApp::setGUI3() {
 
 //GUI DOS VALORES DOS FILTROS: POR CIMA DO VIDEO, À DIREITA, APENAS ECRA DO VIDEO A TOCAR
 void ofApp::setGUI4() {
-	gui4 = new ofxUISuperCanvas("Filter values (updated for each frame)", 
+	gui4 = new ofxUISuperCanvas("Filters information", 
 		top_guis_final_point_width - top_guis_width, 5, 
 		top_guis_width, ofGetHeight()*0.18);
 	gui4->addSpacer();
@@ -974,6 +998,13 @@ void ofApp::applyFiltersToFrame222(ofImage img2){
 
 	can_update_frame = true;
 }*/
+
+string ofApp::getFilterString(bool var) {
+	if(var)
+		return "[X]";
+	else
+		return "[ ]";
+}
 
 bool ofApp::saveFrame() {
 	bool result = false;
