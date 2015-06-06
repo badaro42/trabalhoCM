@@ -836,7 +836,6 @@ void ofApp::applyFiltersToFrame(ofImage img2){
 
 	int i = 0;
 	int j = 0;
-	int count = 0;
 	float value_max = -1;
 	float value_min = 100;
 
@@ -856,22 +855,25 @@ void ofApp::applyFiltersToFrame(ofImage img2){
 		nr_people = haarFinder.findHaarObjects(movie.getPixelsRef());
 	}
 
+	if(quality_filter_enabled) {
+		if(radio_button_position2 == NONE)
+			radio_button_position2 = ANY;
+	}
+
 	//percorremos os pixeis todos e realizamos todos os calculos
 	for(i = 0; i < movie.getHeight(); i++) {
 		for(j = 0; j < movie.getWidth(); j++) {
 			if(luminance_enabled) 
 				mean_luminance += img.calculateLuminance(i, j);
 
-			if(dominant_color_enabled) 
+			if(dominant_color_enabled || quality_filter_enabled) 
 				hue_total += img.calcColorAux(i, j);
 
 			if(contrast_enabled)
 				contrastVal += img.calculateContrast(i, j);
 
-			if(radio_button_position2 != NONE){
+			if(radio_button_position2 != NONE || quality_filter_enabled)
 				nr_edges += img.getEdges(i, j, radio_button_position2);
-				count++; //TODO: QUÉSTA MERDA!!!?????
-			}
 		}
 	}
 
@@ -880,6 +882,10 @@ void ofApp::applyFiltersToFrame(ofImage img2){
 		gabor_value = img.calculateTexture();
 		cout << "GABOR (%): " << gabor_value*100 << "\n";
 	}
+
+	double img_quality;
+	if(quality_filter_enabled)
+		img_quality = img.calculateQuality();
 
 	//normalização dos dados :)
 	nr_edges /= i*j;

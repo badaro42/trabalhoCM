@@ -19,9 +19,10 @@ private:
 	int width;  
 	int size;
 	int nr_edges;
-
+	int hue_vector[361];
 
 public:
+
 	Image(unsigned char * pix_color, unsigned char * pix_gray, int t_width, int t_height);	
 	void setPixels(unsigned char * p);
 	void setWidth(int width);
@@ -37,8 +38,9 @@ public:
 	ofImage getObj();
 	int match(ofImage img); 
 	int getEdges(int i, int j, int type);
-	double Image::calculateTexture();
+	double calculateTexture();
 	float calculateLuminance(int i, int j);
+	double calculateQuality();
 };
 
 #endif

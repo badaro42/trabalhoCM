@@ -19,6 +19,9 @@ Image::Image(unsigned char * pix_color, unsigned char * pix_gray, int t_width, i
 	width = t_width;
 	height = t_height;
 	size = t_width*t_height;
+	nr_edges = 0;
+	for(int i = 0; i < 361; i++)
+		hue_vector[i] = 0;
 }
 
 
@@ -54,6 +57,12 @@ float Image::calcColor(float red, float green, float blue) {
 		hue_temp = ((red - green) / (delta + 1e-20f)) + 4;
 	hue = hue_temp * 60;
 
+	int add_hue = int(hue);
+
+	if(add_hue > 330)
+		bool b = true;
+
+	hue_vector[add_hue]++;
 	return hue;
 }
 
@@ -124,8 +133,10 @@ int Image::getEdges(int i, int j, int type){
 	int val = applyFilter(i, j, type);
 
 	//zero ou proximo
-	if(val >= 240)
+	if(val >= 240){
+		nr_edges++;
 		return 1;
+	}
 	return 0;
 }
 
@@ -276,5 +287,25 @@ int Image::applyFilter(int i, int j, int type){
 
 	return (topo_esquerdo*edges[0] + topo*edges[1] + topo_direito*edges[2] + esquerdo*edges[3] + middle_pixel*edges[4]
 	+ direito*edges[5] + baixo_esquerdo*edges[6] + baixo*edges[7] + baixo_direito*edges[8]);
+}
+
+double Image::calculateQuality(){
+
+	int i;
+	int count = 0;
+	double size = (width*height);
+	double res = 0.0;
+	//double hue_vector_norm[361];
+	for(i = 0; i < 361; i++) {
+		//hue_vector_norm[i] = hue_vector[i]/(width*height);	
+		res += hue_vector[i]/size;
+		if(hue_vector[i] > 0)
+			count++;
+	}
+
+	res /= count;
+
+	nr_edges; 
+	return 1;
 }
 

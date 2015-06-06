@@ -208,6 +208,9 @@
     <ClCompile Include="src\Image.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\HueHist.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -789,6 +792,9 @@
       <Filter>addons\ofxUI\src</Filter>
     </ClInclude>
     <ClInclude Include="src\Image.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\HueHist.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
