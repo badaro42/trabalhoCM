@@ -107,24 +107,46 @@ float Image::calculateContrast(int i, int j){
 
 int Image::match(ofImage img){
 
+	bool result = false;
+	float neares_neighbor_distance_ratio = 0.7f;
+
 	cv::SurfFeatureDetector detector(400);
 	vector<cv::KeyPoint> keypoints1, keypoints2;
+	cv::SurfDescriptorExtractor extractor;
+	cv::Mat descriptors1, descriptors2;
+	
 	cv::Mat img1(height, width, CV_8UC3, pixels_color);
 	cv::Mat img2(img.getHeight(), img.getWidth(), CV_8UC3, img.getPixels());
 
 	detector.detect(img1, keypoints1);
 	detector.detect(img2, keypoints2);
-
-	cv::SurfDescriptorExtractor extractor;
-	cv::Mat descriptors1, descriptors2;
+	
 	extractor.compute(img1, keypoints1, descriptors1);
 	extractor.compute(img2, keypoints2, descriptors2);
 
-	cv::BruteForceMatcher<cv::L2<float>> matcher;
-	vector<cv::DMatch> matches;
-	matcher.match(descriptors1, descriptors2, matches);
+	cv::FlannBasedMatcher matcher;
+	vector<vector<cv::DMatch>> matches;
 
-	return matches.size();
+	//cv::BruteForceMatcher<cv::L2<float>> matcher;
+	//vector<cv::DMatch> matches;
+	matcher.knnMatch(descriptors1, descriptors2, matches, 2);
+
+	vector<cv::DMatch> good_matches;
+	good_matches.reserve(matches.size());  
+
+	for(size_t i = 0; i < matches.size(); ++i)
+	{ 
+		if(matches[i].size() < 2)
+			continue;
+     
+		const cv::DMatch &m1 = matches[i][0];
+		const cv::DMatch &m2 = matches[i][1];
+     
+		if(m1.distance <= neares_neighbor_distance_ratio * m2.distance)        
+			good_matches.push_back(m1);     
+	}
+
+	return good_matches.size();
 }
 
 //************************** EDGES EDGES EDGES ***********************************
