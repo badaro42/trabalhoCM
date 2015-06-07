@@ -424,8 +424,26 @@ void ofApp::draw(){
 			curr_index++;
 		}
 
-		ofDrawBitmapString("img_array.size: " + ofToString(img_array.size()), 400, 75);
 		ofSetColor(0);
+		ofDrawBitmapString("Number of images that match your criteria: " + 
+			ofToString(img_array.size()), 209, 50);	
+		ofDrawBitmapString("Number of images that match your criteria: " + 
+			ofToString(img_array.size()), 210, 50);	
+
+		if(img_array.size() == 0) {
+			ofDrawBitmapString("Review which filters you have enabled and their values and", 
+				209, 80);	
+			ofDrawBitmapString("process the video again!", 
+				209, 95);	
+		}
+		else {
+			ofDrawBitmapString("Here are the results! If you are happy with them, press the", 
+				209, 80);	
+			ofDrawBitmapString("'Save' button to save these images to your hard-drive.", 
+				209, 95);	
+			ofDrawBitmapString("The images are save on a folder named 'temp'.", 
+				209, 110);
+		}
 	}
 }
 
@@ -732,6 +750,7 @@ void ofApp::mousePressed(int x, int y, int button){
 			gui6->toggleVisible(); //mostra
 
 			resetValues();
+			img_array.clear();
 		
 			cout << "botao de BACK!!!\n";
 		}
@@ -749,6 +768,8 @@ void ofApp::mousePressed(int x, int y, int button){
 				movie.play();
 				video_playing = true;
 			}
+
+			img_array.clear();
 
 			cout << "botao de play/pause kkkk!!!\n";
 		}
@@ -842,6 +863,7 @@ void ofApp::mousePressed(int x, int y, int button){
 				ofImage img = img_array[i];
 				ofSaveImage(img.getPixelsRef(), "temp/img"+ofToString(i)+".png");
 			}
+			//img_array.clear();
 		}
 	}	
 }
