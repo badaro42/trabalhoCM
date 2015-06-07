@@ -950,7 +950,7 @@ bool ofApp::saveFrame() {
 			else
 				return false;
 		}
-		if(object_loaded) { //pattern matching - sift
+		if(object_loaded && object_match_enabled) { //pattern matching - sift
 			if(match_object > number_of_objects)
 				result = true;
 			else
@@ -1002,7 +1002,7 @@ bool ofApp::saveFrame() {
 			else
 				return false;
 		}
-		if(object_loaded) { //pattern matching - sift
+		if(object_loaded && object_match_enabled) { //pattern matching - sift
 			if(match_object < number_of_objects) 
 				result = true;
 			else
@@ -1055,7 +1055,7 @@ bool ofApp::saveFrame() {
 			else
 				return false;
 		}
-		if(object_loaded) { //pattern matching - sift -> [-5;5]
+		if(object_loaded && object_match_enabled) { //pattern matching - sift -> [-5;5]
 			if(match_object >= number_of_objects-5 && match_object <= number_of_objects+5) 
 				result = true;
 			else

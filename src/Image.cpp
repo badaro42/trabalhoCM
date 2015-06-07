@@ -31,10 +31,10 @@ Image::Image(unsigned char * pix_color, unsigned char * pix_gray, int t_width, i
 float Image::calculateLuminance(int i, int j) {
 	int pos = i*width+j;
 	int r = pixels_color[pos];
-    	int g = pixels_color[pos+1];
-    	int b = pixels_color[pos+2];
+    int g = pixels_color[pos+1];
+    int b = pixels_color[pos+2];
 
-    	return 0.213*r+0.715*g+0.072*b;
+    return 0.213*r+0.715*g+0.072*b;
 }
 
 float Image::calcColor(float red, float green, float blue) {
@@ -176,15 +176,15 @@ cv::Mat mkKernel(int kernel_size, double sigma, double theta, double lambda, dou
 	
 	cv::Mat kernel(kernel_size, kernel_size, CV_32F);
 	for (int y=-half_ks; y<=half_ks; y++) {
-        	for (int x=-half_ks; x<=half_ks; x++) {
-            		x_theta = x*delta*cos(theta_aux) + y*delta*sin(theta_aux);
+        for (int x=-half_ks; x<=half_ks; x++) {
+			x_theta = x*delta*cos(theta_aux) + y*delta*sin(theta_aux);
 			y_theta = -x*delta*sin(theta_aux) + y*delta*cos(theta_aux);
 			kernel.at<float>(half_ks+y, half_ks+x) = 
 				(float)exp(-0.5*(pow(x_theta,2)+pow(y_theta,2))/pow(sigma_aux,2)) * 
 				cos(2*CV_PI*x_theta/lambda_aux + psi_aux);
-        	}
-    	}
-    	return kernel;
+		}
+    }
+    return kernel;
 }
  
 double Image::calculateTexture(){
@@ -201,29 +201,29 @@ double Image::calculateTexture(){
 	cvtColor(src, dest, CV_RGB2GRAY);
 
 	double num = 0;
-    	double num_total = 0;
-    	for(; th <= 135; th += 45){
-        	cv::Mat kernel = mkKernel(kernel_size, sig, th, lm, ps);
-        	cv::filter2D(dest, src, CV_32F, kernel);
+    double num_total = 0;
+    for(; th <= 135; th += 45){
+        cv::Mat kernel = mkKernel(kernel_size, sig, th, lm, ps);
+        cv::filter2D(src, dest, CV_32F, kernel);
         
-	        ofImage imageOut = ofImage();
-	        imageOut.setFromPixels((unsigned char *) IplImage(src).imageData, src.size().width, src.size().height, OF_IMAGE_GRAYSCALE);
+	    ofImage imageOut = ofImage();
+	    imageOut.setFromPixels((unsigned char *) IplImage(dest).imageData, dest.size().width, dest.size().height, OF_IMAGE_GRAYSCALE);
 	        
-	        // contar numero de pixels acima de threshold - 240
-	        int x, y; 
+	    // contar numero de pixels acima de threshold - 240
+	    int x, y; 
 		int width = imageOut.width;
 		int heigth = imageOut.height;
 	
-	        unsigned char* pixels = imageOut.getPixels();
-	        num = 0;
-	        for (x = 0; x < width; x++){
+	    unsigned char* pixels = imageOut.getPixels();
+	    num = 0;
+	    for (x = 0; x < width; x++){
 			for(y = 0; y < heigth; y++){
-			if(pixels[(y*width+x)] >= 240)
-				num++;
+				if(pixels[(y*width+x)] >= 240)
+					num++;
 			}
-	        }
-	        num /= (width*height);
-	        num_total += num;
+		}
+	    num /= (width*height);
+	    num_total += num;
     }
     // 4 imagens geradas
     return num_total/4;
