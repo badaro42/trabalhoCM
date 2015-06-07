@@ -625,7 +625,7 @@ void ofApp::setGUI1()
     gui1->addSpacer();
 	gui1->addToggle("Object match filter", false);
 	gui1->addButton("Open Object", false);
-	ofxUISlider *slider4 = gui1->addSlider("# of Objects", 0.0, 20.0, &number_of_objects);
+	ofxUISlider *slider4 = gui1->addSlider("# of Objects", 0.0, 100.0, &number_of_objects);
 	slider4->setTriggerType(OFX_UI_TRIGGER_ALL);
 
 	gui1->addSpacer();
