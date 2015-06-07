@@ -443,6 +443,12 @@ void ofApp::draw(){
 				209, 95);	
 			ofDrawBitmapString("The images are save on a folder named 'temp'.", 
 				209, 110);
+			ofDrawBitmapString("Page " + ofToString(gallery_selected_page) + 
+				"/" + ofToString(max_pages), 
+				700, 50);
+			ofDrawBitmapString("Page " + ofToString(gallery_selected_page) + 
+				"/" + ofToString(max_pages), 
+				701, 50);
 		}
 	}
 }
