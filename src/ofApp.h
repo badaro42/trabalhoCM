@@ -16,15 +16,12 @@ class ofApp : public ofBaseApp {
 		static const int MAX_ITEMS_PER_PAGE = 15;
 
 		static const int GALLERY_BUTTON_WIDTH = 175;
-
 		static const int LARGE_BUTTON_WIDTH = 110;
 		static const int LARGE_BUTTON_HEIGHT = 110;
-
 		static const int SMALL_BUTTON_HEIGHT = 75;
 		static const int SMALL_BUTTON_WIDTH = 75;
 		static const int SMALL_INTERVAL = 10;
 
-		
 		static const int ABOVE = 0;
 		static const int BELOW = 1;
 		static const int RANGE = 2;
@@ -61,8 +58,7 @@ class ofApp : public ofBaseApp {
 		void setGUI6();
 
 		string getFilterString(bool var);
-		//void applyFiltersToFrame();
-		void applyFiltersToFrame(ofImage img);
+		void applyFiltersToFrame(ofImage img, int index);
 		bool saveFrame();
 	
 		//cenas da barra lateral e do background

@@ -41,6 +41,7 @@ public:
 	double calculateTexture();
 	float calculateLuminance(int i, int j);
 	double calculateQuality();
+	int peopleOnFrame(ofPixelsRef pixels);
 };
 
 #endif

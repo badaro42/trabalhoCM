@@ -320,7 +320,7 @@ void ofApp::draw(){
 
 			int i;
 			for(i = 0; i < video_frames.size(); i++) {
-				applyFiltersToFrame(video_frames[i]);
+				applyFiltersToFrame(video_frames[i], i);
 			}
 
 			cout << video_frames.size() << "\n";
@@ -331,13 +331,6 @@ void ofApp::draw(){
 	//estamos no terceiro ecra, o da galeria, vamos mostrar as imagens
 	else if(gallery_screen) {
 		ofSetColor(255);
-
-		/*ofLine(ofGetWidth()*0.5, ofGetHeight()*0.79, 
-			ofGetWidth()*0.5, ofGetHeight()*0.89); //linha ao centro
-		ofLine(ofGetWidth()*0.25, ofGetHeight()*0.79, 
-			ofGetWidth()*0.25, ofGetHeight()*0.89); //linha a 25%
-		ofLine(ofGetWidth()*0.75, ofGetHeight()*0.79, 
-			ofGetWidth()*0.75, ofGetHeight()*0.89);*/ //linha a 75%
 
 		back_button.draw(ofGetWidth()*0.2, 
 			ofGetHeight()*0.86);
@@ -823,7 +816,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 }
 
-void ofApp::applyFiltersToFrame(ofImage img2){
+void ofApp::applyFiltersToFrame(ofImage img2, int index){
 
 	can_update_frame = false;
 
@@ -847,11 +840,10 @@ void ofApp::applyFiltersToFrame(ofImage img2){
 
 	sliders_dominant_color = img.calcColor(red, green, blue);
 	
-	//apenas calcula de 10 em 10 frames e só se o filtro estiver ativo
-	if(movie.getCurrentFrame() % 10 == 0 && people_enabled) {
-		ofxCvHaarFinder haarFinder; 
-		haarFinder.setup("HaarFinder/haarcascade_frontalface_default.xml");
-		nr_people = haarFinder.findHaarObjects(movie.getPixelsRef());
+	//apenas calcula de 5 em 5 frames e só se o filtro estiver ativo
+	if(index % 5 == 0 && people_enabled) {
+		nr_people = img.peopleOnFrame(img2.getPixelsRef());
+		cout << "PESSOAS NA FRAME: " << nr_people << "\n";
 	}
 
 	if(quality_filter_enabled) {

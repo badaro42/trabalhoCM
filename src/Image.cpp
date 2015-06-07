@@ -160,7 +160,14 @@ int Image::getEdges(int i, int j, int type){
 	return 0;
 }
 
- 
+//************************** PESSOAS NUMA FRAME ***********************************
+
+int Image::peopleOnFrame(ofPixelsRef pixels) {
+	ofxCvHaarFinder haarFinder; 
+	haarFinder.setup("HaarFinder/haarcascade_frontalface_default.xml");
+	return haarFinder.findHaarObjects(pixels);
+}
+
 //************************** GABOR GABOR GABOR ***********************************
 
 cv::Mat mkKernel(int kernel_size, double sigma, double theta, double lambda, double psi) {
