@@ -14,6 +14,9 @@ void ofApp::setup(){
 	max_pages = 0;
 	can_update_frame = true;
 
+	finished_processing = false;
+	time_to_display_message = 0;
+
 	quality_filter_enabled = false;
 	dominant_color_enabled = false;
 	luminance_enabled = false;
@@ -311,12 +314,28 @@ void ofApp::draw(){
 			redraw_frame_flag = false;
 		}
 
+		int max_frame = (int(range_maximum_percentage*movie.getTotalNumFrames()));
+
+		// para mostrar a string com a indicação que estamos a processar o video
+		if(movie.getCurrentFrame() == max_frame-1) {
+			int width = 520;
+			int height = 690;
+			// cria o efeito do bold!
+			ofDrawBitmapString("Processing video, please wait...", 
+				width, height);
+			ofDrawBitmapString("Processing video, please wait...", 
+				width+1, height);
+		}
+
 		//chegamos ao ultimo frame escolhido pelo utilizador
 		//uma vez que o filme esta em loop, apontamos para o min do range
-		if(movie.getCurrentFrame() >= (int(range_maximum_percentage*movie.getTotalNumFrames()))) {
+		if(movie.getCurrentFrame() >= max_frame) {
 			cout << "CHEGAMOS AO FRAME MAXIMO ESCOLHIDO PELO USER!!!\n";
 			movie.setFrame(int(range_minimum_percentage*movie.getTotalNumFrames()));
 			movie.stop();
+
+			//ofDrawBitmapString("PROCESSING VIDEO", 
+			//	800, 700);
 
 			int i;
 			for(i = 0; i < video_frames.size(); i++) {
@@ -325,6 +344,37 @@ void ofApp::draw(){
 
 			cout << video_frames.size() << "\n";
 			video_frames.clear();
+
+			finished_processing = true;
+		}
+
+		// para mostrar a string com a indicação que o video esta processado
+		// usamos um contador para mostrar durante alguns segundos
+		if(finished_processing) {
+			int width = 470;
+			int height = 690;
+
+			if(img_array.size() == 0) {
+				// cria o efeito do bold!
+				ofDrawBitmapString("Video processed! No images match your criteria...", 
+					width, height);
+				ofDrawBitmapString("Video processed! No images match your criteria...", 
+					width+1, height);
+			}
+			else {
+				// cria o efeito do bold!
+				ofDrawBitmapString("Video processed! Check out the gallery!", 
+					width+40, height);
+				ofDrawBitmapString("Video processed! Check out the gallery!", 
+					width+41, height);
+			}
+
+			if(time_to_display_message == 150) {
+				finished_processing = false;
+				time_to_display_message = 0;
+			}
+			else
+				time_to_display_message++;
 		}
 	}
 

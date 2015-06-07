@@ -123,10 +123,7 @@ int Image::match(ofImage img){
 	extractor.compute(img2, keypoints2, descriptors2);
 
 	cv::FlannBasedMatcher matcher;
-	vector<vector<cv::DMatch>> matches;
-
-	//cv::BruteForceMatcher<cv::L2<float>> matcher;
-	//vector<cv::DMatch> matches;
+	vector<vector<cv::DMatch>> matches;	
 	matcher.knnMatch(descriptors1, descriptors2, matches, 2);
 
 	vector<cv::DMatch> good_matches;

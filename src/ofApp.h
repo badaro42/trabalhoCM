@@ -159,6 +159,8 @@ class ofApp : public ofBaseApp {
 
 		ofImage objFinder; 
 		bool can_update_frame;
+		bool finished_processing;
+		int time_to_display_message;
 
 		vector<ofImage> video_frames;
 };
